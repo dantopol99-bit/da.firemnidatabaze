@@ -10,8 +10,10 @@ dělat analýzy a reporty.
 .
 ├── src/firemni_databaze/   # Python balíček (kód projektu)
 │   ├── db.py               # připojení k PostgreSQL podle .env
-│   └── overeni_schemat.py  # ověří připojení a existenci schémat
+│   ├── overeni_schemat.py  # ověří připojení a existenci schémat
+│   └── nasad_sql.py        # nasadí SQL skripty ze sql/<schema>/
 ├── sql/init/               # SQL skripty spouštěné při prvním startu databáze
+├── sql/dev/                # identitní jádro – tabulky ve schématu dev
 ├── tests/                  # testy (unittest)
 ├── data/                   # lokální data – NEcommitují se
 ├── docker-compose.yml      # lokální PostgreSQL v Dockeru
@@ -54,6 +56,38 @@ pip install -e .
 python -m firemni_databaze.overeni_schemat
 python -m unittest discover -s tests
 ```
+
+## Identitní jádro (schéma `dev`)
+
+SQL skripty jsou v `sql/dev/` a nasazují se v pořadí podle čísla:
+
+| skript | obsah |
+|--------|-------|
+| `01_zaklad.sql` | rozšíření, typ `dev.ico`, kontrola IČO, párovací klíč osoby, stráže historizace |
+| `02_ciselniky.sql` | právní formy, stavy subjektu, typy adres, role (jen role z OR) |
+| `03_import_davka.sql` | evidence načtení dat (původ každého údaje) |
+| `04_subjekt.sql` | `subjekt` (klíč IČO) + `subjekt_verze` |
+| `05_osoba.sql` | `osoba` (interní ID + párovací klíč) + `osoba_verze` |
+| `06_adresa.sql` | `adresa` (neměnné) + `subjekt_adresa` |
+| `07_vazba.sql` | vazby osoba/firma → firma podle obchodního rejstříku |
+| `08_pohledy.sql` | `*_aktualne` pohledy a funkce `subjekt_k_datu` |
+
+Nasazení (opakovatelné, skripty jsou idempotentní):
+
+```bash
+python -m firemni_databaze.nasad_sql dev
+```
+
+**Historizace:** verze mají dvě časové osy – `platnost_od/do` (kdy údaj platil podle registru,
+interval `[od, do)`) a `zaznamenano_od/do` (kdy jsme ho evidovali). Změna = uzavřít starou verzi
+(`zaznamenano_do = now()`) a vložit novou. Mazání a přepisování databáze sama zakazuje (triggery).
+
+**Rozsah vazeb:** jen přímé vazby zapsané v obchodním rejstříku. Skuteční (koncoví) majitelé
+nejsou součástí – jejich evidence není od 17. 12. 2025 veřejná.
+
+Chceš-li `dev` začít úplně od nuly (smaže vše v něm):
+`docker compose exec db psql -U firemni -d firemni_databaze -c "DROP SCHEMA dev CASCADE; CREATE SCHEMA dev;"`
+a pak znovu `python -m firemni_databaze.nasad_sql dev`.
 
 Zastavení databáze: `docker compose down` (data zůstanou ve volume).
 Smazání i s daty: `docker compose down -v`.
