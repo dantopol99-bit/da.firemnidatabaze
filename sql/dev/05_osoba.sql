@@ -29,6 +29,10 @@ CREATE OR REPLACE TRIGGER osoba_zakaz_mazani
     BEFORE DELETE ON dev.osoba
     FOR EACH ROW EXECUTE FUNCTION dev.zakaz_mazani();
 
+CREATE OR REPLACE TRIGGER osoba_zakaz_truncate
+    BEFORE TRUNCATE ON dev.osoba
+    FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();
+
 CREATE TABLE IF NOT EXISTS dev.osoba_verze (
     id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     osoba_id            bigint      NOT NULL REFERENCES dev.osoba (id),
@@ -67,3 +71,7 @@ CREATE OR REPLACE TRIGGER osoba_verze_jen_uzavreni
 CREATE OR REPLACE TRIGGER osoba_verze_zakaz_mazani
     BEFORE DELETE ON dev.osoba_verze
     FOR EACH ROW EXECUTE FUNCTION dev.zakaz_mazani();
+
+CREATE OR REPLACE TRIGGER osoba_verze_zakaz_truncate
+    BEFORE TRUNCATE ON dev.osoba_verze
+    FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();

@@ -25,3 +25,7 @@ COMMENT ON TABLE dev.import_davka IS 'Jedno načtení dat ze zdroje; na dávku o
 CREATE OR REPLACE TRIGGER import_davka_zakaz_mazani
     BEFORE DELETE ON dev.import_davka
     FOR EACH ROW EXECUTE FUNCTION dev.zakaz_mazani();
+
+CREATE OR REPLACE TRIGGER import_davka_zakaz_truncate
+    BEFORE TRUNCATE ON dev.import_davka
+    FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();

@@ -28,6 +28,10 @@ CREATE OR REPLACE TRIGGER subjekt_zakaz_mazani
     BEFORE DELETE ON dev.subjekt
     FOR EACH ROW EXECUTE FUNCTION dev.zakaz_mazani();
 
+CREATE OR REPLACE TRIGGER subjekt_zakaz_truncate
+    BEFORE TRUNCATE ON dev.subjekt
+    FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();
+
 -- Verze údajů subjektu
 CREATE TABLE IF NOT EXISTS dev.subjekt_verze (
     id                bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -67,3 +71,7 @@ CREATE OR REPLACE TRIGGER subjekt_verze_jen_uzavreni
 CREATE OR REPLACE TRIGGER subjekt_verze_zakaz_mazani
     BEFORE DELETE ON dev.subjekt_verze
     FOR EACH ROW EXECUTE FUNCTION dev.zakaz_mazani();
+
+CREATE OR REPLACE TRIGGER subjekt_verze_zakaz_truncate
+    BEFORE TRUNCATE ON dev.subjekt_verze
+    FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();

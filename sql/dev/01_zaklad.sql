@@ -84,6 +84,8 @@ COMMENT ON FUNCTION dev.klic_osoby(text, text, date) IS 'Párovací klíč osoby
 
 -- ---------------------------------------------------------------------
 -- Stráž 1: zákaz mazání (identity i verze se nikdy nemažou).
+-- Používá se pro DELETE (po řádcích) i TRUNCATE (po příkazech) –
+-- TRUNCATE řádkové triggery nespouští, proto potřebuje vlastní.
 -- ---------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION dev.zakaz_mazani()
 RETURNS trigger

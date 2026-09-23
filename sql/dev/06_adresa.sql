@@ -46,6 +46,10 @@ CREATE OR REPLACE TRIGGER adresa_zakaz_mazani
     BEFORE DELETE ON dev.adresa
     FOR EACH ROW EXECUTE FUNCTION dev.zakaz_mazani();
 
+CREATE OR REPLACE TRIGGER adresa_zakaz_truncate
+    BEFORE TRUNCATE ON dev.adresa
+    FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();
+
 -- Přiřazení adresy subjektu v čase (sídlo, provozovna, doručovací)
 CREATE TABLE IF NOT EXISTS dev.subjekt_adresa (
     id               bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -90,3 +94,7 @@ CREATE OR REPLACE TRIGGER subjekt_adresa_jen_uzavreni
 CREATE OR REPLACE TRIGGER subjekt_adresa_zakaz_mazani
     BEFORE DELETE ON dev.subjekt_adresa
     FOR EACH ROW EXECUTE FUNCTION dev.zakaz_mazani();
+
+CREATE OR REPLACE TRIGGER subjekt_adresa_zakaz_truncate
+    BEFORE TRUNCATE ON dev.subjekt_adresa
+    FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();

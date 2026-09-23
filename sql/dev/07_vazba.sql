@@ -59,3 +59,7 @@ CREATE OR REPLACE TRIGGER vazba_jen_uzavreni
 CREATE OR REPLACE TRIGGER vazba_zakaz_mazani
     BEFORE DELETE ON dev.vazba
     FOR EACH ROW EXECUTE FUNCTION dev.zakaz_mazani();
+
+CREATE OR REPLACE TRIGGER vazba_zakaz_truncate
+    BEFORE TRUNCATE ON dev.vazba
+    FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();
