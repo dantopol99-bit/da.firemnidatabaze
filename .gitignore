@@ -1,0 +1,29 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Virtuální prostředí ---
+.venv/
+venv/
+
+# --- Tajné údaje (hesla, připojení) ---
+.env
+
+# --- Data (stažené registry, exporty) — do gitu nepatří ---
+/data/*
+!/data/.gitkeep
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,27 @@
+# Lokální PostgreSQL pro vývoj.
+# Hodnoty ${...} si docker compose automaticky načte ze souboru .env vedle tohoto souboru.
+services:
+  db:
+    image: postgres:16
+    container_name: firemni_databaze_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-firemni}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Nastav POSTGRES_PASSWORD v souboru .env}
+      POSTGRES_DB: ${POSTGRES_DB:-firemni_databaze}
+    ports:
+      # 127.0.0.1 = databáze je dostupná jen z tvého počítače, ne ze sítě
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # SQL skripty v této složce se spustí JEN při prvním startu (prázdný volume)
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+    name: firemni_databaze_pgdata
