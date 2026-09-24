@@ -40,8 +40,20 @@ CREATE TABLE IF NOT EXISTS dev.subjekt_verze (
     nazev             text        NOT NULL,
     pravni_forma_kod  text        REFERENCES dev.ciselnik_pravni_forma (kod),
     stav_kod          text        NOT NULL REFERENCES dev.ciselnik_stav_subjektu (kod),
+    -- Nezávislé příznaky (firma může být v likvidaci i v insolvenci zároveň).
+    -- NULL = pro dané období nezjištěno (typicky insolvence u historických
+    -- verzí – ARES dává spolehlivě jen aktuální stav insolvence).
+    je_v_likvidaci    boolean,
+    je_v_insolvenci   boolean,
     datum_vzniku      date,
     datum_zaniku      date,
+
+    dic                        text,
+    spisova_znacka             text,           -- např. 'B 8573/MSPH'
+    zakladni_kapital           numeric(18, 2),
+    zakladni_kapital_mena      text,
+    cz_nace                    text[],         -- kódy CZ-NACE
+    datum_aktualizace_zdroje   date,           -- datumAktualizace z ARES
 
     platnost_od       date,
     platnost_do       date,
@@ -53,6 +65,8 @@ CREATE TABLE IF NOT EXISTS dev.subjekt_verze (
     CHECK (platnost_od IS NULL OR platnost_do IS NULL OR platnost_do >= platnost_od),
     CHECK (zaznamenano_do IS NULL OR zaznamenano_do >= zaznamenano_od),
     CHECK (datum_zaniku IS NULL OR datum_vzniku IS NULL OR datum_zaniku >= datum_vzniku),
+    CHECK (dic IS NULL OR dic ~ '^CZ[0-9]{8,10}$'),
+    CHECK (zakladni_kapital_mena IS NULL OR zakladni_kapital_mena ~ '^[A-Z]{3}$'),
 
     CONSTRAINT subjekt_verze_bez_prekryvu EXCLUDE USING gist (
         ico WITH =,

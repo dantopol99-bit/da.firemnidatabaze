@@ -11,9 +11,13 @@ dělat analýzy a reporty.
 ├── src/firemni_databaze/   # Python balíček (kód projektu)
 │   ├── db.py               # připojení k PostgreSQL podle .env
 │   ├── overeni_schemat.py  # ověří připojení a existenci schémat
-│   └── nasad_sql.py        # nasadí SQL skripty ze sql/<schema>/
+│   ├── nasad_sql.py        # nasadí SQL skripty ze sql/<schema>/
+│   ├── ares_klient.py      # stahování z REST API ARES
+│   ├── ares_mapovani.py    # převod odpovědí ARES na řádky jádra (bez DB)
+│   └── ares_import.py      # import z ARES do dev (historizace + import_davka)
 ├── sql/init/               # SQL skripty spouštěné při prvním startu databáze
 ├── sql/dev/                # identitní jádro – tabulky ve schématu dev
+├── docs/                   # návrhy a rozhodnutí (např. mapování ARES)
 ├── tests/                  # testy (unittest)
 ├── data/                   # lokální data – NEcommitují se
 ├── docker-compose.yml      # lokální PostgreSQL v Dockeru
@@ -64,8 +68,8 @@ SQL skripty jsou v `sql/dev/` a nasazují se v pořadí podle čísla:
 | skript | obsah |
 |--------|-------|
 | `01_zaklad.sql` | rozšíření, typ `dev.ico`, kontrola IČO, párovací klíč osoby, stráže historizace |
-| `02_ciselniky.sql` | právní formy, stavy subjektu, typy adres, role (jen role z OR) |
-| `03_import_davka.sql` | evidence načtení dat (původ každého údaje) |
+| `02_ciselniky.sql` | právní formy (úplný číselník z ARES), stavy subjektu, typy adres, role (jen role z OR) |
+| `03_import_davka.sql` | evidence načtení dat (původ každého údaje) + surové odpovědi zdroje (`import_surova_data`) |
 | `04_subjekt.sql` | `subjekt` (klíč IČO) + `subjekt_verze` |
 | `05_osoba.sql` | `osoba` (interní ID + párovací klíč) + `osoba_verze` |
 | `06_adresa.sql` | `adresa` (neměnné) + `subjekt_adresa` |
@@ -84,6 +88,24 @@ interval `[od, do)`) a `zaznamenano_od/do` (kdy jsme ho evidovali). Změna = uza
 
 **Rozsah vazeb:** jen přímé vazby zapsané v obchodním rejstříku. Skuteční (koncoví) majitelé
 nejsou součástí – jejich evidence není od 17. 12. 2025 veřejná.
+
+**Schéma se změnilo (mapování ARES):** skripty používají `CREATE TABLE IF NOT EXISTS`, takže do
+už existujícího `dev` nové sloupce nepřidají. Pokud máš `dev` nasazené z dřívějška, založ ho
+znovu (viz níže).
+
+## Import z ARES
+
+Mapování a jeho rozhodnutí jsou popsané v [`docs/ares_mapovani.md`](docs/ares_mapovani.md).
+
+```bash
+python -m firemni_databaze.ares_import --ico 27082440 04115210
+python -m firemni_databaze.ares_import --soubor-ico seznam_ico.txt
+```
+
+Každý běh je jedna dávka v `dev.import_davka`. Surové odpovědi ARES se ukládají vždy
+(`dev.import_surova_data`). Opakovaný import stejných dat nic nezmění; změněné údaje uzavřou
+starou verzi a vloží novou. Každý subjekt běží ve vlastní transakci, takže chyba jednoho
+neshodí ostatní. Na konci se vypíše souhrn, přeskočené údaje a chyby.
 
 Chceš-li `dev` začít úplně od nuly (smaže vše v něm):
 `docker compose exec db psql -U firemni -d firemni_databaze -c "DROP SCHEMA dev CASCADE; CREATE SCHEMA dev;"`

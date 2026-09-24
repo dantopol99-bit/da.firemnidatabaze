@@ -7,8 +7,15 @@
 -- Koncoví (skuteční) majitelé ani dopočítané nepřímé vlastnictví nejsou
 -- součástí – evidence skutečných majitelů není od 17. 12. 2025 veřejná.
 --
--- Členem může být fyzická osoba (clen_osoba_id) NEBO jiný subjekt
--- (clen_ico) – vždy právě jedno z nich.
+-- Členem je vždy právě jedno z:
+--   * fyzická osoba                     (clen_osoba_id),
+--   * subjekt s českým IČO              (clen_ico),
+--   * pojmenovaný člen bez vlastní identity – typicky zahraniční
+--     právnická osoba bez IČO           (clen_nazev + clen_stat).
+--
+-- Časy: platnost_od/do = vznik/zánik funkce či členství (skutečnost);
+-- datum_zapisu_or/datum_vymazu_or = kdy byl údaj zapsán do / vymazán
+-- z obchodního rejstříku (často později než skutečnost).
 -- Překryv vazeb se nehlídá: jeden společník může legálně držet více
 -- obchodních podílů současně.
 -- =====================================================================
@@ -19,6 +26,8 @@ CREATE TABLE IF NOT EXISTS dev.vazba (
 
     clen_osoba_id       bigint        REFERENCES dev.osoba (id),
     clen_ico            dev.ico       REFERENCES dev.subjekt (ico),
+    clen_nazev          text,         -- název člena bez identity (zahraniční PO)
+    clen_stat           text,         -- ISO 3166-1 alpha-2, jen spolu s clen_nazev
 
     role_kod            text          NOT NULL REFERENCES dev.ciselnik_role (kod),
     organ_puvodni       text,         -- název orgánu / funkce přesně podle zdroje
@@ -32,18 +41,23 @@ CREATE TABLE IF NOT EXISTS dev.vazba (
 
     platnost_od         date,
     platnost_do         date,
+    datum_zapisu_or     date,
+    datum_vymazu_or     date,
     zaznamenano_od      timestamptz   NOT NULL DEFAULT now(),
     zaznamenano_do      timestamptz,
     import_davka_id     bigint        NOT NULL REFERENCES dev.import_davka (id),
     hash_obsahu         text,
 
-    CHECK (num_nonnulls(clen_osoba_id, clen_ico) = 1),
+    CHECK (num_nonnulls(clen_osoba_id, clen_ico, clen_nazev) = 1),
+    CHECK ((clen_nazev IS NULL) = (clen_stat IS NULL)),
+    CHECK (clen_stat IS NULL OR clen_stat ~ '^[A-Z]{2}$'),
     CHECK (clen_ico IS NULL OR clen_ico <> ico),
     CHECK (vklad_mena IS NULL OR vklad_mena ~ '^[A-Z]{3}$'),
     CHECK (podil_procento    IS NULL OR podil_procento    BETWEEN 0 AND 100),
     CHECK (splaceno_procento IS NULL OR splaceno_procento BETWEEN 0 AND 100),
     CHECK (platnost_od IS NULL OR platnost_do IS NULL OR platnost_do >= platnost_od),
-    CHECK (zaznamenano_do IS NULL OR zaznamenano_do >= zaznamenano_od)
+    CHECK (zaznamenano_do IS NULL OR zaznamenano_do >= zaznamenano_od),
+    CHECK (datum_zapisu_or IS NULL OR datum_vymazu_or IS NULL OR datum_vymazu_or >= datum_zapisu_or)
 );
 
 COMMENT ON TABLE dev.vazba IS 'Přímé vazby jen na úrovni obchodního rejstříku – bitemporální';

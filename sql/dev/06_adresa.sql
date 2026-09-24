@@ -5,36 +5,60 @@
 -- mnoho subjektů). Historii nese až vazba subjekt_adresa.
 -- =====================================================================
 
+-- Otisk obsahu adresy (normalizovaný). Používá ho generovaný sloupec
+-- hash_adresy i loader při hledání adresy bez RÚIAN kódu.
+CREATE OR REPLACE FUNCTION dev.otisk_adresy(
+    p_ulice text, p_cislo_popisne text, p_cislo_evidencni text, p_cislo_orientacni text,
+    p_obec text, p_cast_obce text, p_psc text, p_stat text, p_text_puvodni text
+)
+RETURNS text
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    SELECT md5(
+           lower(btrim(coalesce(p_ulice, '')))
+        || '|' || lower(btrim(coalesce(p_cislo_popisne, '')))
+        || '|' || lower(btrim(coalesce(p_cislo_evidencni, '')))
+        || '|' || lower(btrim(coalesce(p_cislo_orientacni, '')))
+        || '|' || lower(btrim(coalesce(p_obec, '')))
+        || '|' || lower(btrim(coalesce(p_cast_obce, '')))
+        || '|' || replace(coalesce(p_psc, ''), ' ', '')
+        || '|' || upper(coalesce(p_stat, ''))
+        || '|' || lower(btrim(coalesce(p_text_puvodni, '')))
+    )
+$$;
+
 CREATE TABLE IF NOT EXISTS dev.adresa (
     id                bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     ruian_kod         bigint UNIQUE,          -- kód adresního místa RÚIAN, pokud je znám
     ulice             text,
     cislo_popisne     text,
+    cislo_evidencni   text,                   -- č.ev. (rekreační objekty) – místo č.p.
     cislo_orientacni  text,
     obec              text,
     cast_obce         text,
     psc               text,
     stat              text NOT NULL DEFAULT 'CZ',   -- ISO 3166-1 alpha-2
+    kod_obce          integer,                -- kód obce RÚIAN
+    kod_kraje         integer,                -- kód kraje RÚIAN
     text_puvodni      text,                   -- adresa přesně tak, jak přišla ze zdroje
     vznik_zaznamu     timestamptz NOT NULL DEFAULT now(),
 
-    -- Otisk pro odhalení duplicit (i u adres bez RÚIAN kódu)
+    -- Otisk obsahu. Jednoznačnost ale hlídá:
+    --   * adresa s RÚIAN kódem  -> ruian_kod (text se může drobně lišit),
+    --   * adresa bez RÚIAN kódu -> hash_adresy (index níže).
     hash_adresy       text GENERATED ALWAYS AS (
-        md5(
-               coalesce(ruian_kod::text, '')
-            || '|' || lower(btrim(coalesce(ulice, '')))
-            || '|' || lower(btrim(coalesce(cislo_popisne, '')))
-            || '|' || lower(btrim(coalesce(cislo_orientacni, '')))
-            || '|' || lower(btrim(coalesce(obec, '')))
-            || '|' || lower(btrim(coalesce(cast_obce, '')))
-            || '|' || replace(coalesce(psc, ''), ' ', '')
-            || '|' || upper(stat)
-            || '|' || lower(btrim(coalesce(text_puvodni, '')))
-        )
-    ) STORED UNIQUE,
+        dev.otisk_adresy(ulice, cislo_popisne, cislo_evidencni, cislo_orientacni,
+                         obec, cast_obce, psc, stat, text_puvodni)
+    ) STORED,
 
-    CHECK (stat ~ '^[A-Z]{2}$')
+    CHECK (stat ~ '^[A-Z]{2}$'),
+    CHECK (cislo_popisne IS NULL OR cislo_evidencni IS NULL)
 );
+
+-- Adresy bez RÚIAN kódu se odlišují otiskem obsahu
+CREATE UNIQUE INDEX IF NOT EXISTS adresa_bez_ruian_hash_uq
+    ON dev.adresa (hash_adresy) WHERE ruian_kod IS NULL;
 
 COMMENT ON TABLE dev.adresa IS 'Unikátní adresy; neměnné, sdílené více subjekty';
 
