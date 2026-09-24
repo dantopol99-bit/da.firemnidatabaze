@@ -1,6 +1,8 @@
 # ARES → identitní jádro: návrh mapování (ke schválení)
 
-Stav: **návrh, čeká na schválení.** Do databáze se zatím nic neukládá.
+Stav: **schváleno a implementováno** (`ares_import.py`, `ares_mapovani.py`).
+Kapitoly 1–4 popisují původní rozbor vzorku; kde se liší od schválených
+rozhodnutí na konci dokumentu, platí rozhodnutí.
 
 ## Vzorek
 
@@ -332,20 +334,35 @@ zápis do OR proběhl u Zavorala a Krejčíře až 23. 7. 2026.
 **osoba:** nevytváří se. ARES u FO podnikatele nedává datum narození, takže
 ji nelze spárovat přes `dev.klic_osoby` a `osoba.ico` zůstane nepropojené.
 
-## Otázky ke schválení
+## Schválená rozhodnutí a jejich implementace
 
-1. Zahraniční PO bez IČO: rozšířit `vazba` o třetí typ člena (např.
-   `clen_nazev` + `clen_stat`), nebo zavést tabulku „zahraniční subjekt“?
-2. Členy s IČO, které nemáme: dotahovat rekurzivně z ARES, nebo zakládat holou
-   identitu?
-3. Doplnit role: místopředseda představenstva, místopředseda DR, předseda
-   správní rady, statutární ředitel, předseda/místopředseda/člen
-   představenstva družstva, předseda/místopředseda/člen kontrolní komise?
-4. Stav: nechat jeden `stav_kod` (s prioritou ZANIKLY > INSOLVENCE >
-   LIKVIDACE > AKTIVNI), nebo dva příznaky (`v_likvidaci`, `v_insolvenci`)?
-5. Data u vazby: `platnost` = vznik/zánik funkce, a přidat
-   `datum_zapisu_or`/`datum_vymazu_or`?
-6. Která „pole navíc“ přidat hned (návrh: DIČ, spisová značka, základní
-   kapitál, CZ-NACE, `kod_obce`, `cislo_evidencni`, surový JSON)?
-7. Párování osob se změnou příjmení: zatím nechat jako dvě osoby a jen
-   označit ke kontrole (stejné jméno + datum narození + firma)?
+| # | rozhodnutí | implementace |
+|---|---|---|
+| 1 | Zahraniční PO bez IČO jako pojmenovaný člen bez identity | `vazba.clen_nazev` + `clen_stat`; člen je právě jedno z `clen_osoba_id` / `clen_ico` / `clen_nazev` (+`clen_stat`) |
+| 2 | Chybějící firmy z vazeb: jen identita | `INSERT INTO subjekt (ico)`, bez verze a bez stahování |
+| 3 | Doplnit nalezené role | místopředseda představenstva a DR, předseda/místopředseda/člen kontrolní komise, předseda/místopředseda družstva, statutární ředitel, předseda správní rady |
+| 4 | Stav = AKTIVNI/ZANIKLY + dva nezávislé příznaky | `stav_kod`, `je_v_likvidaci`, `je_v_insolvenci` |
+| 5 | Platnost dle vzniku/zániku funkce, zápis do OR zvlášť | `platnost_od/do` + `datum_zapisu_or` / `datum_vymazu_or` |
+| 6 | Pole navíc hned | `subjekt_verze`: `dic`, `spisova_znacka`, `zakladni_kapital(_mena)`, `cz_nace`, `datum_aktualizace_zdroje`; `adresa`: `cislo_evidencni`, `kod_obce`, `kod_kraje`; surový JSON v `import_surova_data.raw` |
+| 7 | Změna příjmení: dvě osoby + příznak | `osoba.kandidat_slouceni`, funkce `dev.oznac_kandidaty_slouceni()`, pohled `dev.osoba_kandidati_slouceni` |
+| – | Podíl: originál + číslo jen při spolehlivém parsování | `podil_text` = hodnota přesně z ARES; `podil_procento` jen z `%`, `a/b`, zlomku `a;b` nebo typu PROCENTA |
+| – | Adresa: jednoznačnost podle RÚIAN | s RÚIAN kódem: `UNIQUE (ruian_kod)`, text se neporovnává; bez RÚIAN: částečný unikátní index na `hash_adresy` |
+
+### Upřesnění při implementaci (k odsouhlasení)
+
+- **Surový JSON je v samostatné tabulce `import_surova_data`, ne ve sloupci `subjekt_verze`.**
+  Ukládá se při každé dávce pro každé IČO a endpoint, i když se nic nezměnilo nebo převod selhal.
+  Ve sloupci verze by chyběl právě v těchto případech a u firem s více verzemi by se duplikoval.
+- **`je_v_insolvenci` u historických verzí = NULL (nezjištěno).** ARES dává spolehlivě jen
+  aktuální stav (`stavZdrojeIr`). Sekce insolvence ve výpisu z OR zůstává otevřená i po skončení
+  řízení (např. Sokolovské strojírny), proto ji na historii nepoužíváme. Stejně tak DIČ, CZ-NACE
+  a datum aktualizace se vyplní jen v poslední (otevřené) verzi.
+- **`je_v_likvidaci`** = v daném období byl zapsán likvidátor, nebo název obsahuje „v likvidaci“.
+- **Platnost podílu společníka** = zápis/výmaz podílu v OR (podíl nemá vlastní vznik/zánik).
+- **Družstvo:** holé „předseda/místopředseda/člen“ ve statutárním orgánu = představenstvo;
+  „předseda družstva“ se v OR píše výslovně.
+- **Nepřevedeno** (zůstává jen v surových datech, vypisuje se jako přeskočené): „ředitel družstva“,
+  „generální ředitel a.s.“ bez hodnosti v představenstvu, zahraniční PO bez uvedeného státu
+  (např. GPL Limited, Guernsey, jen textová adresa), sekce členů družstva a jejich vkladů.
+- **Opakované zápisy téhož člena** (OR přepíše člena při každé změně) se slučují podle
+  člen + role + podíl + `platnost_od`; navazující řádky se stejným obsahem se spojí.
