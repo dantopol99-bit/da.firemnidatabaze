@@ -348,7 +348,7 @@ ji nelze spárovat přes `dev.klic_osoby` a `osoba.ico` zůstane nepropojené.
 | – | Podíl: originál + číslo jen při spolehlivém parsování | `podil_text` = hodnota přesně z ARES; `podil_procento` jen z `%`, `a/b`, zlomku `a;b` nebo typu PROCENTA |
 | – | Adresa: jednoznačnost podle RÚIAN | s RÚIAN kódem: `UNIQUE (ruian_kod)`, text se neporovnává; bez RÚIAN: částečný unikátní index na `hash_adresy` |
 
-### Upřesnění při implementaci (k odsouhlasení)
+### Upřesnění při implementaci (schváleno 24. 9. 2026)
 
 - **Surový JSON je v samostatné tabulce `import_surova_data`, ne ve sloupci `subjekt_verze`.**
   Ukládá se při každé dávce pro každé IČO a endpoint, i když se nic nezměnilo nebo převod selhal.
@@ -361,8 +361,26 @@ ji nelze spárovat přes `dev.klic_osoby` a `osoba.ico` zůstane nepropojené.
 - **Platnost podílu společníka** = zápis/výmaz podílu v OR (podíl nemá vlastní vznik/zánik).
 - **Družstvo:** holé „předseda/místopředseda/člen“ ve statutárním orgánu = představenstvo;
   „předseda družstva“ se v OR píše výslovně.
-- **Nepřevedeno** (zůstává jen v surových datech, vypisuje se jako přeskočené): „ředitel družstva“,
-  „generální ředitel a.s.“ bez hodnosti v představenstvu, zahraniční PO bez uvedeného státu
-  (např. GPL Limited, Guernsey, jen textová adresa), sekce členů družstva a jejich vkladů.
+- **Nepřevedené údaje** viz přehled níže.
 - **Opakované zápisy téhož člena** (OR přepíše člena při každé změně) se slučují podle
   člen + role + podíl + `platnost_od`; navazující řádky se stejným obsahem se spojí.
+
+## Vědomě nezpracované údaje z ARES
+
+Tyto údaje importér záměrně nepřevádí do jádra. Zůstávají jen v surových
+datech (`dev.import_surova_data.raw`) a importér je na konci běhu vypíše jako
+„Přeskočené údaje“. Až padne rozhodnutí je dodělat, stačí je znovu převést ze
+surových dat, bez nového stahování.
+
+| údaj v ARES | příklad ze vzorku (78 firem) | proč nezpracováno | co by bylo potřeba | stav |
+|---|---|---|---|---|
+| Funkce „ředitel družstva“ ve statutárním orgánu | 3× (stavební bytová družstva) | nejde o člena představenstva ani o předsedu družstva, role v číselníku není | rozhodnout, zda jde o roli z OR, a přidat ji do `ciselnik_role` | čeká na rozhodnutí |
+| Funkce bez hodnosti v představenstvu a.s. („generální ředitel a.s.“) | 1× | nelze určit, zda jde o předsedu, místopředsedu, nebo člena; nehádáme | pravidlo pro tyto funkce (např. role „člen“ + původní text), nebo ruční určení | čeká na rozhodnutí |
+| Zahraniční PO bez IČO a bez uvedeného státu | 1× GPL Limited (Guernsey, akcionář 2006–07, jen textová adresa) | `clen_stat` je povinný a stát z textu adresy neodhadujeme | ruční doplnění státu, nebo spolehlivé rozpoznání státu z textu | čeká na rozhodnutí |
+| Členové družstva a jejich vklady (`VKLAD_CLEN_DRUZSTVA_SEKCE`) | 1× | mimo rozsah: členství v družstvu není role statutárního ani kontrolního orgánu | rozhodnout o rozšíření rozsahu vazeb | mimo rozsah |
+
+Mimo jádro jsou dále celé sekce, které se zatím nikam nemapují (jsou jen
+v surových datech): předmět podnikání, způsob jednání, počet členů orgánů,
+ostatní skutečnosti, akcie, konkursy, text insolvenčních zápisů, odštěpné
+závody a bydliště fyzických osob (to záměrně, viz `05_osoba.sql`).
+
