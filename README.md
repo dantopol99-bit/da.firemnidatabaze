@@ -14,9 +14,12 @@ dělat analýzy a reporty.
 │   ├── nasad_sql.py        # nasadí SQL skripty ze sql/<schema>/
 │   ├── ares_klient.py      # stahování z REST API ARES
 │   ├── ares_mapovani.py    # převod odpovědí ARES na řádky jádra (bez DB)
-│   └── ares_import.py      # import z ARES do dev (historizace + import_davka)
+│   ├── ares_import.py      # import z ARES do dev (historizace + import_davka)
+│   ├── res_zdroj.py        # RES (ČSÚ): stažení, otisk, kontrola struktury, číselníky (bez DB)
+│   └── res_import.py       # hromadný import RES do schématu res (COPY + import_davka)
 ├── sql/init/               # SQL skripty spouštěné při prvním startu databáze
 ├── sql/dev/                # identitní jádro – tabulky ve schématu dev
+├── sql/res/                # Registr ekonomických subjektů ČSÚ – schéma res
 ├── docs/                   # návrhy a rozhodnutí (např. mapování ARES)
 ├── tests/                  # testy (unittest)
 ├── data/                   # lokální data – NEcommitují se
@@ -30,7 +33,8 @@ dělat analýzy a reporty.
 
 | schéma | účel |
 |--------|------|
-| `dev`  | vývoj a pokusy |
+| `dev`  | vývoj a pokusy (identitní jádro z ARES) |
+| `res`  | snímky Registru ekonomických subjektů ČSÚ (podklad Oborově-regionálního reportu) |
 | `test` | testování načítání dat |
 | `prod` | ověřená data |
 
@@ -106,6 +110,35 @@ Každý běh je jedna dávka v `dev.import_davka`. Surové odpovědi ARES se ukl
 (`dev.import_surova_data`). Opakovaný import stejných dat nic nezmění; změněné údaje uzavřou
 starou verzi a vloží novou. Každý subjekt běží ve vlastní transakci, takže chyba jednoho
 neshodí ostatní. Na konci se vypíše souhrn, přeskočené údaje a chyby.
+
+## Registr ekonomických subjektů ČSÚ (schéma `res`)
+
+Podklad pro Oborově-regionální report: celá populace subjektů z hromadných otevřených dat
+RES (ČSÚ), ne dotazy na ARES po jednotlivých IČO. Identitní jádro (`dev`) schéma `res` jen čte.
+Zdroj, mapování sloupců, kvalita, srovnání s ČSÚ a omezení: [`docs/res_zdroj.md`](docs/res_zdroj.md).
+
+| skript | obsah |
+|--------|-------|
+| `01_snimek.sql` | schéma `res`, `res.snimek` (datum, soubor, URL, SHA-256, počet řádků, dávka), `res.cis_zdroj` |
+| `02_ciselniky.sql` | číselníky ČSÚ: CZ-NACE (obě verze, sekce/oddíl/skupina/třída), kraje, okresy → kraj, právní formy, KATPO, způsob zániku, zdroj údaje |
+| `03_subjekt.sql` | `res.subjekt` (res_data.csv, PK IČO + datum snímku) a `res.pf_nace` (res_pf_nace.csv) |
+| `04_vysledky.sql` | `res.kvalita` (kvalita snímku), `res.csu_agregat` (publikované počty ČSÚ) |
+| `05_pohledy.sql` | `v_subjekt`, `v_kvalita`, `v_pocty_kraj_sekce`, `v_srovnani_csu`, `v_jadro_kontrola`, `prunik_souhrn()`, pilot |
+
+```bash
+python -m firemni_databaze.nasad_sql dev            # res používá dev.import_davka
+python -m firemni_databaze.nasad_sql res
+python -m firemni_databaze.res_import vse           # číselníky + snímek + agregáty ČSÚ + přehled
+```
+
+Po částech: `res_import ciselniky`, `res_import snimek` (stáhne ~1,6 GB do dočasné složky mimo
+repozitář a po importu je smaže; `--adresar DIR` použije dříve stažené soubory), `res_import agregaty`,
+`res_import prehled`. Snímek se načítá přes `COPY` a je neměnný; opakovaný import téhož souboru
+se přeskočí, jiný soubor ke stejnému datu import odmítne. Chybí-li NACE sekce nebo kraj u víc než
+20 % subjektů bez zániku, import skončí kódem 3 a vypíše proč.
+
+Testy nad načtenými daty (`tests/test_res_import_db.py`) potřebují databázi se snímkem, jinak se
+přeskočí. S `RES_ADRESAR=<adresář se soubory>` ověří počty řádků i proti samotným souborům.
 
 Chceš-li `dev` začít úplně od nuly (smaže vše v něm):
 `docker compose exec db psql -U firemni -d firemni_databaze -c "DROP SCHEMA dev CASCADE; CREATE SCHEMA dev;"`

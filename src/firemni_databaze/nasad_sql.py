@@ -1,6 +1,7 @@
 """Nasadí SQL skripty ze složky sql/<schema>/ do databáze (v abecedním pořadí).
 
 Spuštění:  python -m firemni_databaze.nasad_sql dev
+           python -m firemni_databaze.nasad_sql res   # až po dev (používá dev.import_davka)
 
 Skripty jsou idempotentní, takže je lze spouštět opakovaně.
 Každý soubor běží v samostatné transakci – při chybě se soubor celý vrátí.
@@ -13,7 +14,7 @@ from pathlib import Path
 from firemni_databaze.db import get_engine
 
 SQL_DIR = Path(__file__).resolve().parents[2] / "sql"
-POVOLENA_SCHEMATA = ("dev",)  # test a prod zatím nenasazujeme
+POVOLENA_SCHEMATA = ("dev", "res")  # test a prod zatím nenasazujeme
 
 
 def sql_soubory(schema: str) -> list[Path]:
