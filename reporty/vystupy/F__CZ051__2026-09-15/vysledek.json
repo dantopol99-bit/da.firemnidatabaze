@@ -1,0 +1,1255 @@
+{
+ "meta": {
+  "zadani": {
+   "obor": [
+    "F"
+   ],
+   "uzemi": "CZ051",
+   "datum_snimku": "2026-09-15",
+   "srovnani": [],
+   "prah": 10
+  },
+  "obor": [
+   {
+    "kod": "F",
+    "nazev": "Stavebnictví",
+    "uroven": 1
+   }
+  ],
+  "obor_popis": "F Stavebnictví",
+  "klasifikace": "CZ-NACE Rev. 2 (klasifikace ČSÚ 80004, sloupec NACE)",
+  "uzemi": {
+   "typ": "KRAJ",
+   "kod": "CZ051",
+   "nazev": "Liberecký kraj",
+   "kraj": "CZ051"
+  },
+  "populace": "registrované ekonomické subjekty bez data zániku (sídlo v území, převažující činnost v oboru)",
+  "citace": "Zdroj: Český statistický úřad, Registr ekonomických subjektů (RES) – otevřená data, stav k 15. 9. 2026; licence CC BY 4.0 (https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu); vlastní výpočet.",
+  "oznaceni": "Odvozené údaje, nejde o oficiální statistiku ČSÚ.",
+  "dalsi_zdroje": [
+   "ČSÚ, DataStat, sada OBY02A – počet obyvatel k 31. 12. 2025",
+   "ČSÚ, DataStat, výběr RES02QT1 – podíl subjektů se zjištěnou aktivitou, 2026-Q2",
+   "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů"
+  ],
+  "licence": {
+   "nazev": "CC BY 4.0",
+   "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
+  },
+  "vygenerovano": "2026-09-30T09:02:46+00:00"
+ },
+ "tabulky": [
+  {
+   "kod": "T01_zakladni",
+   "nazev": "Základní ukazatele",
+   "sloupce": [
+    {
+     "kod": "hodnota",
+     "nazev": "Hodnota",
+     "ukazatel": null
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Registrované subjekty v oboru – Liberecký kraj",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "REG_POCET"
+     },
+     "hodnoty": {
+      "hodnota": 14799
+     },
+     "promenna": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Registrované subjekty v oboru – Česko",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "REG_POCET_CR"
+     },
+     "hodnoty": {
+      "hodnota": 339922
+     },
+     "promenna": "obor@CZ"
+    },
+    {
+     "popis": "Podíl území na oboru v ČR (%)",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "REG_PODIL_CR"
+     },
+     "hodnoty": {
+      "hodnota": 4.35
+     },
+     "zaklad": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Všechny registrované subjekty v území",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "REG_POCET_VSE"
+     },
+     "hodnoty": {
+      "hodnota": 107418
+     },
+     "promenna": "vse@CZ051"
+    },
+    {
+     "popis": "Podíl oboru na registrovaných subjektech území (%)",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "REG_PODIL_OBOR"
+     },
+     "hodnoty": {
+      "hodnota": 13.78
+     },
+     "zaklad": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Lokalizační koeficient",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "LQ"
+     },
+     "hodnoty": {
+      "hodnota": 1.19
+     },
+     "zaklad": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Počet obyvatel k 31. 12. 2025",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "OBYVATELE"
+     },
+     "hodnoty": {
+      "hodnota": 448610
+     }
+    },
+    {
+     "popis": "Registrované subjekty oboru na 1 000 obyvatel",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "HUSTOTA"
+     },
+     "hodnoty": {
+      "hodnota": 32.99
+     },
+     "zaklad": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Pořadí kraje mezi 14 kraji podle počtu",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "PORADI_POCET"
+     },
+     "hodnoty": {
+      "hodnota": 13
+     },
+     "zaklad": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Pořadí kraje mezi 14 kraji podle hustoty",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "PORADI_HUSTOTA"
+     },
+     "hodnoty": {
+      "hodnota": 2
+     },
+     "zaklad": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Průměrný věk existujících subjektů (roky)",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "VEK_PRUMER"
+     },
+     "hodnoty": {
+      "hodnota": 18.4
+     },
+     "zaklad": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Mediánový věk existujících subjektů (roky)",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "VEK_MEDIAN"
+     },
+     "hodnoty": {
+      "hodnota": 18.5
+     },
+     "zaklad": "obor@kraj:CZ051"
+    },
+    {
+     "popis": "Obor neurčen (pseudokód 00) – v území, všechny obory",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "DOPL_OBOR_NEURCEN"
+     },
+     "hodnoty": {
+      "hodnota": 3314
+     },
+     "promenna": "dopl:00"
+    },
+    {
+     "popis": "Podíl subjektů se zjištěnou aktivitou – Liberecký kraj, všechny obory (ČSÚ, 2026-Q2, %)",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "AKTIVNI_PODIL_KRAJ"
+     },
+     "hodnoty": {
+      "hodnota": 59.1
+     },
+     "poznamka": "kontext: počty v reportu jsou registrované subjekty"
+    },
+    {
+     "popis": "Podíl subjektů se zjištěnou aktivitou – Liberecký kraj, sekce F (ČSÚ, 2026-Q2, %)",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "AKTIVNI_PODIL_SEKCE_KRAJ"
+     },
+     "hodnoty": {
+      "hodnota": 62.8
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Počty jsou registrované subjekty bez data zániku. Podíl subjektů se zjištěnou aktivitou je jen kontext z publikace ČSÚ, na subjekty oboru se nepřepočítává."
+   ]
+  },
+  {
+   "kod": "T02_srovnani",
+   "nazev": "Srovnání s ČR a se zadanými kraji",
+   "sloupce": [
+    {
+     "kod": "pocet",
+     "nazev": "Počet registrovaných subjektů v oboru",
+     "ukazatel": "REG_POCET"
+    },
+    {
+     "kod": "vse",
+     "nazev": "Všechny registrované subjekty",
+     "ukazatel": "REG_POCET_VSE"
+    },
+    {
+     "kod": "podil_obor",
+     "nazev": "Podíl oboru (%)",
+     "ukazatel": "REG_PODIL_OBOR"
+    },
+    {
+     "kod": "podil_cr",
+     "nazev": "Podíl na ČR (%)",
+     "ukazatel": "REG_PODIL_CR"
+    },
+    {
+     "kod": "lq",
+     "nazev": "Lokalizační koeficient",
+     "ukazatel": "LQ"
+    },
+    {
+     "kod": "obyvatele",
+     "nazev": "Obyvatelé",
+     "ukazatel": "OBYVATELE"
+    },
+    {
+     "kod": "hustota",
+     "nazev": "Na 1 000 obyvatel",
+     "ukazatel": "HUSTOTA"
+    },
+    {
+     "kod": "aktivni_kraj",
+     "nazev": "Kraj: podíl se zjištěnou aktivitou, ČSÚ (%)",
+     "ukazatel": "AKTIVNI_PODIL_KRAJ"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Česko",
+     "typ": "polozka",
+     "promenna": "obor@CZ",
+     "hodnoty": {
+      "pocet": 339922,
+      "vse": 2947143,
+      "podil_obor": 11.53,
+      "podil_cr": 100.0,
+      "lq": 1.0,
+      "obyvatele": 10915839,
+      "hustota": 31.14,
+      "aktivni_kraj": 61.0
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Liberecký kraj (zkoumané území)",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ051",
+     "hodnoty": {
+      "pocet": 14799,
+      "vse": 107418,
+      "podil_obor": 13.78,
+      "podil_cr": 4.35,
+      "lq": 1.19,
+      "obyvatele": 448610,
+      "hustota": 32.99,
+      "aktivni_kraj": 59.1
+     },
+     "poznamka": null
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Srovnávací kraje nebyly zadány; automaticky se srovnává jen s ČR a pořadím krajů (T03)."
+   ]
+  },
+  {
+   "kod": "T03_kraje",
+   "nazev": "Pořadí krajů (všech 14)",
+   "sloupce": [
+    {
+     "kod": "poradi_pocet",
+     "nazev": "Pořadí podle počtu",
+     "ukazatel": "PORADI_POCET"
+    },
+    {
+     "kod": "pocet",
+     "nazev": "Počet registrovaných subjektů",
+     "ukazatel": "REG_POCET"
+    },
+    {
+     "kod": "podil_cr",
+     "nazev": "Podíl na ČR (%)",
+     "ukazatel": "REG_PODIL_CR"
+    },
+    {
+     "kod": "lq",
+     "nazev": "Lokalizační koeficient",
+     "ukazatel": "LQ"
+    },
+    {
+     "kod": "hustota",
+     "nazev": "Na 1 000 obyvatel",
+     "ukazatel": "HUSTOTA"
+    },
+    {
+     "kod": "poradi_hustota",
+     "nazev": "Pořadí podle hustoty",
+     "ukazatel": "PORADI_HUSTOTA"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Hlavní město Praha",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ010",
+     "hodnoty": {
+      "poradi_pocet": 1,
+      "pocet": 61133,
+      "podil_cr": 18.0,
+      "lq": 0.75,
+      "hustota": 43.45,
+      "poradi_hustota": 1
+     }
+    },
+    {
+     "popis": "Středočeský kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ020",
+     "hodnoty": {
+      "poradi_pocet": 2,
+      "pocet": 44691,
+      "podil_cr": 13.1,
+      "lq": 1.07,
+      "hustota": 30.26,
+      "poradi_hustota": 8
+     }
+    },
+    {
+     "popis": "Jihomoravský kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ064",
+     "hodnoty": {
+      "poradi_pocet": 3,
+      "pocet": 38565,
+      "podil_cr": 11.3,
+      "lq": 1.0,
+      "hustota": 31.34,
+      "poradi_hustota": 4
+     }
+    },
+    {
+     "popis": "Moravskoslezský kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ080",
+     "hodnoty": {
+      "poradi_pocet": 4,
+      "pocet": 29246,
+      "podil_cr": 8.6,
+      "lq": 0.99,
+      "hustota": 24.86,
+      "poradi_hustota": 14
+     }
+    },
+    {
+     "popis": "Ústecký kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ042",
+     "hodnoty": {
+      "poradi_pocet": 5,
+      "pocet": 24106,
+      "podil_cr": 7.1,
+      "lq": 1.24,
+      "hustota": 29.91,
+      "poradi_hustota": 9
+     }
+    },
+    {
+     "popis": "Jihočeský kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ031",
+     "hodnoty": {
+      "poradi_pocet": 6,
+      "pocet": 20725,
+      "podil_cr": 6.1,
+      "lq": 1.13,
+      "hustota": 31.74,
+      "poradi_hustota": 3
+     }
+    },
+    {
+     "popis": "Zlínský kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ072",
+     "hodnoty": {
+      "poradi_pocet": 7,
+      "pocet": 17539,
+      "podil_cr": 5.2,
+      "lq": 1.12,
+      "hustota": 30.37,
+      "poradi_hustota": 7
+     }
+    },
+    {
+     "popis": "Královéhradecký kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ052",
+     "hodnoty": {
+      "poradi_pocet": 8,
+      "pocet": 16941,
+      "podil_cr": 5.0,
+      "lq": 1.12,
+      "hustota": 30.54,
+      "poradi_hustota": 6
+     }
+    },
+    {
+     "popis": "Olomoucký kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ071",
+     "hodnoty": {
+      "poradi_pocet": 9,
+      "pocet": 16625,
+      "podil_cr": 4.9,
+      "lq": 1.03,
+      "hustota": 26.33,
+      "poradi_hustota": 12
+     }
+    },
+    {
+     "popis": "Plzeňský kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ032",
+     "hodnoty": {
+      "poradi_pocet": 10,
+      "pocet": 16016,
+      "podil_cr": 4.7,
+      "lq": 0.98,
+      "hustota": 26.06,
+      "poradi_hustota": 13
+     }
+    },
+    {
+     "popis": "Kraj Vysočina",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ063",
+     "hodnoty": {
+      "poradi_pocet": 11,
+      "pocet": 15858,
+      "podil_cr": 4.7,
+      "lq": 1.24,
+      "hustota": 30.74,
+      "poradi_hustota": 5
+     }
+    },
+    {
+     "popis": "Pardubický kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ053",
+     "hodnoty": {
+      "poradi_pocet": 12,
+      "pocet": 15621,
+      "podil_cr": 4.6,
+      "lq": 1.13,
+      "hustota": 29.42,
+      "poradi_hustota": 10
+     }
+    },
+    {
+     "popis": "Liberecký kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ051",
+     "hodnoty": {
+      "poradi_pocet": 13,
+      "pocet": 14799,
+      "podil_cr": 4.4,
+      "lq": 1.19,
+      "hustota": 32.99,
+      "poradi_hustota": 2
+     }
+    },
+    {
+     "popis": "Karlovarský kraj",
+     "typ": "polozka",
+     "promenna": "obor@kraj:CZ041",
+     "hodnoty": {
+      "poradi_pocet": 14,
+      "pocet": 8057,
+      "podil_cr": 2.4,
+      "lq": 1.01,
+      "hustota": 27.59,
+      "poradi_hustota": 11
+     }
+    },
+    {
+     "popis": "Česko",
+     "typ": "celkem",
+     "promenna": "obor@CZ",
+     "hodnoty": {
+      "pocet": 339922,
+      "podil_cr": 100.0,
+      "lq": 1.0,
+      "hustota": 31.14
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Pořadí je spočteno ze skutečných počtů všech 14 krajů; kraje pod prahem jsou sloučeny do řádku „ostatní kraje“ bez pořadí."
+   ]
+  },
+  {
+   "kod": "T04_okresy",
+   "nazev": "Okresy kraje Liberecký kraj",
+   "sloupce": [
+    {
+     "kod": "poradi_pocet",
+     "nazev": "Pořadí podle počtu",
+     "ukazatel": "PORADI_POCET"
+    },
+    {
+     "kod": "pocet",
+     "nazev": "Počet registrovaných subjektů",
+     "ukazatel": "REG_POCET"
+    },
+    {
+     "kod": "podil_cr",
+     "nazev": "Podíl na ČR (%)",
+     "ukazatel": "REG_PODIL_CR"
+    },
+    {
+     "kod": "lq",
+     "nazev": "Lokalizační koeficient",
+     "ukazatel": "LQ"
+    },
+    {
+     "kod": "hustota",
+     "nazev": "Na 1 000 obyvatel",
+     "ukazatel": "HUSTOTA"
+    },
+    {
+     "kod": "poradi_hustota",
+     "nazev": "Pořadí podle hustoty",
+     "ukazatel": "PORADI_HUSTOTA"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Liberec",
+     "typ": "polozka",
+     "promenna": "obor@okres:CZ0513",
+     "hodnoty": {
+      "poradi_pocet": 1,
+      "pocet": 6533,
+      "podil_cr": 1.9,
+      "lq": 1.25,
+      "hustota": 36.08,
+      "poradi_hustota": 2
+     }
+    },
+    {
+     "popis": "Jablonec nad Nisou",
+     "typ": "polozka",
+     "promenna": "obor@okres:CZ0512",
+     "hodnoty": {
+      "poradi_pocet": 2,
+      "pocet": 3351,
+      "podil_cr": 1.0,
+      "lq": 1.24,
+      "hustota": 36.1,
+      "poradi_hustota": 1
+     }
+    },
+    {
+     "popis": "Česká Lípa",
+     "typ": "polozka",
+     "promenna": "obor@okres:CZ0511",
+     "hodnoty": {
+      "poradi_pocet": 3,
+      "pocet": 2624,
+      "podil_cr": 0.8,
+      "lq": 1.08,
+      "hustota": 25.67,
+      "poradi_hustota": 4
+     }
+    },
+    {
+     "popis": "Semily",
+     "typ": "polozka",
+     "promenna": "obor@okres:CZ0514",
+     "hodnoty": {
+      "poradi_pocet": 4,
+      "pocet": 2291,
+      "podil_cr": 0.7,
+      "lq": 1.13,
+      "hustota": 31.61,
+      "poradi_hustota": 3
+     }
+    },
+    {
+     "popis": "Liberecký kraj",
+     "typ": "celkem",
+     "promenna": "obor@kraj:CZ051",
+     "hodnoty": {
+      "pocet": 14799,
+      "podil_cr": 4.4
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Pořadí mezi okresy téhož kraje; okresy pod prahem jsou sloučeny do „ostatní okresy“."
+   ]
+  },
+  {
+   "kod": "T05_fo_po",
+   "nazev": "Registrované subjekty podle typu osoby",
+   "sloupce": [
+    {
+     "kod": "pocet",
+     "nazev": "Počet registrovaných subjektů",
+     "ukazatel": "FOPO_POCET"
+    },
+    {
+     "kod": "podil",
+     "nazev": "Podíl (%)",
+     "ukazatel": "FOPO_PODIL"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "fyzické osoby (FO)",
+     "typ": "polozka",
+     "promenna": "fopo:FO",
+     "hodnoty": {
+      "pocet": 13068,
+      "podil": 88.3
+     }
+    },
+    {
+     "popis": "právnické osoby a ostatní (PO)",
+     "typ": "polozka",
+     "promenna": "fopo:PO",
+     "hodnoty": {
+      "pocet": 1731,
+      "podil": 11.7
+     }
+    },
+    {
+     "popis": "celkem",
+     "typ": "celkem",
+     "promenna": "obor@kraj:CZ051",
+     "hodnoty": {
+      "pocet": 14799,
+      "podil": 100.0
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": []
+  },
+  {
+   "kod": "T06_pravni_forma",
+   "nazev": "Registrované subjekty podle právní formy (číselník ČSÚ 56)",
+   "sloupce": [
+    {
+     "kod": "pocet",
+     "nazev": "Počet registrovaných subjektů",
+     "ukazatel": "FORMA_POCET"
+    },
+    {
+     "kod": "podil",
+     "nazev": "Podíl (%)",
+     "ukazatel": "FORMA_PODIL"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "101 Fyzická osoba podnikající dle živnostenského zákona",
+     "typ": "polozka",
+     "promenna": "forma:101",
+     "hodnoty": {
+      "pocet": 12717,
+      "podil": 85.9
+     }
+    },
+    {
+     "popis": "424 Zahraniční fyzická osoba",
+     "typ": "polozka",
+     "promenna": "forma:424",
+     "hodnoty": {
+      "pocet": 329,
+      "podil": 2.2
+     }
+    },
+    {
+     "popis": "ostatní formy FO",
+     "typ": "ostatni",
+     "promenna": "ostatni:T06_pravni_forma:FO",
+     "hodnoty": {
+      "pocet": 22,
+      "podil": 0.1
+     }
+    },
+    {
+     "popis": "FO celkem",
+     "typ": "mezisoucet",
+     "promenna": "fopo:FO",
+     "hodnoty": {
+      "pocet": 13068,
+      "podil": 88.3
+     }
+    },
+    {
+     "popis": "112 Společnost s ručením omezeným",
+     "typ": "polozka",
+     "promenna": "forma:112",
+     "hodnoty": {
+      "pocet": 1648,
+      "podil": 11.1
+     }
+    },
+    {
+     "popis": "121 Akciová společnost",
+     "typ": "polozka",
+     "promenna": "forma:121",
+     "hodnoty": {
+      "pocet": 30,
+      "podil": 0.2
+     }
+    },
+    {
+     "popis": "111 Veřejná obchodní společnost",
+     "typ": "polozka",
+     "promenna": "forma:111",
+     "hodnoty": {
+      "pocet": 28,
+      "podil": 0.2
+     }
+    },
+    {
+     "popis": "205 Družstvo",
+     "typ": "polozka",
+     "promenna": "forma:205",
+     "hodnoty": {
+      "pocet": 12,
+      "podil": 0.1
+     }
+    },
+    {
+     "popis": "ostatní formy PO",
+     "typ": "ostatni",
+     "promenna": "ostatni:T06_pravni_forma:PO",
+     "hodnoty": {
+      "pocet": 13,
+      "podil": 0.1
+     }
+    },
+    {
+     "popis": "PO celkem",
+     "typ": "mezisoucet",
+     "promenna": "fopo:PO",
+     "hodnoty": {
+      "pocet": 1731,
+      "podil": 11.7
+     }
+    },
+    {
+     "popis": "celkem",
+     "typ": "celkem",
+     "promenna": "obor@kraj:CZ051",
+     "hodnoty": {
+      "pocet": 14799,
+      "podil": 100.0
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Formy pod prahem jsou sloučeny v rámci FO a v rámci PO; podíl je z celku území."
+   ]
+  },
+  {
+   "kod": "T07_velikost_fo",
+   "nazev": "Velikostní profil FO podle počtu zaměstnanců (KATPO)",
+   "sloupce": [
+    {
+     "kod": "pocet",
+     "nazev": "Počet registrovaných subjektů",
+     "ukazatel": "VEL_FO_POCET"
+    },
+    {
+     "kod": "podil",
+     "nazev": "Podíl (%)",
+     "ukazatel": "VEL_FO_PODIL"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "bez zaměstnanců",
+     "typ": "polozka",
+     "promenna": "vel_FO:110",
+     "hodnoty": {
+      "pocet": 6775,
+      "podil": 51.8
+     }
+    },
+    {
+     "popis": "1–9 zaměstnanců",
+     "typ": "polozka",
+     "promenna": "vel_FO:1-9",
+     "hodnoty": {
+      "pocet": 321,
+      "podil": 2.5
+     }
+    },
+    {
+     "popis": "10–49 zaměstnanců",
+     "typ": "polozka",
+     "promenna": "vel_FO:10-49",
+     "hodnoty": {
+      "pocet": 13,
+      "podil": 0.1
+     }
+    },
+    {
+     "popis": "Neuvedeno",
+     "typ": "polozka",
+     "promenna": "vel_FO:000",
+     "hodnoty": {
+      "pocet": 5959,
+      "podil": 45.6
+     }
+    },
+    {
+     "popis": "celkem",
+     "typ": "celkem",
+     "promenna": "fopo:FO",
+     "hodnoty": {
+      "pocet": 13068,
+      "podil": 100.0
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "„Neuvedeno“ (KATPO 000) je samostatný řádek, nesčítá se s „bez zaměstnanců“. U PO se kód 110 prakticky nepoužívá."
+   ]
+  },
+  {
+   "kod": "T08_velikost_po",
+   "nazev": "Velikostní profil PO podle počtu zaměstnanců (KATPO)",
+   "sloupce": [
+    {
+     "kod": "pocet",
+     "nazev": "Počet registrovaných subjektů",
+     "ukazatel": "VEL_PO_POCET"
+    },
+    {
+     "kod": "podil",
+     "nazev": "Podíl (%)",
+     "ukazatel": "VEL_PO_PODIL"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "1–9 zaměstnanců",
+     "typ": "polozka",
+     "promenna": "vel_PO:1-9",
+     "hodnoty": {
+      "pocet": 775,
+      "podil": 44.8
+     }
+    },
+    {
+     "popis": "10–49 zaměstnanců",
+     "typ": "polozka",
+     "promenna": "vel_PO:10-49",
+     "hodnoty": {
+      "pocet": 164,
+      "podil": 9.5
+     }
+    },
+    {
+     "popis": "Neuvedeno",
+     "typ": "polozka",
+     "promenna": "vel_PO:000",
+     "hodnoty": {
+      "pocet": 778,
+      "podil": 44.9
+     }
+    },
+    {
+     "popis": "ostatní (sloučené malé položky)",
+     "typ": "ostatni",
+     "promenna": "ostatni:T08_velikost_po",
+     "hodnoty": {
+      "pocet": 14,
+      "podil": 0.8
+     }
+    },
+    {
+     "popis": "celkem",
+     "typ": "celkem",
+     "promenna": "fopo:PO",
+     "hodnoty": {
+      "pocet": 1731,
+      "podil": 100.0
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "„Neuvedeno“ (KATPO 000) je samostatný řádek, nesčítá se s „bez zaměstnanců“. U PO se kód 110 prakticky nepoužívá."
+   ]
+  },
+  {
+   "kod": "T09_vekova_struktura",
+   "nazev": "Věková struktura existujících subjektů",
+   "sloupce": [
+    {
+     "kod": "pocet",
+     "nazev": "Počet registrovaných subjektů",
+     "ukazatel": "VEK_PASMO_POCET"
+    },
+    {
+     "kod": "podil",
+     "nazev": "Podíl (%)",
+     "ukazatel": "VEK_PASMO_PODIL"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "méně než 3 roky",
+     "typ": "polozka",
+     "promenna": "vek:0-2",
+     "hodnoty": {
+      "pocet": 1687,
+      "podil": 11.4
+     }
+    },
+    {
+     "popis": "3–5 let",
+     "typ": "polozka",
+     "promenna": "vek:3-5",
+     "hodnoty": {
+      "pocet": 1383,
+      "podil": 9.3
+     }
+    },
+    {
+     "popis": "6–10 let",
+     "typ": "polozka",
+     "promenna": "vek:6-10",
+     "hodnoty": {
+      "pocet": 1958,
+      "podil": 13.2
+     }
+    },
+    {
+     "popis": "11–20 let",
+     "typ": "polozka",
+     "promenna": "vek:11-20",
+     "hodnoty": {
+      "pocet": 3277,
+      "podil": 22.1
+     }
+    },
+    {
+     "popis": "21–30 let",
+     "typ": "polozka",
+     "promenna": "vek:21-30",
+     "hodnoty": {
+      "pocet": 3617,
+      "podil": 24.4
+     }
+    },
+    {
+     "popis": "31 a více let",
+     "typ": "polozka",
+     "promenna": "vek:31+",
+     "hodnoty": {
+      "pocet": 2877,
+      "podil": 19.4
+     }
+    },
+    {
+     "popis": "celkem",
+     "typ": "celkem",
+     "promenna": "obor@kraj:CZ051",
+     "hodnoty": {
+      "pocet": 14799,
+      "podil": 100.0
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Věk = datum snímku − datum vzniku. Jde o strukturu dnes existujících subjektů, ne o počet vzniků v jednotlivých letech (zaniklé subjekty nejsou zahrnuty)."
+   ]
+  },
+  {
+   "kod": "T10_zaniky_po",
+   "nazev": "Zaniklé právnické osoby v oboru a území podle roku zániku (RES, od 2023)",
+   "sloupce": [
+    {
+     "kod": "pocet",
+     "nazev": "Počet zaniklých PO",
+     "ukazatel": "ZANIK_PO_RES"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "2023",
+     "typ": "polozka",
+     "promenna": "zanik_po:2023",
+     "hodnoty": {
+      "pocet": 35
+     }
+    },
+    {
+     "popis": "2024",
+     "typ": "polozka",
+     "promenna": "zanik_po:2024",
+     "hodnoty": {
+      "pocet": 51
+     }
+    },
+    {
+     "popis": "2025",
+     "typ": "polozka",
+     "promenna": "zanik_po:2025",
+     "hodnoty": {
+      "pocet": 103
+     }
+    },
+    {
+     "popis": "2026 (do data snímku)",
+     "typ": "polozka",
+     "promenna": "zanik_po:2026",
+     "hodnoty": {
+      "pocet": 60
+     }
+    },
+    {
+     "popis": "celkem",
+     "typ": "celkem",
+     "promenna": "zanik_po@uzemi",
+     "hodnoty": {
+      "pocet": 249
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Jen PO: zaniklé FO mají v otevřených datech jen IČO a datum zániku (GDPR). Zaniklé subjekty jsou v RES jen 4 roky po zániku."
+   ]
+  },
+  {
+   "kod": "T11_dynamika_csu",
+   "nazev": "Vznik a zánik ekonomických subjektů v území – všechny obory (ČSÚ, RES05)",
+   "sloupce": [
+    {
+     "kod": "fo",
+     "nazev": "FO",
+     "ukazatel": "DYN_VZNIK_CSU"
+    },
+    {
+     "kod": "po",
+     "nazev": "PO",
+     "ukazatel": "DYN_VZNIK_CSU"
+    },
+    {
+     "kod": "celkem",
+     "nazev": "Celkem",
+     "ukazatel": "DYN_VZNIK_CSU"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "2023 – vzniklé",
+     "typ": "polozka",
+     "promenna": "dyn:2023:4962:celkem",
+     "ukazatele": {
+      "fo": "DYN_VZNIK_CSU",
+      "po": "DYN_VZNIK_CSU",
+      "celkem": "DYN_VZNIK_CSU"
+     },
+     "hodnoty": {
+      "fo": 2859,
+      "po": 785,
+      "celkem": 3644
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2023 – zaniklé",
+     "typ": "polozka",
+     "promenna": "dyn:2023:4963:celkem",
+     "ukazatele": {
+      "fo": "DYN_ZANIK_CSU",
+      "po": "DYN_ZANIK_CSU",
+      "celkem": "DYN_ZANIK_CSU"
+     },
+     "hodnoty": {
+      "fo": 13252,
+      "po": 483,
+      "celkem": 13735
+     },
+     "poznamka": "mimořádný výkyv: hromadný zánik FO v 1. čtvrtletí 2023"
+    },
+    {
+     "popis": "2024 – vzniklé",
+     "typ": "polozka",
+     "promenna": "dyn:2024:4962:celkem",
+     "ukazatele": {
+      "fo": "DYN_VZNIK_CSU",
+      "po": "DYN_VZNIK_CSU",
+      "celkem": "DYN_VZNIK_CSU"
+     },
+     "hodnoty": {
+      "fo": 3326,
+      "po": 768,
+      "celkem": 4094
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2024 – zaniklé",
+     "typ": "polozka",
+     "promenna": "dyn:2024:4963:celkem",
+     "ukazatele": {
+      "fo": "DYN_ZANIK_CSU",
+      "po": "DYN_ZANIK_CSU",
+      "celkem": "DYN_ZANIK_CSU"
+     },
+     "hodnoty": {
+      "fo": 3390,
+      "po": 582,
+      "celkem": 3972
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2025 – vzniklé",
+     "typ": "polozka",
+     "promenna": "dyn:2025:4962:celkem",
+     "ukazatele": {
+      "fo": "DYN_VZNIK_CSU",
+      "po": "DYN_VZNIK_CSU",
+      "celkem": "DYN_VZNIK_CSU"
+     },
+     "hodnoty": {
+      "fo": 3239,
+      "po": 766,
+      "celkem": 4005
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2025 – zaniklé",
+     "typ": "polozka",
+     "promenna": "dyn:2025:4963:celkem",
+     "ukazatele": {
+      "fo": "DYN_ZANIK_CSU",
+      "po": "DYN_ZANIK_CSU",
+      "celkem": "DYN_ZANIK_CSU"
+     },
+     "hodnoty": {
+      "fo": 2003,
+      "po": 1221,
+      "celkem": 3224
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2026 – vzniklé",
+     "typ": "polozka",
+     "promenna": "dyn:2026:4962:celkem",
+     "ukazatele": {
+      "fo": "DYN_VZNIK_CSU",
+      "po": "DYN_VZNIK_CSU",
+      "celkem": "DYN_VZNIK_CSU"
+     },
+     "hodnoty": {
+      "fo": 1880,
+      "po": 425,
+      "celkem": 2305
+     },
+     "poznamka": "2 čtvrtletí"
+    },
+    {
+     "popis": "2026 – zaniklé",
+     "typ": "polozka",
+     "promenna": "dyn:2026:4963:celkem",
+     "ukazatele": {
+      "fo": "DYN_ZANIK_CSU",
+      "po": "DYN_ZANIK_CSU",
+      "celkem": "DYN_ZANIK_CSU"
+     },
+     "hodnoty": {
+      "fo": 850,
+      "po": 516,
+      "celkem": 1366
+     },
+     "poznamka": "2 čtvrtletí"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "ČSÚ nepublikuje vznik a zánik v členění podle oboru (kraj × sekce); jde o celé území. Čísla FO a PO pod prahem se nezveřejňují (zůstává jen celkem)."
+   ]
+  }
+ ]
+}
