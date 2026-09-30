@@ -27,3 +27,6 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# --- Interní podklady kontroly reportu (obsahují skrytá čísla) — nezveřejňovat ---
+reporty/vystupy/*/_interni/

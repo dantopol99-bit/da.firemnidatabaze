@@ -9,6 +9,7 @@ import csv
 import email.utils
 import hashlib
 import io
+import json
 import os
 import time
 import urllib.error
@@ -323,6 +324,89 @@ def radky_agregatu(obsah: bytes, definice: dict) -> list[dict]:
             "nace_kod": r[nace["kod"] + ".Polozka"],
             "nace": r[nace["nazev"]],
             "obdobi": r[cas["kod"] + ".Polozka"],
+            "hodnota": float(r["Hodnota"]),
+        })
+    return radky
+
+
+# ---------------------------------------------------------------------------
+# DataStat – sady s hierarchickým územím (ČR › region › kraj › okres)
+# ---------------------------------------------------------------------------
+
+DATASTAT_SADY = "https://data.csu.gov.cz/api/katalog/v1/sady/"
+DATASTAT_SADA_DATA = "https://data.csu.gov.cz/api/dotaz/v1/data/sady/"
+UROVNE_UZEMI = ("OKRES", "KRAJ", "REGION", "STAT")    # od nejpodrobnější
+_PRIPONA_UROVNE = {"OKRES": "-Okres", "KRAJ": "-Kraj", "REGION": "-Region", "STAT": "-Stát"}
+
+
+def url_sady_csv(sada: str) -> str:
+    """Celá datová sada jako CSV (jen u menších sad, např. RES05)."""
+    return DATASTAT_SADA_DATA + sada + "?" + urllib.parse.urlencode({"format": "CSV", "kodCiselniku": "true"})
+
+
+def url_vlastni_vyber(sada: str) -> str:
+    return DATASTAT_SADA_DATA + sada + "/vlastni?" + urllib.parse.urlencode(
+        {"format": "CSV", "kodCiselniku": "true", "rozsah": "CELY_VYBER"})
+
+
+def vyber_obyvatel(rok: int) -> dict:
+    """Tělo vlastního výběru z OBY02A: ČR, regiony, kraje a okresy za jeden rok."""
+    return {
+        "sloupce": [{"kodDimenze": "POHL2", "filtrTabulkyKod": "0", "filtr": [{"zobrazitPolozky": ["0"]}]}],
+        "radky": [{"kodDimenze": "Uz0123h2", "rozbalitUroven": "OKRES"}],
+        "filtryTabulky": [
+            {"kodDimenze": "IndicatorType", "filtrTabulkyKod": "2406K2"},
+            {"kodDimenze": "CasR", "filtrTabulkyKod": str(rok), "filtr": [{"zobrazitPolozky": [str(rok)]}]},
+        ],
+        "nepouziteDimenze": [],
+    }
+
+
+def stahni_post_json(url: str, telo: dict, timeout: int = 300) -> bytes:
+    pozadavek = urllib.request.Request(
+        url, data=json.dumps(telo).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(pozadavek, timeout=timeout) as r:
+        return r.read()
+
+
+def _uzemi(r: dict, dim: str) -> tuple[str, str, str]:
+    """(kód, úroveň, název) nejpodrobnější vyplněné úrovně hierarchického území."""
+    for uroven in UROVNE_UZEMI:
+        kod = r.get(f"{dim}.{uroven}.Polozka")
+        if kod:
+            nazev = next((v for k, v in r.items() if k.endswith(_PRIPONA_UROVNE[uroven]) and v), kod)
+            return kod, uroven, nazev
+    raise ValueError(f"řádek bez území: {r}")
+
+
+def radky_obyvatel(obsah: bytes, definice_sady: dict) -> list[dict]:
+    ukazatele = {u["nazev"]: u["kod"] for u in definice_sady["ukazatele"]}
+    radky = []
+    for r in csv.DictReader(io.StringIO(obsah.decode("utf-8-sig"))):
+        if r.get("POHL2.Polozka") != "0" or r["Hodnota"] in ("", None):
+            continue
+        kod, uroven, nazev = _uzemi(r, "Uz0123h2")
+        radky.append({
+            "uzemi_kod": kod, "uroven": uroven, "uzemi": nazev,
+            "rok": int(r["CasR.Polozka"]),
+            "ukazatel_kod": ukazatele[r["Ukazatel"]], "ukazatel": r["Ukazatel"],
+            "hodnota": float(r["Hodnota"]),
+        })
+    return radky
+
+
+def radky_vznik_zanik(obsah: bytes, definice_sady: dict) -> list[dict]:
+    ukazatele = {u["nazev"]: u["kod"] for u in definice_sady["ukazatele"]}
+    radky = []
+    for r in csv.DictReader(io.StringIO(obsah.decode("utf-8-sig"))):
+        if r["Hodnota"] in ("", None) or not r.get("CasQ.Polozka"):
+            continue
+        kod, uroven, nazev = _uzemi(r, "UZ023H2U")
+        radky.append({
+            "uzemi_kod": kod, "uroven": uroven, "uzemi": nazev,
+            "forma_kod": r["FORMA0.Polozka"], "forma": r["Právní forma"],
+            "obdobi": r["CasQ.Polozka"],
+            "ukazatel_kod": ukazatele[r["Ukazatel"]], "ukazatel": r["Ukazatel"],
             "hodnota": float(r["Hodnota"]),
         })
     return radky

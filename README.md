@@ -16,11 +16,16 @@ dělat analýzy a reporty.
 │   ├── ares_mapovani.py    # převod odpovědí ARES na řádky jádra (bez DB)
 │   ├── ares_import.py      # import z ARES do dev (historizace + import_davka)
 │   ├── res_zdroj.py        # RES (ČSÚ): stažení, otisk, kontrola struktury, číselníky (bez DB)
-│   └── res_import.py       # hromadný import RES do schématu res (COPY + import_davka)
+│   ├── res_import.py       # hromadný import RES do schématu res (COPY + import_davka)
+│   ├── report.py           # výpočet Oborově-regionálního reportu (obor × území × snímek)
+│   ├── report_potlaceni.py # práh 10, slučování do „ostatní“, kontrola dopočtu
+│   ├── report_xlsx.py      # datová příloha XLSX
+│   └── report_kontrola.py  # kontrola výstupu před zveřejněním
 ├── sql/init/               # SQL skripty spouštěné při prvním startu databáze
 ├── sql/dev/                # identitní jádro – tabulky ve schématu dev
 ├── sql/res/                # Registr ekonomických subjektů ČSÚ – schéma res
-├── docs/                   # návrhy a rozhodnutí (např. mapování ARES)
+├── docs/                   # návrhy a rozhodnutí (mapování ARES, zdroj RES, metodika reportu)
+├── reporty/                # katalog ukazatelů a vzorové výstupy reportu
 ├── tests/                  # testy (unittest)
 ├── data/                   # lokální data – NEcommitují se
 ├── docker-compose.yml      # lokální PostgreSQL v Dockeru
@@ -124,6 +129,7 @@ Zdroj, mapování sloupců, kvalita, srovnání s ČSÚ a omezení: [`docs/res_z
 | `03_subjekt.sql` | `res.subjekt` (res_data.csv, PK IČO + datum snímku) a `res.pf_nace` (res_pf_nace.csv) |
 | `04_vysledky.sql` | `res.kvalita` (kvalita snímku), `res.csu_agregat` (publikované počty ČSÚ) |
 | `05_pohledy.sql` | `v_subjekt`, `v_kvalita`, `v_pocty_kraj_sekce`, `v_srovnani_csu`, `v_jadro_kontrola`, `prunik_souhrn()`, pilot |
+| `06_report_zdroje.sql` | `res.csu_obyvatelstvo` (OBY02A), `res.csu_vznik_zanik` (RES05) |
 
 ```bash
 python -m firemni_databaze.nasad_sql dev            # res používá dev.import_davka
@@ -139,6 +145,20 @@ se přeskočí, jiný soubor ke stejnému datu import odmítne. Chybí-li NACE s
 
 Testy nad načtenými daty (`tests/test_res_import_db.py`) potřebují databázi se snímkem, jinak se
 přeskočí. S `RES_ADRESAR=<adresář se soubory>` ověří počty řádků i proti samotným souborům.
+
+## Oborově-regionální report – výpočetní vrstva
+
+Metodika a schválená pravidla: [`docs/report_metodika.md`](docs/report_metodika.md), ukazatele:
+[`reporty/katalog_ukazatelu.yaml`](reporty/katalog_ukazatelu.yaml).
+
+```bash
+python -m firemni_databaze.res_import agregaty      # DataStat: RES02QT1, obyvatelstvo OBY02A, vznik/zánik RES05
+python -m firemni_databaze.report --obor F --uzemi CZ051 [--srovnani CZ031,CZ053] [--datum 2026-09-15]
+python -m firemni_databaze.report_kontrola reporty/vystupy/*
+```
+
+Výstup je v `reporty/vystupy/<obor>__<území>__<datum>/`: `vysledek.json`, `vysledek.md`, `priloha.xlsx`.
+Podadresář `_interni/` obsahuje i skrytá čísla pro kontrolu dopočtu a do gitu nepatří.
 
 Chceš-li `dev` začít úplně od nuly (smaže vše v něm):
 `docker compose exec db psql -U firemni -d firemni_databaze -c "DROP SCHEMA dev CASCADE; CREATE SCHEMA dev;"`

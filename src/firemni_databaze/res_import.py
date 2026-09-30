@@ -4,7 +4,7 @@ Spuštění:
     python -m firemni_databaze.res_import ciselniky              # oficiální číselníky ČSÚ
     python -m firemni_databaze.res_import snimek                 # stáhne poslední snímek, načte, soubory smaže
     python -m firemni_databaze.res_import snimek --adresar DIR   # dříve stažené soubory (ponechá je)
-    python -m firemni_databaze.res_import agregaty               # agregáty ČSÚ z DataStatu pro kontrolu
+    python -m firemni_databaze.res_import agregaty               # DataStat: RES02QT1, obyvatelstvo, vznik/zánik
     python -m firemni_databaze.res_import vse                    # vše výše v tomto pořadí
     python -m firemni_databaze.res_import prehled                # kvalita, srovnání s ČSÚ, jádro, pilot
 
@@ -310,6 +310,48 @@ def nacti_agregaty(conn, vyber: str = z.DATASTAT_VYBER) -> int:
     return v_davce(conn, "CSU-DATASTAT", url, prace)
 
 
+def nacti_obyvatelstvo(conn, rok: int = date.today().year - 1) -> int:
+    """Počet obyvatel ČR, krajů a okresů z DataStatu (OBY02A) za zadaný rok."""
+    url = z.url_vlastni_vyber("OBY02A")
+
+    def prace(davka: int):
+        definice = json.loads(z.stahni_text(z.DATASTAT_SADY + "OBY02A"))
+        radky = z.radky_obyvatel(z.stahni_post_json(url, z.vyber_obyvatel(rok)), definice)
+        if not any(r["uroven"] == "OKRES" for r in radky):
+            raise ValueError(f"OBY02A za rok {rok} neobsahuje okresy")
+        for r in radky:
+            r.update(url=url, import_davka_id=davka)
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM res.csu_obyvatelstvo WHERE rok = %s", (rok,))
+            vloz(cur, "csu_obyvatelstvo", radky)
+        conn.commit()
+        print(f"  OBY02A: {len(radky)} hodnot za rok {rok}")
+        return len(radky), f"DataStat OBY02A, rok {rok}"
+
+    return v_davce(conn, "CSU-DATASTAT", url, prace)
+
+
+def nacti_vznik_zanik(conn) -> int:
+    """Vzniklé a zaniklé ekonomické subjekty (DataStat RES05) – celá sada."""
+    url = z.url_sady_csv("RES05")
+
+    def prace(davka: int):
+        definice = json.loads(z.stahni_text(z.DATASTAT_SADY + "RES05"))
+        radky = z.radky_vznik_zanik(z.stahni_text(url), definice)
+        for r in radky:
+            r.update(url=url, import_davka_id=davka)
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM res.csu_vznik_zanik")
+            vloz(cur, "csu_vznik_zanik", radky)
+            cur.execute("SELECT min(obdobi), max(obdobi) FROM res.csu_vznik_zanik")
+            od, do = cur.fetchone()
+        conn.commit()
+        print(f"  RES05: {len(radky)} hodnot, {od} – {do}")
+        return len(radky), f"DataStat RES05, {od} – {do}"
+
+    return v_davce(conn, "CSU-DATASTAT", url, prace)
+
+
 # ---------------------------------------------------------------------------
 # Přehled výsledků
 # ---------------------------------------------------------------------------
@@ -376,7 +418,7 @@ def main() -> int:
     p_cis.add_argument("--k-datu", type=date.fromisoformat, default=date.today(), help="platnost číselníků (YYYY-MM-DD)")
     p_sn = sub.add_parser("snimek", help="načte snímek RES")
     p_sn.add_argument("--adresar", type=Path, help="adresář s dříve staženými res_data.csv, res_pf_nace.csv a *-metadata.json")
-    sub.add_parser("agregaty", help="načte agregáty ČSÚ z DataStatu")
+    sub.add_parser("agregaty", help="načte agregáty ČSÚ z DataStatu (RES02QT1, OBY02A, RES05)")
     p_vse = sub.add_parser("vse", help="číselníky + snímek + agregáty")
     p_vse.add_argument("--adresar", type=Path)
     sub.add_parser("prehled", help="vypíše kvalitu, srovnání s ČSÚ, kontrolu jádra a pilot")
@@ -400,8 +442,8 @@ def main() -> int:
                 return KOD_PRAH_PREKROCEN
         if args.prikaz in ("agregaty", "vse"):
             print("Agregáty ČSÚ:")
-            davka = nacti_agregaty(conn)
-            print(f"  dávka {davka} OK")
+            for davka in (nacti_agregaty(conn), nacti_obyvatelstvo(conn), nacti_vznik_zanik(conn)):
+                print(f"  dávka {davka} OK")
         if args.prikaz in ("prehled", "vse"):
             prehled(conn)
     finally:

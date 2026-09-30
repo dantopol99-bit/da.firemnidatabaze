@@ -1,0 +1,353 @@
+# Katalog ukazatelů Oborově-regionálního reportu (verze v0)
+#
+# Každé číslo ve výstupu reportu (JSON i XLSX) nese kód ukazatele z tohoto
+# katalogu; kontrolní skript (report_kontrola) ověřuje, že kód existuje.
+#
+# Společné pro všechny ukazatele z RES:
+#   populace  = registrované ekonomické subjekty BEZ data zániku ve snímku RES
+#               (definice ČSÚ „počet ekonomických subjektů“), NE „firmy“ ani „aktivní“
+#   obor      = převažující činnost CZ-NACE Rev. 2 (sloupec NACE, klasifikace 80004)
+#               na úrovni sekce / oddílu / skupiny / třídy, případně jejich seznam
+#   území     = sídlo subjektu: okres (OKRESLAU, číselník 109) → kraj (vazba 109 → 108)
+#   práh      = 10 subjektů; buňky pod prahem se slučují do „ostatní“ (docs/report_metodika.md)
+#
+# typ: pocet    – počet registrovaných subjektů; zveřejní se jen ≥ práh
+#      podil    – procento z počtů ve stejném řádku/tabulce; jen u zveřejněných počtů
+#      index    – poměrový ukazatel (LQ, hustota); jen u zveřejněných počtů
+#      poradi   – pořadí; jen u zveřejněných počtů
+#      prumer   – průměr/medián; jen pokud je zveřejněn počet populace
+#      kontext  – převzatý publikovaný údaj ČSÚ, který není počtem subjektů (obyvatelé, podíl se zjištěnou aktivitou)
+#                 (vznik/zánik ČSÚ jsou počty subjektů, proto typ pocet a platí na ně práh)
+# stav: naplněno | částečně | nelze naplnit (s důvodem)
+
+ukazatele:
+
+  - kod: REG_POCET
+    nazev: Počet registrovaných subjektů v oboru a území
+    typ: pocet
+    definice: Registrované ekonomické subjekty bez data zániku s převažující činností v oboru a sídlem v území.
+    vzorec: "count(subjekt) where ddatzan is null and nace ∈ obor and okres/kraj(sídlo) ∈ území"
+    zdroj: ČSÚ, RES – otevřená data (res_data.csv), snímek k datu
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Subjekty bez NACE sekce (pseudokód 00) a subjekty zařazené jen do vyšší úrovně klasifikace se do oboru nepočítají, uvádějí se zvlášť (DOPL_OBOR_NEURCEN, DOPL_JEN_VYSSI). Zaniklé subjekty se nepočítají.
+    vyklad: Jde o registrované subjekty; podle ČSÚ má zjištěnou aktivitu (daně, pojistné) jen asi 60 % z nich (AKTIVNI_PODIL_KRAJ).
+    stav: naplněno
+
+  - kod: REG_POCET_CR
+    nazev: Počet registrovaných subjektů v oboru v ČR
+    typ: pocet
+    definice: REG_POCET za celou ČR.
+    vzorec: "count(subjekt) where ddatzan is null and nace ∈ obor"
+    zdroj: ČSÚ, RES – otevřená data
+    uroven: [CR]
+    chybejici_hodnoty: jako REG_POCET
+    vyklad: Jmenovatel podílu území na ČR.
+    stav: naplněno
+
+  - kod: REG_PODIL_CR
+    nazev: Podíl území na registrovaných subjektech oboru v ČR (%)
+    typ: podil
+    definice: Kolik procent registrovaných subjektů oboru v ČR má sídlo v území.
+    vzorec: "100 × REG_POCET(území) / REG_POCET_CR"
+    zdroj: odvozeno z RES
+    uroven: [kraj, okres]
+    chybejici_hodnoty: Nezveřejní se, je-li REG_POCET skrytý.
+    vyklad: Srovnávejte s podílem území na všech subjektech (viz LQ).
+    stav: naplněno
+
+  - kod: REG_POCET_VSE
+    nazev: Počet všech registrovaných subjektů v území
+    typ: pocet
+    definice: Registrované subjekty bez data zániku se sídlem v území, všechny obory včetně pseudokódu 00.
+    vzorec: "count(subjekt) where ddatzan is null and sídlo ∈ území"
+    zdroj: ČSÚ, RES – otevřená data
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: –
+    vyklad: Jmenovatel podílu oboru v území a lokalizačního koeficientu.
+    stav: naplněno
+
+  - kod: REG_PODIL_OBOR
+    nazev: Podíl oboru na registrovaných subjektech území (%)
+    typ: podil
+    definice: Kolik procent všech registrovaných subjektů území má převažující činnost v oboru.
+    vzorec: "100 × REG_POCET / REG_POCET_VSE"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Nezveřejní se, je-li REG_POCET skrytý.
+    vyklad: Jmenovatel obsahuje i subjekty s pseudokódem 00 (obor neurčen), shodně v čitateli ČR i území.
+    stav: naplněno
+
+  - kod: LQ
+    nazev: Lokalizační koeficient
+    typ: index
+    definice: Podíl oboru na subjektech území dělený podílem oboru na subjektech ČR.
+    vzorec: "(REG_POCET / REG_POCET_VSE) / (REG_POCET_CR / REG_POCET_VSE(ČR))"
+    zdroj: odvozeno z RES
+    uroven: [kraj, okres]
+    chybejici_hodnoty: Nezveřejní se, je-li REG_POCET skrytý.
+    vyklad: ">1 = obor je v území zastoupen víc než v průměru ČR. Počítá registrované subjekty, ne zaměstnanost ani výkon."
+    stav: naplněno
+
+  - kod: OBYVATELE
+    nazev: Počet obyvatel území
+    typ: kontext
+    definice: Počet obyvatel k 31. 12. posledního zveřejněného roku.
+    vzorec: převzato
+    zdroj: ČSÚ, DataStat, sada OBY02A (ukazatel 2406K2)
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Praha nemá okres v datech obyvatelstva; okres Praha (CZ0100) = kraj Hlavní město Praha.
+    vyklad: Rok stavu obyvatel se liší od data snímku RES.
+    stav: naplněno
+
+  - kod: HUSTOTA
+    nazev: Registrované subjekty oboru na 1 000 obyvatel
+    typ: index
+    definice: Počet registrovaných subjektů oboru na 1 000 obyvatel území.
+    vzorec: "1000 × REG_POCET / OBYVATELE"
+    zdroj: odvozeno z RES a ČSÚ OBY02A
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Nezveřejní se, je-li REG_POCET skrytý.
+    vyklad: Sídlo subjektu nemusí být místem činnosti; v Praze je hustota zvýšena sídly bez činnosti v Praze.
+    stav: naplněno
+
+  - kod: PORADI_POCET
+    nazev: Pořadí podle počtu registrovaných subjektů oboru
+    typ: poradi
+    definice: Pořadí kraje mezi 14 kraji (u okresu mezi okresy téhož kraje) podle REG_POCET, 1 = nejvíce.
+    vzorec: "rank() over (order by REG_POCET desc)"
+    zdroj: odvozeno z RES
+    uroven: [kraj, okres]
+    chybejici_hodnoty: Pořadí se počítá ze skutečných počtů všech území; zveřejní se jen u zveřejněných počtů.
+    vyklad: Automaticky se srovnává jen s ČR a pořadím mezi všemi kraji; srovnávací kraje volí člověk.
+    stav: naplněno
+
+  - kod: PORADI_HUSTOTA
+    nazev: Pořadí podle hustoty na 1 000 obyvatel
+    typ: poradi
+    definice: Pořadí kraje mezi 14 kraji (u okresu mezi okresy téhož kraje) podle HUSTOTA, 1 = nejvyšší.
+    vzorec: "rank() over (order by HUSTOTA desc)"
+    zdroj: odvozeno z RES a ČSÚ OBY02A
+    uroven: [kraj, okres]
+    chybejici_hodnoty: jako PORADI_POCET
+    vyklad: Odstraňuje vliv velikosti území.
+    stav: naplněno
+
+  - kod: FOPO_POCET
+    nazev: Registrované subjekty podle typu osoby (FO/PO)
+    typ: pocet
+    definice: "FO = statistická právní forma (FORMA) 101–108, 424, 425 (podnikající fyzické osoby včetně zahraničních); PO = ostatní formy."
+    vzorec: "count(subjekt) group by FO/PO"
+    zdroj: ČSÚ, RES – otevřená data; vymezení FO podle metodiky ČSÚ (statistiky z RES)
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Je-li FO nebo PO pod prahem, rozdělení se nezveřejní (a s ním ani velikostní profily FO/PO).
+    vyklad: FO jsou většinou OSVČ; název subjektu je u nich jméno osoby.
+    stav: naplněno
+
+  - kod: FOPO_PODIL
+    nazev: Podíl FO/PO (%)
+    typ: podil
+    definice: Podíl FO resp. PO na REG_POCET.
+    vzorec: "100 × FOPO_POCET / REG_POCET"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: jako FOPO_POCET
+    vyklad: –
+    stav: naplněno
+
+  - kod: FORMA_POCET
+    nazev: Registrované subjekty podle právní formy
+    typ: pocet
+    definice: Počet podle statistické právní formy (FORMA, číselník ČSÚ 56).
+    vzorec: "count(subjekt) group by forma"
+    zdroj: ČSÚ, RES – otevřená data; číselník 56
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Formy pod prahem se slučují do „ostatní formy FO“ / „ostatní formy PO“ (v rámci skupiny); je-li skryté rozdělení FO/PO, do jednoho „ostatní“.
+    vyklad: –
+    stav: naplněno
+
+  - kod: FORMA_PODIL
+    nazev: Podíl právní formy (%)
+    typ: podil
+    definice: Podíl na REG_POCET.
+    vzorec: "100 × FORMA_POCET / REG_POCET"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: jako FORMA_POCET
+    vyklad: –
+    stav: naplněno
+
+  - kod: VEL_FO_POCET
+    nazev: Velikostní profil FO – počet podle kategorie zaměstnanců
+    typ: pocet
+    definice: "FO podle KATPO (číselník 579) seskupené do pásem: bez zaměstnanců (110), 1–9 (120, 130), 10–49 (210–230), 50–249 (240–320), 250 a více (330–510), Neuvedeno (000)."
+    vzorec: "count(subjekt FO) group by pásmo(KATPO)"
+    zdroj: ČSÚ, RES – otevřená data; číselník 579
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: „Neuvedeno“ (000) je vždy samostatný řádek, nikdy se neslučuje s „bez zaměstnanců“; pásma pod prahem se slučují do „ostatní“.
+    vyklad: U FO znamená 110 bez zaměstnanců; od 7/2024 se do zaměstnanců počítají i DPP.
+    stav: naplněno
+
+  - kod: VEL_FO_PODIL
+    nazev: Velikostní profil FO – podíl (%)
+    typ: podil
+    definice: Podíl pásma na FO celkem; podíl „Neuvedeno“ se zobrazuje vždy (je-li zveřejnitelný).
+    vzorec: "100 × VEL_FO_POCET / FOPO_POCET(FO)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: jako VEL_FO_POCET
+    vyklad: –
+    stav: naplněno
+
+  - kod: VEL_PO_POCET
+    nazev: Velikostní profil PO – počet podle kategorie zaměstnanců
+    typ: pocet
+    definice: PO podle KATPO v týchž pásmech jako VEL_FO_POCET.
+    vzorec: "count(subjekt PO) group by pásmo(KATPO)"
+    zdroj: ČSÚ, RES – otevřená data; číselník 579
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: jako VEL_FO_POCET
+    vyklad: U PO se kód 110 prakticky nepoužívá; PO bez hlášených zaměstnanců mají „Neuvedeno“ (000). Neuvedeno ≠ bez zaměstnanců.
+    stav: naplněno
+
+  - kod: VEL_PO_PODIL
+    nazev: Velikostní profil PO – podíl (%)
+    typ: podil
+    definice: Podíl pásma na PO celkem.
+    vzorec: "100 × VEL_PO_POCET / FOPO_POCET(PO)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: jako VEL_PO_POCET
+    vyklad: –
+    stav: naplněno
+
+  - kod: VEK_PRUMER
+    nazev: Průměrný věk existujících subjektů (roky)
+    typ: prumer
+    definice: Průměr (datum snímku − datum vzniku) v letech u registrovaných subjektů oboru v území.
+    vzorec: "avg((datum_snimku − ddatvzn) / 365.25)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Nezveřejní se, je-li REG_POCET skrytý.
+    vyklad: Věková struktura existujících subjektů, ne dynamika vzniku (zaniklé subjekty nejsou zahrnuty).
+    stav: naplněno
+
+  - kod: VEK_MEDIAN
+    nazev: Mediánový věk existujících subjektů (roky)
+    typ: prumer
+    definice: Medián (datum snímku − datum vzniku) v letech.
+    vzorec: "percentile_cont(0.5)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: jako VEK_PRUMER
+    vyklad: jako VEK_PRUMER
+    stav: naplněno
+
+  - kod: VEK_PASMO_POCET
+    nazev: Věková struktura existujících subjektů – počet v pásmu
+    typ: pocet
+    definice: "Pásma věku: méně než 3 roky, 3–5, 6–10, 11–20, 21–30, 31 a více let."
+    vzorec: "count(subjekt) group by pásmo(věk)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Pásma pod prahem se slučují do „ostatní“.
+    vyklad: Není to počet vzniků v jednotlivých letech.
+    stav: naplněno
+
+  - kod: VEK_PASMO_PODIL
+    nazev: Věková struktura existujících subjektů – podíl pásma (%)
+    typ: podil
+    definice: Podíl pásma na REG_POCET.
+    vzorec: "100 × VEK_PASMO_POCET / REG_POCET"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: jako VEK_PASMO_POCET
+    vyklad: –
+    stav: naplněno
+
+  - kod: DOPL_JEN_VYSSI
+    nazev: Zařazeno jen do vyšší úrovně klasifikace (např. „zařazeno jen do sekce“)
+    typ: pocet
+    definice: Registrované subjekty v území, jejichž NACE je nadřazený kód zkoumaného oboru (např. jen „J“ u oddílu 62) – do oboru mohou, ale nemusí patřit.
+    vzorec: "count(subjekt) where nace ∈ předci(obor)"
+    zdroj: ČSÚ, RES – otevřená data
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Samostatné číslo; pod prahem se nezveřejní. Jen pro obor na úrovni oddílu a nižší.
+    vyklad: Horní mez nejistoty počtu v oboru.
+    stav: naplněno
+
+  - kod: DOPL_OBOR_NEURCEN
+    nazev: Obor neurčen (pseudokód 00)
+    typ: pocet
+    definice: Registrované subjekty v území s pseudokódem 00 („výroba, obchod a služby neuvedené v přílohách 1 až 3 živnostenského zákona“).
+    vzorec: "count(subjekt) where nace = '00'"
+    zdroj: ČSÚ, RES – otevřená data
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Samostatné číslo; pod prahem se nezveřejní.
+    vyklad: Tyto subjekty nejde přiřadit žádnému oboru; ČSÚ je vykazuje jako „X Nezjištěno“.
+    stav: naplněno
+
+  - kod: AKTIVNI_PODIL_KRAJ
+    nazev: Podíl subjektů se zjištěnou aktivitou v kraji podle ČSÚ (%, všechny obory)
+    typ: kontext
+    definice: Počet ekonomických subjektů se zjištěnou aktivitou / počet ekonomických subjektů celkem, kraj (u okresu jeho kraj), všechny obory, poslední čtvrtletí.
+    vzorec: "100 × 4958_akt / 4958_reg (RES02QT1, NACE celkem)"
+    zdroj: ČSÚ, DataStat, výběr RES02QT1
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Za okres ČSÚ podíl v členění podle převažující činnosti nepublikuje; uvádí se krajský.
+    vyklad: Jen kontext. Aktivitu po subjektech nedopočítáváme; počty v reportu jsou registrované subjekty.
+    stav: naplněno
+
+  - kod: AKTIVNI_PODIL_SEKCE_KRAJ
+    nazev: Podíl subjektů se zjištěnou aktivitou v sekci a kraji podle ČSÚ (%)
+    typ: kontext
+    definice: Jako AKTIVNI_PODIL_KRAJ, ale jen pro sekci CZ-NACE zkoumaného oboru.
+    vzorec: "100 × 4958_akt / 4958_reg (RES02QT1, sekce)"
+    zdroj: ČSÚ, DataStat, výběr RES02QT1
+    uroven: [CR, kraj]
+    chybejici_hodnoty: "Jen je-li obor přesně jedna sekce, kterou ČSÚ publikuje samostatně (ne B, C, D, E – ty jen jako B–E); jinak nelze naplnit."
+    vyklad: Jen kontext.
+    stav: částečně
+
+  - kod: ZANIK_PO_RES
+    nazev: Zaniklé právnické osoby v oboru a území podle roku zániku (RES)
+    typ: pocet
+    definice: PO s datem zániku od 1. 1. 2023 do data snímku, s převažující činností v oboru a sídlem v území.
+    vzorec: "count(subjekt PO) where ddatzan >= 2023-01-01 group by year(ddatzan)"
+    zdroj: ČSÚ, RES – otevřená data
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Zaniklé FO mají v otevřených datech jen IČO a datum zániku (GDPR) – do oboru ani území je přiřadit nelze. Zaniklé více než 4 roky v RES nejsou; proto jen od roku 2023. Poslední rok je neúplný.
+    vyklad: Jen PO; nelze z toho počítat míru zániku oboru.
+    stav: částečně
+
+  - kod: DYN_VZNIK_CSU
+    nazev: Vzniklé ekonomické subjekty v území podle ČSÚ (všechny obory)
+    typ: pocet
+    definice: Počet vzniklých ekonomických subjektů v roce (součet čtvrtletí), FO a PO, území celkem.
+    vzorec: "sum(4962) over čtvrtletí roku (RES05)"
+    zdroj: ČSÚ, DataStat, sada RES05
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: ČSÚ vznik a zánik v členění podle oboru (kraj × sekce ani ČR × obor) z RES nepublikuje – dynamiku oboru nelze naplnit. Poslední rok je neúplný (jen zveřejněná čtvrtletí).
+    vyklad: Dynamika celého území, ne oboru.
+    stav: částečně
+
+  - kod: DYN_ZANIK_CSU
+    nazev: Zaniklé ekonomické subjekty v území podle ČSÚ (všechny obory)
+    typ: pocet
+    definice: Počet zaniklých ekonomických subjektů v roce (součet čtvrtletí), FO a PO, území celkem.
+    vzorec: "sum(4963) over čtvrtletí roku (RES05)"
+    zdroj: ČSÚ, DataStat, sada RES05
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: jako DYN_VZNIK_CSU. Rok 2023 u FO obsahuje mimořádný výkyv (1. čtvrtletí 2023 hromadný zánik FO, v ČR 200 977 zániků FO proti obvyklým 15–45 tis.).
+    vyklad: Dynamika celého území, ne oboru.
+    stav: částečně
+
+  - kod: DYN_OBOR_CSU
+    nazev: Vznik a zánik subjektů v oboru a území podle ČSÚ
+    typ: kontext
+    definice: Počet vzniklých a zaniklých subjektů v oboru × kraji.
+    vzorec: –
+    zdroj: ČSÚ DataStat – tabulka v tomto členění neexistuje (RES05 jen území × FO/PO; RES06 registrace a RESDP00 demografie podniků jen za ČR podle odvětví)
+    uroven: []
+    chybejici_hodnoty: Nelze naplnit.
+    vyklad: Náhradou je ZANIK_PO_RES (jen PO) a věková struktura existujících subjektů.
+    stav: nelze naplnit
