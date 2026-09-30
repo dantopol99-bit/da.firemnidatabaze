@@ -1,0 +1,5 @@
+62 Činnosti v oblasti informačních technologií × Jeseník: 28 registrovaných subjektů, méně než 100 – report se nevydá
+Návrh vyšší úrovně:
+  ✔ 62 Činnosti v oblasti informačních technologií × Olomoucký kraj: 801 subjektů   (python -m firemni_databaze.report --obor 62 --uzemi CZ071)
+  ✔ J Informační a komunikační činnosti × Jeseník: 110 subjektů   (python -m firemni_databaze.report --obor J --uzemi CZ0711)
+  ✔ J Informační a komunikační činnosti × Olomoucký kraj: 2690 subjektů   (python -m firemni_databaze.report --obor J --uzemi CZ071)

@@ -410,3 +410,19 @@ def radky_vznik_zanik(obsah: bytes, definice_sady: dict) -> list[dict]:
             "hodnota": float(r["Hodnota"]),
         })
     return radky
+
+
+def radky_demografie(obsah: bytes, definice_sady: dict) -> list[dict]:
+    """RESDP00 (demografie podniků, ČR) → řádky res.csu_demografie."""
+    ukazatele = {u["nazev"]: u["kod"] for u in definice_sady["ukazatele"]}
+    radky = []
+    for r in csv.DictReader(io.StringIO(obsah.decode("utf-8-sig"))):
+        if r["Hodnota"] in ("", None):
+            continue
+        radky.append({
+            "odvetvi_kod": r["CZNACERES.Polozka"], "odvetvi": r["Odvětví ekonomické činnosti"].strip(),
+            "forma_kod": r["FORMA.Polozka"], "rok": int(r["CasR.Polozka"]),
+            "ukazatel_kod": ukazatele[r["Ukazatel"]], "ukazatel": r["Ukazatel"],
+            "hodnota": float(r["Hodnota"]), "predbezna": bool(r.get("OBS_STATUS")),
+        })
+    return radky

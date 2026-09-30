@@ -32,8 +32,10 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 |---|---|---|---|---|---|---|---|---|---|
 | Česko | 339 922 | 2 947 143 | 11,53 | 100 | 1 | 10 915 839 | 31,14 | 61 |  |
 | Liberecký kraj (zkoumané území) | 14 799 | 107 418 | 13,78 | 4,35 | 1,19 | 448 610 | 32,99 | 59,1 |  |
+| Královéhradecký kraj | 16 941 | 131 212 | 12,91 | 4,98 | 1,12 | 554 668 | 30,54 | 62,4 |  |
+| Karlovarský kraj | 8 057 | 68 873 | 11,7 | 2,37 | 1,01 | 292 027 | 27,59 | 53,1 |  |
 
-> Srovnávací kraje nebyly zadány; automaticky se srovnává jen s ČR a pořadím krajů (T03).
+> Srovnávací kraje zadal uživatel; automaticky se srovnává jen s ČR.
 
 ## T03_kraje: Pořadí krajů (všech 14)
 
@@ -160,3 +162,20 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 | 2026 – zaniklé | 850 | 516 | 1 366 | 2 čtvrtletí |
 
 > ČSÚ nepublikuje vznik a zánik v členění podle oboru (kraj × sekce); jde o celé území. Čísla FO a PO pod prahem se nezveřejňují (zůstává jen celkem).
+
+## T12_demografie_cr: Demografie podniků v ČR – kontext (ČSÚ, RESDP00; jednotka podnik)
+
+| Položka | Stavebnictví: aktivní podniky | Stavebnictví: míra vzniků (%) | Stavebnictví: míra zániků (%) | Všechna odvětví: aktivní podniky | Všechna odvětví: míra vzniků (%) | Všechna odvětví: míra zániků (%) | Poznámka |
+|---|---|---|---|---|---|---|---|
+| 2019 – podniky FO | 151 021 | 7,81 | 7,44 | 903 037 | 8,8 | 7,84 |  |
+| 2019 – podniky PO | 32 611 | 8,25 | 2,91 | 306 300 | 8,26 | 3,73 |  |
+| 2020 – podniky FO | 151 683 | 7,42 | 6,89 | 906 249 | 8,3 | 7,69 |  |
+| 2020 – podniky PO | 34 021 | 7,15 | 3,25 | 315 010 | 7,42 | 4,15 |  |
+| 2021 – podniky FO | 154 046 | 7,82 | 6,46 | 918 884 | 9,07 | 6,3 |  |
+| 2021 – podniky PO | 35 822 | 7,52 | 3,42 | 334 396 | 7,98 | 3,85 |  |
+| 2022 – podniky FO | 158 250 | 8,85 | 7,75 | 946 485 | 9,69 | 7,71 |  |
+| 2022 – podniky PO | 37 480 | 7,22 | 3,43 | 344 989 | 7,21 | 3,96 |  |
+| 2023 – podniky FO | 162 083 | 9,59 | 9,05 | 968 178 | 9,83 | 8,79 | předběžné hodnoty |
+| 2023 – podniky PO | 39 445 | 7,36 | 4,55 | 353 778 | 7,02 | 5,08 | předběžné hodnoty |
+
+> Jiná jednotka: aktivní PODNIK ze statistiky demografie podniků, ne registrovaný ekonomický subjekt z RES; čísla nejsou srovnatelná s ostatními tabulkami. Jen za ČR.

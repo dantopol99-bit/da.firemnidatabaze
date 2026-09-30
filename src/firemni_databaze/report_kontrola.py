@@ -14,7 +14,7 @@ Ověřuje:
   6. čísla ve výstupu odpovídají interním proměnným,
   7. citace zdroje (ČSÚ, RES, datum snímku, CC BY 4.0) a označení odvozených údajů
      jsou v JSON i na každém listu XLSX,
-  8. texty neobsahují „firmy“ ani „aktivní“ (rozhodnutí 1).
+  8. texty neobsahují „firmy“ ani „aktivní“ (rozhodnutí 1); výjimkou je jednotka ČSÚ „aktivní podnik“.
 Interní soubor _interni/kontrola.json obsahuje i skrytá čísla – nezveřejňuje se.
 """
 
@@ -31,7 +31,9 @@ from firemni_databaze.report import KATALOG, OZNACENI
 from firemni_databaze.report_potlaceni import dopocitatelne
 from firemni_databaze.report_xlsx import RADEK_ZAHLAVI
 
-ZAKAZANA_SLOVA = re.compile(r"\bfirm|\baktivn", re.IGNORECASE)
+ZAKAZANA_SLOVA = re.compile(r"\bfirm\w*|\baktivn\w*+(?!\s+podnik)", re.IGNORECASE)
+# „aktivní podnik(y)“ je oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10),
+# nikoli označení registrovaných subjektů – proto je povolené jen v tomto sousloví.
 ODVOZENE_TYPY = ("podil", "index", "poradi", "prumer")
 
 
@@ -153,3 +155,77 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ---------------------------------------------------------------------------
+# Konzistence PDF (Blok 3): každé číslo v textu PDF musí být v JSON i v XLSX
+# ---------------------------------------------------------------------------
+
+# Číslo v sazbě: tisíce oddělené úzkou (U+202F) nebo pevnou mezerou, desetinná čárka.
+_CISLO_SAZBA = re.compile(r"\d+(?:[  ]\d{3})*(?:[,.]\d+)?")
+# V textech JSON/XLSX se tisíce oddělují i obyčejnou mezerou („na 1 000 obyvatel“).
+_CISLO_TEXT = re.compile(r"\d{1,3}(?: \d{3})+(?:[,.]\d+)?")
+_STRANA = re.compile(r"strana\s+\d+\s+z\s+\d+", re.IGNORECASE)
+
+
+def _norm(cislo: str) -> str:
+    from decimal import Decimal, InvalidOperation
+    t = re.sub(r"[\s  ]", "", cislo).replace(",", ".")
+    try:
+        return format(Decimal(t).normalize(), "f")
+    except InvalidOperation:
+        return t
+
+
+def cisla_v_textu(text: str) -> set[str]:
+    """Normalizovaná čísla v textu sazby (bez čísel stránek)."""
+    return {_norm(c) for c in _CISLO_SAZBA.findall(_STRANA.sub(" ", text))}
+
+
+def _cisla_zdroje(hodnoty) -> set[str]:
+    vysledek: set[str] = set()
+    for h in hodnoty:
+        if isinstance(h, bool) or h is None:
+            continue
+        if isinstance(h, (int, float)):
+            vysledek.add(_norm(str(h)))
+        elif isinstance(h, str):
+            vysledek |= {_norm(c) for c in _CISLO_SAZBA.findall(h)}
+            vysledek |= {_norm(c) for c in _CISLO_TEXT.findall(h)}
+    return vysledek
+
+
+def _hodnoty_json(obj):
+    if isinstance(obj, dict):
+        for v in obj.values():
+            yield from _hodnoty_json(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _hodnoty_json(v)
+    else:
+        yield obj
+
+
+def povolena_cisla(adresar: Path) -> set[str]:
+    """Čísla, která smí být v textu reportu: vyskytují se v JSON I v XLSX."""
+    vysledek = json.loads((adresar / "vysledek.json").read_text(encoding="utf-8"))
+    wb = load_workbook(adresar / "priloha.xlsx", read_only=True)
+    v_xlsx = _cisla_zdroje(c for ws in wb for row in ws.iter_rows(values_only=True) for c in row)
+    return _cisla_zdroje(_hodnoty_json(vysledek)) & v_xlsx
+
+
+def text_pdf(pdf: Path) -> str:
+    from pypdf import PdfReader
+    return "\n".join(stranka.extract_text() or "" for stranka in PdfReader(pdf).pages)
+
+
+def zkontroluj_pdf(pdf: Path, adresar: Path) -> list[str]:
+    """Čísla v textu PDF, která nejsou v JSON a XLSX (prázdný seznam = v pořádku)."""
+    povolena = povolena_cisla(adresar)
+    text = text_pdf(pdf)
+    chyby = []
+    for c in sorted(cisla_v_textu(text) - povolena):
+        misto = next((radek.strip() for radek in text.splitlines() if c.replace(".", ",") in radek.replace(" ", "")
+                      or c in radek), "")
+        chyby.append(f"číslo {c} v PDF není v JSON a XLSX (…{misto[:70]}…)")
+    return chyby

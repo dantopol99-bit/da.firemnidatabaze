@@ -14,7 +14,7 @@ from openpyxl import load_workbook
 
 import yaml
 
-from firemni_databaze.report import KATALOG, Zadani, spocitej, uloz
+from firemni_databaze.report import KATALOG, MalyRozsah, Zadani, spocitej, uloz
 from firemni_databaze.report_kontrola import zkontroluj
 from firemni_databaze.report_xlsx import RADEK_ZAHLAVI
 from tests.test_res_import_db import CONN, SNIMKY
@@ -36,7 +36,7 @@ class TestReport(unittest.TestCase):
         cls.vystupy = {}
         for klic, zadani in {
             "F_LBK": Zadani(["F"], "CZ051"),
-            "62_JES": Zadani(["62"], "Jeseník"),
+            "62_JES": Zadani(["62"], "Jeseník", min_rozsah=0),
             "41_42_CR": Zadani(["41", "42"], "CZ"),
         }.items():
             vysledek, interni = spocitej(CONN, zadani)
@@ -49,7 +49,7 @@ class TestReport(unittest.TestCase):
                 "AND s.datum_snimku = res.posledni_snimek() GROUP BY 1, 2 HAVING count(*) BETWEEN 2 AND 9 LIMIT 1")
             trida, okres = cur.fetchone()
         CONN.rollback()
-        vysledek, interni = spocitej(CONN, Zadani([trida], okres))
+        vysledek, interni = spocitej(CONN, Zadani([trida], okres, min_rozsah=0))
         cls.vystupy["MALE"] = (vysledek, interni, uloz(vysledek, interni, cls.tmp))
 
     @classmethod
@@ -139,6 +139,25 @@ class TestReport(unittest.TestCase):
         v["tabulky"][0]["poznamky"].append("Počet aktivních firem v kraji.")
         (a / "vysledek.json").write_text(json.dumps(v, ensure_ascii=False), encoding="utf-8")
         self.assertTrue(any("zakázané slovo" in c for c in zkontroluj(a)))
+
+    def test_minimalni_rozsah_odmitne_s_navrhem(self):
+        with self.assertRaises(MalyRozsah) as ctx:
+            spocitej(CONN, Zadani(["62"], "Jeseník"))
+        CONN.rollback()
+        e = ctx.exception
+        self.assertLess(e.pocet, 100)
+        popisy = [n["popis"] for n in e.navrhy]
+        self.assertTrue(any("Olomoucký kraj" in p and p.startswith("62") for p in popisy), popisy)
+        self.assertTrue(any(p.startswith("J ") for p in popisy), popisy)
+        self.assertTrue(all(isinstance(n["pocet"], int) for n in e.navrhy))
+        self.assertIn("Návrh vyšší úrovně", e.vypis())
+
+    def test_spolehlivost_zarazeni(self):
+        vysledek, _, _ = self.vystupy["62_JES"]
+        r = radek_t01(vysledek, "SPOLEHLIVOST_JEN_SEKCE")
+        self.assertGreater(r["hodnoty"]["hodnota"], 25)
+        self.assertTrue(vysledek["meta"]["varovani"])
+        self.assertEqual(self.vystupy["F_LBK"][0]["meta"]["varovani"], [])
 
     def test_neplatne_zadani(self):
         for zadani in (Zadani(["41", "4120"], "CZ"), Zadani(["00"], "CZ"), Zadani(["F"], "Neexistující"),

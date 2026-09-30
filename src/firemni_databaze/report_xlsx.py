@@ -36,9 +36,12 @@ def zapis_xlsx(vysledek: dict, cesta: Path, katalog_cesta: Path) -> None:
         ("Datum snímku RES", meta["zadani"]["datum_snimku"]),
         ("Populace", meta["populace"]),
         ("Srovnávací kraje (zadal uživatel)", ", ".join(meta["zadani"]["srovnani"]) or "nezadány"),
-        ("Práh zveřejnění", meta["zadani"]["prah"]),
+        ("Práh zveřejnění (subjektů)", meta["pravidla"]["prah"]),
+        ("Minimální rozsah reportu (subjektů)", meta["pravidla"]["min_rozsah"]),
+        ("Práh spolehlivosti zařazení (%)", meta["pravidla"]["prah_spolehlivosti_pct"]),
         ("Citace", meta["citace"]),
         ("Označení", meta["oznaceni"]),
+    ] + [("Varování", v) for v in meta["varovani"]] + [
         (None, None),
         ("Tabulky", None),
     ] + [(t["kod"], t["nazev"] + ("" if t["zverejneno"] else f" – nezveřejněno: {t['duvod']}"))
