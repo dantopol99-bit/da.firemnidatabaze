@@ -55,6 +55,12 @@ PASMA_VELIKOSTI = (       # (kód, název, kódy KATPO 579)
     ("000", "Neuvedeno", {"000"}),
 )
 ZANIKY_OD_ROKU = 2023     # rozhodnutí 4
+MIN_ROZSAH = 100          # rozhodnutí 8: pod 100 registrovanými subjekty se report nevydá
+PRAH_SPOLEHLIVOSTI = 25.0 # rozhodnutí 9: podíl „jen do sekce“ nad 25 % = varování
+ODVETVI_DEMOGRAFIE = {    # sekce CZ-NACE → položka RESDP00 (jen kde existuje)
+    **{k: k for k in "BCDEFGHIJLMNPQR"}, "K": "64660002", "S": "95960001",
+}
+DEMOGRAFIE_CELKEM = "05960003"
 LICENCE_URL = "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
 OZNACENI = "Odvozené údaje, nejde o oficiální statistiku ČSÚ."
 
@@ -76,6 +82,23 @@ class Zadani:
     datum: date | None = None
     srovnani: list[str] = field(default_factory=list)
     prah: int = PRAH
+    min_rozsah: int = MIN_ROZSAH
+
+
+class MalyRozsah(ValueError):
+    """Rozhodnutí 8: obor × území má méně než MIN_ROZSAH subjektů – report se nevydá."""
+
+    def __init__(self, zadani: str, pocet: int, min_rozsah: int, navrhy: list[dict]):
+        self.zadani, self.pocet, self.min_rozsah, self.navrhy = zadani, pocet, min_rozsah, navrhy
+        super().__init__(f"{zadani}: {pocet} registrovaných subjektů, méně než {min_rozsah} – report se nevydá")
+
+    def vypis(self) -> str:
+        radky = [str(self), "Návrh vyšší úrovně:"]
+        for n in self.navrhy:
+            znak = "✔" if n["pocet"] >= self.min_rozsah else "✘"
+            radky.append(f"  {znak} {n['popis']}: {n['pocet']} subjektů"
+                         f"   (python -m firemni_databaze.report --obor {','.join(n['obor'])} --uzemi {n['uzemi']})")
+        return "\n".join(radky)
 
 
 @dataclass
@@ -189,6 +212,51 @@ def nacti_data(cur, obor: list[dict], datum: date) -> dict:
         "obyvatele": {u: float(h) for u, h, _ in obyv}, "rok_obyvatel": obyv[0][2] if obyv else None,
         "aktivita": aktivita, "obdobi_aktivity": obdobi_akt,
     }
+
+
+def pocet_oboru(cur, obor: list[dict], uz: "Uzemi", datum: date) -> int:
+    """Počet registrovaných subjektů oboru v území (pro návrhy vyšší úrovně)."""
+    podle_urovne = {u: [o["kod"] for o in obor if o["uroven"] == u] for u in (1, 2, 3, 4)}
+    cur.execute(
+        "SELECT count(*) FROM res.subjekt s JOIN res.cis_nace n ON n.klasifikace = 80004 AND n.kod = s.nace "
+        "JOIN res.cis_okres o ON o.kod = s.okreslau "
+        "WHERE s.datum_snimku = %(d)s AND s.ddatzan IS NULL AND NOT n.je_pseudokod "
+        "AND (n.sekce = ANY(%(s1)s) OR n.oddil = ANY(%(s2)s) OR n.skupina = ANY(%(s3)s) OR n.trida = ANY(%(s4)s)) "
+        "AND (%(typ)s = 'CR' OR (%(typ)s = 'KRAJ' AND o.kraj_kod = %(kod)s) OR (%(typ)s = 'OKRES' AND o.kod = %(kod)s))",
+        {"d": datum, "s1": podle_urovne[1], "s2": podle_urovne[2], "s3": podle_urovne[3], "s4": podle_urovne[4],
+         "typ": uz.typ, "kod": uz.kod})
+    return cur.fetchone()[0]
+
+
+def navrhy_vyssi_urovne(cur, obor: list[dict], uz: "Uzemi", kraje: dict, datum: date) -> list[dict]:
+    """Rozhodnutí 8: okres → kraj, třída/skupina → oddíl → sekce (i kombinace), s počty."""
+    oddily = sorted({o["predci"][1] if o["uroven"] > 2 else o["kod"] for o in obor if o["uroven"] >= 2})
+    sekce = sorted({o["sekce"] for o in obor})
+    urovne_oboru = [(obor, popis_oboru(obor))]
+    if any(o["uroven"] > 2 for o in obor):
+        o2 = urci_obor(cur, oddily) + [o for o in obor if o["uroven"] == 1]
+        urovne_oboru.append((o2, popis_oboru(o2)))
+    if any(o["uroven"] > 1 for o in obor):
+        o1 = urci_obor(cur, sekce)
+        urovne_oboru.append((o1, popis_oboru(o1)))
+    uzemi = [uz]
+    if uz.typ == "OKRES":
+        uzemi.append(Uzemi("KRAJ", uz.kraj_kod, kraje[uz.kraj_kod]["nazev"], uz.kraj_kod))
+    navrhy = []
+    for o, popis in urovne_oboru:
+        for u in uzemi:
+            if o is obor and u is uz:
+                continue
+            navrhy.append({"obor": [x["kod"] for x in o], "uzemi": u.kod,
+                           "popis": f"{popis} × {u.nazev}", "pocet": pocet_oboru(cur, o, u, datum)})
+    return navrhy
+
+
+def nacti_demografii(cur, sekce: str | None) -> list[tuple]:
+    kody = [DEMOGRAFIE_CELKEM] + ([ODVETVI_DEMOGRAFIE[sekce]] if sekce in ODVETVI_DEMOGRAFIE else [])
+    cur.execute("SELECT odvetvi_kod, odvetvi, forma_kod, rok, ukazatel_kod, hodnota, predbezna "
+                "FROM res.csu_demografie WHERE odvetvi_kod = ANY(%s) ORDER BY rok", (kody,))
+    return cur.fetchall()
 
 
 def nacti_dynamiku(cur, uzemi_kod: str) -> list[tuple]:
@@ -311,6 +379,12 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
         obor = urci_obor(cur, zadani.obor)
         d = nacti_data(cur, obor, datum)
         dynamika = nacti_dynamiku(cur, uz.kod)
+        sekce_oboru = {o["sekce"] for o in obor}
+        demografie = nacti_demografii(cur, next(iter(sekce_oboru)) if len(sekce_oboru) == 1 else None)
+        n_zadani = pocet_oboru(cur, obor, uz, datum)
+        if n_zadani < zadani.min_rozsah:
+            raise MalyRozsah(f"{popis_oboru(obor)} × {uz.nazev}", n_zadani, zadani.min_rozsah,
+                             navrhy_vyssi_urovne(cur, obor, uz, kraje, datum))
     conn.rollback()
 
     prah = zadani.prah
@@ -646,6 +720,23 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
     s.promenna("dopl:00", n00, n00 >= prah)
     t01.append(radek("DOPL_OBOR_NEURCEN", "Obor neurčen (pseudokód 00) – v území, všechny obory", n00 if n00 >= prah else None,
                      "dopl:00", poznamka=None if n00 >= prah else pod_prahem))
+    # rozhodnutí 9: spolehlivost zařazení – „jen do sekce“ (v téže sekci a území) vůči počtu oboru
+    varovani = []
+    sekce_jen = sorted({o["sekce"] for o in obor if o["uroven"] > 1})
+    spolehlivost = None
+    if sekce_jen:
+        vary = [f"dopl:jen:{sk}" for sk in sekce_jen]
+        jen_sekce = sum(s.promenne[v]["hodnota"] for v in vary)
+        if zv and all(s.zverejnena(v) or s.promenne[v]["hodnota"] == 0 for v in vary):
+            spolehlivost = _pct(jen_sekce, n_uz)
+        t01.append(radek("SPOLEHLIVOST_JEN_SEKCE",
+                         f"Zařazeno jen do sekce {', '.join(sekce_jen)} vůči počtu oboru (%)", spolehlivost,
+                         zaklad=T, poznamka=None if spolehlivost is not None else pod_prahem))
+        if spolehlivost is not None and spolehlivost > PRAH_SPOLEHLIVOSTI:
+            varovani.append(
+                f"Nízká spolehlivost zařazení: subjektů zařazených jen do sekce {', '.join(sekce_jen)} je v území "
+                f"{_fmt_cz(spolehlivost)} % počtu oboru (práh {_fmt_cz(PRAH_SPOLEHLIVOSTI)} %). Skutečný počet "
+                f"subjektů v oboru může být výrazně vyšší.")
     kraj_akt = uz.kraj_kod or "CZ"
     a = d["aktivita"].get((kraj_akt, "0"), {})
     t01.append(radek("AKTIVNI_PODIL_KRAJ",
@@ -703,7 +794,45 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
                "poznamky": ["Počty jsou registrované subjekty bez data zániku. Podíl subjektů se zjištěnou "
                             "aktivitou je jen kontext z publikace ČSÚ, na subjekty oboru se nepřepočítává."]}
 
-    tabulky = [t01_tab, t02, t03] + ([t04] if t04 else []) + tabulky_uzemi + [t10, t11]
+    # --- T12 demografie podniků ČR (RESDP00) – kontext, jiná jednotka (rozhodnutí 10) ------
+    t12_radky = []
+    odvetvi = {kod: nazev for kod, nazev, *_ in demografie}
+    kod_oboru = next((k for k in odvetvi if k != DEMOGRAFIE_CELKEM), None)
+    uplne_roky = sorted({r for _, _, _, r, u, _, _ in demografie if u == "9506"})[-5:]
+    for rok in uplne_roky:
+        for fk, fn in (("10", "podniky FO"), ("30", "podniky PO")):
+            def h(odv, uk):
+                return next((float(x[5]) for x in demografie if x[0] == odv and x[2] == fk and x[3] == rok and x[4] == uk), None)
+            hodnoty = {}
+            for pref, odv in (("obor", kod_oboru), ("cr", DEMOGRAFIE_CELKEM)):
+                if odv is None:
+                    continue
+                aktivni = h(odv, "6594_RESDP")
+                hodnoty[f"{pref}_aktivni"] = int(aktivni) if aktivni is not None and aktivni >= prah else None
+                # míry ČSÚ ukládá s 9 desetinnými místy; report je vede na 2 místa (stejně v JSON, XLSX i PDF)
+                mv, mz = h(odv, "9507"), h(odv, "9508")
+                hodnoty[f"{pref}_mira_vzniku"] = round(mv, 2) if mv is not None else None
+                hodnoty[f"{pref}_mira_zaniku"] = round(mz, 2) if mz is not None else None
+            predb = any(x[6] for x in demografie if x[3] == rok)
+            t12_radky.append({"popis": f"{rok} – {fn}", "typ": "polozka", "hodnoty": hodnoty,
+                              "poznamka": "předběžné hodnoty" if predb else None})
+    sl12 = []
+    if kod_oboru:
+        sl12 += [{"kod": "obor_aktivni", "nazev": f"{odvetvi[kod_oboru]}: aktivní podniky", "ukazatel": "DEMOGR_AKTIVNI"},
+                 {"kod": "obor_mira_vzniku", "nazev": f"{odvetvi[kod_oboru]}: míra vzniků (%)", "ukazatel": "DEMOGR_MIRA_VZNIKU"},
+                 {"kod": "obor_mira_zaniku", "nazev": f"{odvetvi[kod_oboru]}: míra zániků (%)", "ukazatel": "DEMOGR_MIRA_ZANIKU"}]
+    sl12 += [{"kod": "cr_aktivni", "nazev": "Všechna odvětví: aktivní podniky", "ukazatel": "DEMOGR_AKTIVNI"},
+             {"kod": "cr_mira_vzniku", "nazev": "Všechna odvětví: míra vzniků (%)", "ukazatel": "DEMOGR_MIRA_VZNIKU"},
+             {"kod": "cr_mira_zaniku", "nazev": "Všechna odvětví: míra zániků (%)", "ukazatel": "DEMOGR_MIRA_ZANIKU"}]
+    t12 = {"kod": "T12_demografie_cr", "nazev": "Demografie podniků v ČR – kontext (ČSÚ, RESDP00; jednotka podnik)",
+           "sloupce": sl12, "radky": t12_radky, "zverejneno": bool(t12_radky),
+           "duvod": None if t12_radky else "ČSÚ údaje nepublikuje",
+           "poznamky": ["Jiná jednotka: aktivní PODNIK ze statistiky demografie podniků, ne registrovaný ekonomický "
+                        "subjekt z RES; čísla nejsou srovnatelná s ostatními tabulkami. Jen za ČR."
+                        + ("" if kod_oboru else " Obor nemá v RESDP00 samostatné odvětví; uvádí se jen celek.")
+                        + (" Odvětví RESDP00 je širší nebo užší než sekce oboru." if kod_oboru and kod_oboru not in "BCDEFGHIJLMNPQR" else "")]}
+
+    tabulky = [t01_tab, t02, t03] + ([t04] if t04 else []) + tabulky_uzemi + [t10, t11, t12]
     for t in tabulky:
         for r in t["radky"]:
             for sl in t["sloupce"]:
@@ -718,6 +847,8 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
     meta = {
         "zadani": {"obor": [o["kod"] for o in obor], "uzemi": uz.kod, "datum_snimku": datum.isoformat(),
                    "srovnani": [k.kod for k in srovnani], "prah": prah},
+        "pravidla": {"prah": prah, "min_rozsah": zadani.min_rozsah, "prah_spolehlivosti_pct": PRAH_SPOLEHLIVOSTI},
+        "varovani": varovani,
         "obor": [{"kod": o["kod"], "nazev": o["nazev"], "uroven": o["uroven"]} for o in obor],
         "obor_popis": popis_oboru(obor),
         "klasifikace": "CZ-NACE Rev. 2 (klasifikace ČSÚ 80004, sloupec NACE)",
@@ -729,10 +860,14 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
             f"ČSÚ, DataStat, sada OBY02A – počet obyvatel k 31. 12. {d['rok_obyvatel']}",
             f"ČSÚ, DataStat, výběr RES02QT1 – podíl subjektů se zjištěnou aktivitou, {d['obdobi_aktivity']}",
             "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
+            "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
         ],
         "licence": {"nazev": "CC BY 4.0", "url": LICENCE_URL},
         "vygenerovano": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
+    pouzite = {r.get("ukazatele", {}).get(sl["kod"]) or sl["ukazatel"] for t in tabulky for r in t["radky"] for sl in t["sloupce"]}
+    meta["ukazatele"] = [{k: u.get(k) for k in ("kod", "nazev", "typ", "definice", "chybejici_hodnoty", "vyklad")}
+                         for kod, u in katalog.items() if kod in pouzite]
     vysledek = {"meta": meta, "tabulky": tabulky}
     interni = {"promenne": s.promenne, "rovnice": s.rovnice, "prah": prah}
     return vysledek, interni
@@ -741,6 +876,10 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
 # ---------------------------------------------------------------------------
 # Výstupy
 # ---------------------------------------------------------------------------
+
+def _fmt_cz(v: float) -> str:
+    return f"{v:.1f}".replace(".", ",") if v != int(v) else str(int(v))
+
 
 def _fmt(v) -> str:
     if v is None:
@@ -796,18 +935,30 @@ def main() -> int:
     parser.add_argument("--datum", type=date.fromisoformat, help="datum snímku RES (výchozí poslední)")
     parser.add_argument("--srovnani", default="", help="srovnávací kraje oddělené čárkou (zadává člověk)")
     parser.add_argument("--prah", type=int, default=PRAH)
+    parser.add_argument("--min-rozsah", type=int, default=MIN_ROZSAH, help="rozhodnutí 8 (výchozí 100)")
     parser.add_argument("--vystup", type=Path, default=VYSTUPY)
+    parser.add_argument("--pdf", action="store_true", help="po výpočtu rovnou vysázet PDF (report_pdf)")
     args = parser.parse_args()
     zadani = Zadani([k for k in args.obor.split(",") if k.strip()], args.uzemi, args.datum,
-                    [k for k in args.srovnani.split(",") if k.strip()], args.prah)
+                    [k for k in args.srovnani.split(",") if k.strip()], args.prah, args.min_rozsah)
     conn = get_engine().raw_connection()
     try:
         vysledek, interni = spocitej(conn, zadani)
+    except MalyRozsah as exc:
+        print(exc.vypis())
+        return 4
     finally:
         conn.close()
     cil = uloz(vysledek, interni, args.vystup)
     print(markdown(vysledek))
     print(f"\nUloženo do {cil}")
+    if args.pdf:
+        from firemni_databaze.report_pdf import ChybaSazby, vysazej
+        try:
+            print(f"PDF: {vysazej(cil, cil)}")
+        except ChybaSazby as exc:
+            print(f"SAZBA ZASTAVENA: {exc}")
+            return 1
     return 0
 
 

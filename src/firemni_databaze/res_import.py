@@ -331,6 +331,26 @@ def nacti_obyvatelstvo(conn, rok: int = date.today().year - 1) -> int:
     return v_davce(conn, "CSU-DATASTAT", url, prace)
 
 
+def nacti_demografii(conn) -> int:
+    """Demografie podniků ČR (DataStat RESDP00) – kontext za ČR, jiná jednotka (podnik)."""
+    url = z.url_sady_csv("RESDP00")
+
+    def prace(davka: int):
+        definice = json.loads(z.stahni_text(z.DATASTAT_SADY + "RESDP00"))
+        radky = z.radky_demografie(z.stahni_text(url), definice)
+        for r in radky:
+            r.update(url=url, import_davka_id=davka)
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM res.csu_demografie")
+            vloz(cur, "csu_demografie", radky)
+        conn.commit()
+        roky = sorted({r["rok"] for r in radky})
+        print(f"  RESDP00: {len(radky)} hodnot, {roky[0]} – {roky[-1]}")
+        return len(radky), f"DataStat RESDP00, {roky[0]} – {roky[-1]}"
+
+    return v_davce(conn, "CSU-DATASTAT", url, prace)
+
+
 def nacti_vznik_zanik(conn) -> int:
     """Vzniklé a zaniklé ekonomické subjekty (DataStat RES05) – celá sada."""
     url = z.url_sady_csv("RES05")
@@ -418,7 +438,7 @@ def main() -> int:
     p_cis.add_argument("--k-datu", type=date.fromisoformat, default=date.today(), help="platnost číselníků (YYYY-MM-DD)")
     p_sn = sub.add_parser("snimek", help="načte snímek RES")
     p_sn.add_argument("--adresar", type=Path, help="adresář s dříve staženými res_data.csv, res_pf_nace.csv a *-metadata.json")
-    sub.add_parser("agregaty", help="načte agregáty ČSÚ z DataStatu (RES02QT1, OBY02A, RES05)")
+    sub.add_parser("agregaty", help="načte agregáty ČSÚ z DataStatu (RES02QT1, OBY02A, RES05, RESDP00)")
     p_vse = sub.add_parser("vse", help="číselníky + snímek + agregáty")
     p_vse.add_argument("--adresar", type=Path)
     sub.add_parser("prehled", help="vypíše kvalitu, srovnání s ČSÚ, kontrolu jádra a pilot")
@@ -442,7 +462,8 @@ def main() -> int:
                 return KOD_PRAH_PREKROCEN
         if args.prikaz in ("agregaty", "vse"):
             print("Agregáty ČSÚ:")
-            for davka in (nacti_agregaty(conn), nacti_obyvatelstvo(conn), nacti_vznik_zanik(conn)):
+            for davka in (nacti_agregaty(conn), nacti_obyvatelstvo(conn), nacti_vznik_zanik(conn),
+                          nacti_demografii(conn)):
                 print(f"  dávka {davka} OK")
         if args.prikaz in ("prehled", "vse"):
             prehled(conn)

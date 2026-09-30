@@ -12,6 +12,12 @@
    ],
    "prah": 10
   },
+  "pravidla": {
+   "prah": 10,
+   "min_rozsah": 100,
+   "prah_spolehlivosti_pct": 25.0
+  },
+  "varovani": [],
   "obor": [
    {
     "kod": "10",
@@ -33,13 +39,264 @@
   "dalsi_zdroje": [
    "ČSÚ, DataStat, sada OBY02A – počet obyvatel k 31. 12. 2025",
    "ČSÚ, DataStat, výběr RES02QT1 – podíl subjektů se zjištěnou aktivitou, 2026-Q2",
-   "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů"
+   "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
+   "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)"
   ],
   "licence": {
    "nazev": "CC BY 4.0",
    "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
   },
-  "vygenerovano": "2026-09-30T09:02:48+00:00"
+  "vygenerovano": "2026-09-30T11:15:22+00:00",
+  "ukazatele": [
+   {
+    "kod": "REG_POCET",
+    "nazev": "Počet registrovaných subjektů v oboru a území",
+    "typ": "pocet",
+    "definice": "Registrované ekonomické subjekty bez data zániku s převažující činností v oboru a sídlem v území.",
+    "chybejici_hodnoty": "Subjekty bez NACE sekce (pseudokód 00) a subjekty zařazené jen do vyšší úrovně klasifikace se do oboru nepočítají, uvádějí se zvlášť (DOPL_OBOR_NEURCEN, DOPL_JEN_VYSSI). Zaniklé subjekty se nepočítají.",
+    "vyklad": "Jde o registrované subjekty; podle ČSÚ má zjištěnou aktivitu (daně, pojistné) jen asi 60 % z nich (AKTIVNI_PODIL_KRAJ)."
+   },
+   {
+    "kod": "REG_POCET_CR",
+    "nazev": "Počet registrovaných subjektů v oboru v ČR",
+    "typ": "pocet",
+    "definice": "REG_POCET za celou ČR.",
+    "chybejici_hodnoty": "jako REG_POCET",
+    "vyklad": "Jmenovatel podílu území na ČR."
+   },
+   {
+    "kod": "REG_PODIL_CR",
+    "nazev": "Podíl území na registrovaných subjektech oboru v ČR (%)",
+    "typ": "podil",
+    "definice": "Kolik procent registrovaných subjektů oboru v ČR má sídlo v území.",
+    "chybejici_hodnoty": "Nezveřejní se, je-li REG_POCET skrytý.",
+    "vyklad": "Srovnávejte s podílem území na všech subjektech (viz LQ)."
+   },
+   {
+    "kod": "REG_POCET_VSE",
+    "nazev": "Počet všech registrovaných subjektů v území",
+    "typ": "pocet",
+    "definice": "Registrované subjekty bez data zániku se sídlem v území, všechny obory včetně pseudokódu 00.",
+    "chybejici_hodnoty": "–",
+    "vyklad": "Jmenovatel podílu oboru v území a lokalizačního koeficientu."
+   },
+   {
+    "kod": "REG_PODIL_OBOR",
+    "nazev": "Podíl oboru na registrovaných subjektech území (%)",
+    "typ": "podil",
+    "definice": "Kolik procent všech registrovaných subjektů území má převažující činnost v oboru.",
+    "chybejici_hodnoty": "Nezveřejní se, je-li REG_POCET skrytý.",
+    "vyklad": "Jmenovatel obsahuje i subjekty s pseudokódem 00 (obor neurčen), shodně v čitateli ČR i území."
+   },
+   {
+    "kod": "LQ",
+    "nazev": "Lokalizační koeficient",
+    "typ": "index",
+    "definice": "Podíl oboru na subjektech území dělený podílem oboru na subjektech ČR.",
+    "chybejici_hodnoty": "Nezveřejní se, je-li REG_POCET skrytý.",
+    "vyklad": ">1 = obor je v území zastoupen víc než v průměru ČR. Počítá registrované subjekty, ne zaměstnanost ani výkon."
+   },
+   {
+    "kod": "OBYVATELE",
+    "nazev": "Počet obyvatel území",
+    "typ": "kontext",
+    "definice": "Počet obyvatel k 31. 12. posledního zveřejněného roku.",
+    "chybejici_hodnoty": "Praha nemá okres v datech obyvatelstva; okres Praha (CZ0100) = kraj Hlavní město Praha.",
+    "vyklad": "Rok stavu obyvatel se liší od data snímku RES."
+   },
+   {
+    "kod": "HUSTOTA",
+    "nazev": "Registrované subjekty oboru na 1 000 obyvatel",
+    "typ": "index",
+    "definice": "Počet registrovaných subjektů oboru na 1 000 obyvatel území.",
+    "chybejici_hodnoty": "Nezveřejní se, je-li REG_POCET skrytý.",
+    "vyklad": "Sídlo subjektu nemusí být místem činnosti; v Praze je hustota zvýšena sídly bez činnosti v Praze."
+   },
+   {
+    "kod": "PORADI_POCET",
+    "nazev": "Pořadí podle počtu registrovaných subjektů oboru",
+    "typ": "poradi",
+    "definice": "Pořadí kraje mezi 14 kraji (u okresu mezi okresy téhož kraje) podle REG_POCET, 1 = nejvíce.",
+    "chybejici_hodnoty": "Pořadí se počítá ze skutečných počtů všech území; zveřejní se jen u zveřejněných počtů.",
+    "vyklad": "Automaticky se srovnává jen s ČR a pořadím mezi všemi kraji; srovnávací kraje volí člověk."
+   },
+   {
+    "kod": "PORADI_HUSTOTA",
+    "nazev": "Pořadí podle hustoty na 1 000 obyvatel",
+    "typ": "poradi",
+    "definice": "Pořadí kraje mezi 14 kraji (u okresu mezi okresy téhož kraje) podle HUSTOTA, 1 = nejvyšší.",
+    "chybejici_hodnoty": "jako PORADI_POCET",
+    "vyklad": "Odstraňuje vliv velikosti území."
+   },
+   {
+    "kod": "FOPO_POCET",
+    "nazev": "Registrované subjekty podle typu osoby (FO/PO)",
+    "typ": "pocet",
+    "definice": "FO = statistická právní forma (FORMA) 101–108, 424, 425 (podnikající fyzické osoby včetně zahraničních); PO = ostatní formy.",
+    "chybejici_hodnoty": "Je-li FO nebo PO pod prahem, rozdělení se nezveřejní (a s ním ani velikostní profily FO/PO).",
+    "vyklad": "FO jsou většinou OSVČ; název subjektu je u nich jméno osoby."
+   },
+   {
+    "kod": "FOPO_PODIL",
+    "nazev": "Podíl FO/PO (%)",
+    "typ": "podil",
+    "definice": "Podíl FO resp. PO na REG_POCET.",
+    "chybejici_hodnoty": "jako FOPO_POCET",
+    "vyklad": "–"
+   },
+   {
+    "kod": "FORMA_POCET",
+    "nazev": "Registrované subjekty podle právní formy",
+    "typ": "pocet",
+    "definice": "Počet podle statistické právní formy (FORMA, číselník ČSÚ 56).",
+    "chybejici_hodnoty": "Formy pod prahem se slučují do „ostatní formy FO“ / „ostatní formy PO“ (v rámci skupiny); je-li skryté rozdělení FO/PO, do jednoho „ostatní“.",
+    "vyklad": "–"
+   },
+   {
+    "kod": "FORMA_PODIL",
+    "nazev": "Podíl právní formy (%)",
+    "typ": "podil",
+    "definice": "Podíl na REG_POCET.",
+    "chybejici_hodnoty": "jako FORMA_POCET",
+    "vyklad": "–"
+   },
+   {
+    "kod": "VEL_FO_POCET",
+    "nazev": "Velikostní profil FO – počet podle kategorie zaměstnanců",
+    "typ": "pocet",
+    "definice": "FO podle KATPO (číselník 579) seskupené do pásem: bez zaměstnanců (110), 1–9 (120, 130), 10–49 (210–230), 50–249 (240–320), 250 a více (330–510), Neuvedeno (000).",
+    "chybejici_hodnoty": "„Neuvedeno“ (000) je vždy samostatný řádek, nikdy se neslučuje s „bez zaměstnanců“; pásma pod prahem se slučují do „ostatní“.",
+    "vyklad": "U FO znamená 110 bez zaměstnanců; od 7/2024 se do zaměstnanců počítají i DPP."
+   },
+   {
+    "kod": "VEL_FO_PODIL",
+    "nazev": "Velikostní profil FO – podíl (%)",
+    "typ": "podil",
+    "definice": "Podíl pásma na FO celkem; podíl „Neuvedeno“ se zobrazuje vždy (je-li zveřejnitelný).",
+    "chybejici_hodnoty": "jako VEL_FO_POCET",
+    "vyklad": "–"
+   },
+   {
+    "kod": "VEL_PO_POCET",
+    "nazev": "Velikostní profil PO – počet podle kategorie zaměstnanců",
+    "typ": "pocet",
+    "definice": "PO podle KATPO v týchž pásmech jako VEL_FO_POCET.",
+    "chybejici_hodnoty": "jako VEL_FO_POCET",
+    "vyklad": "U PO se kód 110 prakticky nepoužívá; PO bez hlášených zaměstnanců mají „Neuvedeno“ (000). Neuvedeno ≠ bez zaměstnanců."
+   },
+   {
+    "kod": "VEL_PO_PODIL",
+    "nazev": "Velikostní profil PO – podíl (%)",
+    "typ": "podil",
+    "definice": "Podíl pásma na PO celkem.",
+    "chybejici_hodnoty": "jako VEL_PO_POCET",
+    "vyklad": "–"
+   },
+   {
+    "kod": "VEK_PRUMER",
+    "nazev": "Průměrný věk existujících subjektů (roky)",
+    "typ": "prumer",
+    "definice": "Průměr (datum snímku − datum vzniku) v letech u registrovaných subjektů oboru v území.",
+    "chybejici_hodnoty": "Nezveřejní se, je-li REG_POCET skrytý.",
+    "vyklad": "Věková struktura existujících subjektů, ne dynamika vzniku (zaniklé subjekty nejsou zahrnuty)."
+   },
+   {
+    "kod": "VEK_MEDIAN",
+    "nazev": "Mediánový věk existujících subjektů (roky)",
+    "typ": "prumer",
+    "definice": "Medián (datum snímku − datum vzniku) v letech.",
+    "chybejici_hodnoty": "jako VEK_PRUMER",
+    "vyklad": "jako VEK_PRUMER"
+   },
+   {
+    "kod": "VEK_PASMO_POCET",
+    "nazev": "Věková struktura existujících subjektů – počet v pásmu",
+    "typ": "pocet",
+    "definice": "Pásma věku: méně než 3 roky, 3–5, 6–10, 11–20, 21–30, 31 a více let.",
+    "chybejici_hodnoty": "Pásma pod prahem se slučují do „ostatní“.",
+    "vyklad": "Není to počet vzniků v jednotlivých letech."
+   },
+   {
+    "kod": "VEK_PASMO_PODIL",
+    "nazev": "Věková struktura existujících subjektů – podíl pásma (%)",
+    "typ": "podil",
+    "definice": "Podíl pásma na REG_POCET.",
+    "chybejici_hodnoty": "jako VEK_PASMO_POCET",
+    "vyklad": "–"
+   },
+   {
+    "kod": "DOPL_JEN_VYSSI",
+    "nazev": "Zařazeno jen do vyšší úrovně klasifikace (např. „zařazeno jen do sekce“)",
+    "typ": "pocet",
+    "definice": "Registrované subjekty v území, jejichž NACE je nadřazený kód zkoumaného oboru (např. jen „J“ u oddílu 62) – do oboru mohou, ale nemusí patřit.",
+    "chybejici_hodnoty": "Samostatné číslo; pod prahem se nezveřejní. Jen pro obor na úrovni oddílu a nižší.",
+    "vyklad": "Horní mez nejistoty počtu v oboru."
+   },
+   {
+    "kod": "DOPL_OBOR_NEURCEN",
+    "nazev": "Obor neurčen (pseudokód 00)",
+    "typ": "pocet",
+    "definice": "Registrované subjekty v území s pseudokódem 00 („výroba, obchod a služby neuvedené v přílohách 1 až 3 živnostenského zákona“).",
+    "chybejici_hodnoty": "Samostatné číslo; pod prahem se nezveřejní.",
+    "vyklad": "Tyto subjekty nejde přiřadit žádnému oboru; ČSÚ je vykazuje jako „X Nezjištěno“."
+   },
+   {
+    "kod": "AKTIVNI_PODIL_KRAJ",
+    "nazev": "Podíl subjektů se zjištěnou aktivitou v kraji podle ČSÚ (%, všechny obory)",
+    "typ": "kontext",
+    "definice": "Počet ekonomických subjektů se zjištěnou aktivitou / počet ekonomických subjektů celkem, kraj (u okresu jeho kraj), všechny obory, poslední čtvrtletí.",
+    "chybejici_hodnoty": "Za okres ČSÚ podíl v členění podle převažující činnosti nepublikuje; uvádí se krajský.",
+    "vyklad": "Jen kontext. Aktivitu po subjektech nedopočítáváme; počty v reportu jsou registrované subjekty."
+   },
+   {
+    "kod": "DYN_VZNIK_CSU",
+    "nazev": "Vzniklé ekonomické subjekty v území podle ČSÚ (všechny obory)",
+    "typ": "pocet",
+    "definice": "Počet vzniklých ekonomických subjektů v roce (součet čtvrtletí), FO a PO, území celkem.",
+    "chybejici_hodnoty": "ČSÚ vznik a zánik v členění podle oboru (kraj × sekce ani ČR × obor) z RES nepublikuje – dynamiku oboru nelze naplnit. Poslední rok je neúplný (jen zveřejněná čtvrtletí).",
+    "vyklad": "Dynamika celého území, ne oboru."
+   },
+   {
+    "kod": "DYN_ZANIK_CSU",
+    "nazev": "Zaniklé ekonomické subjekty v území podle ČSÚ (všechny obory)",
+    "typ": "pocet",
+    "definice": "Počet zaniklých ekonomických subjektů v roce (součet čtvrtletí), FO a PO, území celkem.",
+    "chybejici_hodnoty": "jako DYN_VZNIK_CSU. Rok 2023 u FO obsahuje mimořádný výkyv (1. čtvrtletí 2023 hromadný zánik FO, v ČR 200 977 zániků FO proti obvyklým 15–45 tis.).",
+    "vyklad": "Dynamika celého území, ne oboru."
+   },
+   {
+    "kod": "SPOLEHLIVOST_JEN_SEKCE",
+    "nazev": "Spolehlivost zařazení – subjekty zařazené jen do sekce vůči počtu oboru (%)",
+    "typ": "podil",
+    "definice": "Registrované subjekty v území s převažující činností uvedenou jen písmenem sekce oboru (např. „J“ u oddílu 62) děleno počtem oboru v území (rozhodnutí 9).",
+    "chybejici_hodnoty": "Jen pro obor na úrovni oddílu a nižší. Nezveřejní se, je-li počet „jen do sekce“ pod prahem (pak je podíl nutně malý).",
+    "vyklad": "Nad 25 % nese report varování na titulní straně i v metodické poznámce: skutečný počet oboru může být výrazně vyšší."
+   },
+   {
+    "kod": "DEMOGR_AKTIVNI",
+    "nazev": "Aktivní podniky v ČR (demografie podniků)",
+    "typ": "pocet",
+    "definice": "Počet aktivních podniků podle statistiky demografie podniků ČSÚ, FO a PO zvlášť, odvětví oboru a všechna odvětví.",
+    "chybejici_hodnoty": "Odvětví jen B–R (K = peněžní zprostředkování, S = osobní služby); A, O, T, U v RESDP00 nejsou. Poslední rok bývá předběžný.",
+    "vyklad": "Jiná jednotka (aktivní podnik), nesrovnatelné s registrovanými subjekty RES; jen kontext za ČR (rozhodnutí 10)."
+   },
+   {
+    "kod": "DEMOGR_MIRA_VZNIKU",
+    "nazev": "Míra vzniků podniků v ČR (%)",
+    "typ": "kontext",
+    "definice": "Vzniklé podniky / aktivní podniky × 100 podle ČSÚ, FO a PO zvlášť.",
+    "chybejici_hodnoty": "jako DEMOGR_AKTIVNI",
+    "vyklad": "Kontext dynamiky oboru za ČR; dynamika obor × území je mimo v0 (vznikne z archivu snímků RES)."
+   },
+   {
+    "kod": "DEMOGR_MIRA_ZANIKU",
+    "nazev": "Míra zániků podniků v ČR (%)",
+    "typ": "kontext",
+    "definice": "Zaniklé podniky / aktivní podniky × 100 podle ČSÚ, FO a PO zvlášť.",
+    "chybejici_hodnoty": "Zánik se zjišťuje se zpožděním; poslední rok bez zániků se nezobrazuje.",
+    "vyklad": "jako DEMOGR_MIRA_VZNIKU"
+   }
+  ]
  },
  "tabulky": [
   {
@@ -206,6 +463,17 @@
       "hodnota": 4335
      },
      "promenna": "dopl:00"
+    },
+    {
+     "popis": "Zařazeno jen do sekce C vůči počtu oboru (%)",
+     "typ": "ukazatel",
+     "ukazatele": {
+      "hodnota": "SPOLEHLIVOST_JEN_SEKCE"
+     },
+     "hodnoty": {
+      "hodnota": 0.0
+     },
+     "zaklad": "obor@kraj:CZ063"
     },
     {
      "popis": "Podíl subjektů se zjištěnou aktivitou – Kraj Vysočina, všechny obory (ČSÚ, 2026-Q2, %)",
@@ -1222,6 +1490,179 @@
    "duvod": null,
    "poznamky": [
     "ČSÚ nepublikuje vznik a zánik v členění podle oboru (kraj × sekce); jde o celé území. Čísla FO a PO pod prahem se nezveřejňují (zůstává jen celkem)."
+   ]
+  },
+  {
+   "kod": "T12_demografie_cr",
+   "nazev": "Demografie podniků v ČR – kontext (ČSÚ, RESDP00; jednotka podnik)",
+   "sloupce": [
+    {
+     "kod": "obor_aktivni",
+     "nazev": "Zpracovatelský průmysl: aktivní podniky",
+     "ukazatel": "DEMOGR_AKTIVNI"
+    },
+    {
+     "kod": "obor_mira_vzniku",
+     "nazev": "Zpracovatelský průmysl: míra vzniků (%)",
+     "ukazatel": "DEMOGR_MIRA_VZNIKU"
+    },
+    {
+     "kod": "obor_mira_zaniku",
+     "nazev": "Zpracovatelský průmysl: míra zániků (%)",
+     "ukazatel": "DEMOGR_MIRA_ZANIKU"
+    },
+    {
+     "kod": "cr_aktivni",
+     "nazev": "Všechna odvětví: aktivní podniky",
+     "ukazatel": "DEMOGR_AKTIVNI"
+    },
+    {
+     "kod": "cr_mira_vzniku",
+     "nazev": "Všechna odvětví: míra vzniků (%)",
+     "ukazatel": "DEMOGR_MIRA_VZNIKU"
+    },
+    {
+     "kod": "cr_mira_zaniku",
+     "nazev": "Všechna odvětví: míra zániků (%)",
+     "ukazatel": "DEMOGR_MIRA_ZANIKU"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "2019 – podniky FO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 143966,
+      "obor_mira_vzniku": 8.29,
+      "obor_mira_zaniku": 7.9,
+      "cr_aktivni": 903037,
+      "cr_mira_vzniku": 8.8,
+      "cr_mira_zaniku": 7.84
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2019 – podniky PO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 36554,
+      "obor_mira_vzniku": 6.59,
+      "obor_mira_zaniku": 2.25,
+      "cr_aktivni": 306300,
+      "cr_mira_vzniku": 8.26,
+      "cr_mira_zaniku": 3.73
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2020 – podniky FO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 141846,
+      "obor_mira_vzniku": 7.54,
+      "obor_mira_zaniku": 7.34,
+      "cr_aktivni": 906249,
+      "cr_mira_vzniku": 8.3,
+      "cr_mira_zaniku": 7.69
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2020 – podniky PO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 37317,
+      "obor_mira_vzniku": 5.76,
+      "obor_mira_zaniku": 2.64,
+      "cr_aktivni": 315010,
+      "cr_mira_vzniku": 7.42,
+      "cr_mira_zaniku": 4.15
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2021 – podniky FO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 143056,
+      "obor_mira_vzniku": 8.74,
+      "obor_mira_zaniku": 6.11,
+      "cr_aktivni": 918884,
+      "cr_mira_vzniku": 9.07,
+      "cr_mira_zaniku": 6.3
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2021 – podniky PO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 38562,
+      "obor_mira_vzniku": 6.43,
+      "obor_mira_zaniku": 2.53,
+      "cr_aktivni": 334396,
+      "cr_mira_vzniku": 7.98,
+      "cr_mira_zaniku": 3.85
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2022 – podniky FO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 144726,
+      "obor_mira_vzniku": 9.32,
+      "obor_mira_zaniku": 7.82,
+      "cr_aktivni": 946485,
+      "cr_mira_vzniku": 9.69,
+      "cr_mira_zaniku": 7.71
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2022 – podniky PO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 39847,
+      "obor_mira_vzniku": 6.28,
+      "obor_mira_zaniku": 2.89,
+      "cr_aktivni": 344989,
+      "cr_mira_vzniku": 7.21,
+      "cr_mira_zaniku": 3.96
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "2023 – podniky FO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 148289,
+      "obor_mira_vzniku": 10.79,
+      "obor_mira_zaniku": 8.95,
+      "cr_aktivni": 968178,
+      "cr_mira_vzniku": 9.83,
+      "cr_mira_zaniku": 8.79
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "2023 – podniky PO",
+     "typ": "polozka",
+     "hodnoty": {
+      "obor_aktivni": 41190,
+      "obor_mira_vzniku": 5.9,
+      "obor_mira_zaniku": 3.83,
+      "cr_aktivni": 353778,
+      "cr_mira_vzniku": 7.02,
+      "cr_mira_zaniku": 5.08
+     },
+     "poznamka": "předběžné hodnoty"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Jiná jednotka: aktivní PODNIK ze statistiky demografie podniků, ne registrovaný ekonomický subjekt z RES; čísla nejsou srovnatelná s ostatními tabulkami. Jen za ČR."
    ]
   }
  ]

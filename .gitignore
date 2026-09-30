@@ -30,3 +30,6 @@ Thumbs.db
 
 # --- Interní podklady kontroly reportu (obsahují skrytá čísla) — nezveřejňovat ---
 reporty/vystupy/*/_interni/
+
+# --- PDF výstupy reportu vedle JSON (vzorové PDF jsou v reporty/ukazky) ---
+reporty/vystupy/*/report.pdf

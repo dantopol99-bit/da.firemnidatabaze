@@ -17,6 +17,24 @@ Rozhodnutí k nálezům z Bloku 1. Platí pro všechny výstupy reportu.
 | 6 | Subjekty s NACE jen na úrovni sekce: v reportu za oddíl nebo nižší úroveň samostatný řádek **„zařazeno jen do sekce“**. Pseudokód 00 = **„obor neurčen“**. | T01: `DOPL_JEN_VYSSI` (pro každý nadřazený kód oboru), `DOPL_OBOR_NEURCEN` |
 | 7 | Každý výstup nese **citaci zdroje** (ČSÚ, RES, datum snímku, CC BY 4.0) a označení **„Odvozené údaje, nejde o oficiální statistiku ČSÚ.“** | `meta.citace` a `meta.oznaceni` v JSON, řádky 2–3 každého listu XLSX, list „Zdroj a licence“, hlavička MD; ověřuje kontrola |
 
+**Upřesnění pravidla 3 (schváleno 30. 9. 2026):** (a) zkoumané území a zadané srovnávací kraje se při
+sekundárním slučování přeskočí, pokud je z čeho vybírat; (b) právní formy se slučují v rámci FO a v rámci PO.
+
+## Schválená rozhodnutí – Blok 3 (30. 9. 2026)
+
+| # | rozhodnutí | jak je v kódu |
+|---|---|---|
+| 8 | **Minimální rozsah**: pod 100 registrovanými subjekty se report nevydá. CLI místo toho vypíše návrh vyšší úrovně (okres → kraj, třída/skupina → oddíl → sekce) i s počty. | `report.MIN_ROZSAH`, výjimka `MalyRozsah` s `navrhy_vyssi_urovne()`; CLI skončí kódem 4 (i s `--pdf`) |
+| 9 | **Spolehlivost zařazení**: podíl subjektů „jen do sekce“ (v téže sekci a území) vůči počtu oboru. Nad 25 % nese report varování na titulní straně i v metodické poznámce. | ukazatel `SPOLEHLIVOST_JEN_SEKCE` (T01), `meta.varovani`; zveřejní se, jen je-li počet „jen do sekce“ zveřejnitelný |
+| 10 | **Dynamika**: v0 používá RES05 (dynamika území) a RESDP jako kontext za ČR s poznámkou o jiné jednotce (podnik). Dynamika obor × území je mimo v0 (vznikne z archivu snímků RES). | T11 (RES05), nová T12 (RESDP00, `res.csu_demografie`); míry ČSÚ zaokrouhlené na 2 desetinná místa ve výpočetní vrstvě |
+| 11 | **Hlavní sdělení** nesou počet, lokalizační koeficient, hustota a pořadí. Velikostní profil jde až do strukturní kapitoly, vždy s podílem „Neuvedeno“. | shrnutí a dlaždice v PDF; velikost jen v kapitole Struktura |
+
+**Upřesnění k rozhodnutí 1:** kontrola zakázaných slov povoluje jen sousloví **„aktivní podnik(y)“**.
+Je to oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10), ne označení
+registrovaných subjektů.
+
+Osnova a pravidla sazby PDF: [`report_osnova.md`](report_osnova.md).
+
 ## Výpočet
 
 ```bash
@@ -100,7 +118,7 @@ T10 zaniklé PO z RES od 2023, T11 vznik a zánik v území podle ČSÚ (RES05).
 |---|---|---|---|---|
 | **RES05** Vznik a zánik ekonomických subjektů | vzniklé, zaniklé; FO/PO/celkem; čtvrtletí 2020-Q1 – 2026-Q2 (roky jen v souhrnném výběru za ČR) | **ne** | ČR, kraje, okresy | T11 – dynamika **celého území**, ne oboru |
 | RES06 / RES0A Registrace ekonomických subjektů | registrace; 9 skupin CZ-NACE | ano (hrubě) | **jen ČR** | nepoužito |
-| RESDP00/01 Demografie podniků | aktivní, vzniklé, zaniklé **podniky**, míry; 18 odvětví | ano | **jen ČR** | nepoužito (jiná jednotka: podnik, ne ekonomický subjekt) |
+| RESDP00/01 Demografie podniků | aktivní, vzniklé, zaniklé **podniky**, míry; 18 odvětví | ano | **jen ČR** | T12 – jen kontext ČR (rozhodnutí 10; jiná jednotka: podnik) |
 | RES06UP Úpadky | úpadky; 9 skupin CZ-NACE | ano (hrubě) | jen ČR | nepoužito |
 
 **Tabulka vzniku a zániku v členění kraj × sekce v DataStatu neexistuje.** Ukazatel `DYN_OBOR_CSU`

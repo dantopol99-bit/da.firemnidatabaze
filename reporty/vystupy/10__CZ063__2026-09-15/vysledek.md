@@ -22,6 +22,7 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 | Mediánový věk existujících subjektů (roky) | 13,6 |  |
 | Zařazeno jen do sekce C (Zpracovatelský průmysl) | – | žádné |
 | Obor neurčen (pseudokód 00) – v území, všechny obory | 4 335 |  |
+| Zařazeno jen do sekce C vůči počtu oboru (%) | 0 |  |
 | Podíl subjektů se zjištěnou aktivitou – Kraj Vysočina, všechny obory (ČSÚ, 2026-Q2, %) | 64,6 | kontext: počty v reportu jsou registrované subjekty |
 
 > Počty jsou registrované subjekty bez data zániku. Podíl subjektů se zjištěnou aktivitou je jen kontext z publikace ČSÚ, na subjekty oboru se nepřepočítává.
@@ -151,3 +152,20 @@ _Nezveřejněno: celé členění pod prahem._
 | 2026 – zaniklé | 989 | 148 | 1 137 | 2 čtvrtletí |
 
 > ČSÚ nepublikuje vznik a zánik v členění podle oboru (kraj × sekce); jde o celé území. Čísla FO a PO pod prahem se nezveřejňují (zůstává jen celkem).
+
+## T12_demografie_cr: Demografie podniků v ČR – kontext (ČSÚ, RESDP00; jednotka podnik)
+
+| Položka | Zpracovatelský průmysl: aktivní podniky | Zpracovatelský průmysl: míra vzniků (%) | Zpracovatelský průmysl: míra zániků (%) | Všechna odvětví: aktivní podniky | Všechna odvětví: míra vzniků (%) | Všechna odvětví: míra zániků (%) | Poznámka |
+|---|---|---|---|---|---|---|---|
+| 2019 – podniky FO | 143 966 | 8,29 | 7,9 | 903 037 | 8,8 | 7,84 |  |
+| 2019 – podniky PO | 36 554 | 6,59 | 2,25 | 306 300 | 8,26 | 3,73 |  |
+| 2020 – podniky FO | 141 846 | 7,54 | 7,34 | 906 249 | 8,3 | 7,69 |  |
+| 2020 – podniky PO | 37 317 | 5,76 | 2,64 | 315 010 | 7,42 | 4,15 |  |
+| 2021 – podniky FO | 143 056 | 8,74 | 6,11 | 918 884 | 9,07 | 6,3 |  |
+| 2021 – podniky PO | 38 562 | 6,43 | 2,53 | 334 396 | 7,98 | 3,85 |  |
+| 2022 – podniky FO | 144 726 | 9,32 | 7,82 | 946 485 | 9,69 | 7,71 |  |
+| 2022 – podniky PO | 39 847 | 6,28 | 2,89 | 344 989 | 7,21 | 3,96 |  |
+| 2023 – podniky FO | 148 289 | 10,79 | 8,95 | 968 178 | 9,83 | 8,79 | předběžné hodnoty |
+| 2023 – podniky PO | 41 190 | 5,9 | 3,83 | 353 778 | 7,02 | 5,08 | předběžné hodnoty |
+
+> Jiná jednotka: aktivní PODNIK ze statistiky demografie podniků, ne registrovaný ekonomický subjekt z RES; čísla nejsou srovnatelná s ostatními tabulkami. Jen za ČR.

@@ -20,7 +20,10 @@ dělat analýzy a reporty.
 │   ├── report.py           # výpočet Oborově-regionálního reportu (obor × území × snímek)
 │   ├── report_potlaceni.py # práh 10, slučování do „ostatní“, kontrola dopočtu
 │   ├── report_xlsx.py      # datová příloha XLSX
-│   └── report_kontrola.py  # kontrola výstupu před zveřejněním
+│   ├── report_kontrola.py  # kontrola výstupu a konzistence čísel v PDF
+│   ├── report_grafy.py     # knihovna grafů (6 typů, strop 8)
+│   ├── report_vyklad.py    # návrh analytického výkladu (KONCEPT)
+│   └── report_pdf.py       # sazba PDF v Typstu z výstupu JSON
 ├── sql/init/               # SQL skripty spouštěné při prvním startu databáze
 ├── sql/dev/                # identitní jádro – tabulky ve schématu dev
 ├── sql/res/                # Registr ekonomických subjektů ČSÚ – schéma res
@@ -157,7 +160,10 @@ python -m firemni_databaze.report --obor F --uzemi CZ051 [--srovnani CZ031,CZ053
 python -m firemni_databaze.report_kontrola reporty/vystupy/*
 ```
 
-Výstup je v `reporty/vystupy/<obor>__<území>__<datum>/`: `vysledek.json`, `vysledek.md`, `priloha.xlsx`.
+Výstup je v `reporty/vystupy/<obor>__<území>__<datum>/`: `vysledek.json`, `vysledek.md`, `priloha.xlsx`
+(s `--pdf` i `report.pdf`). Sazba potřebuje binárku [Typst](https://github.com/typst/typst/releases) v PATH;
+fonty jsou v `reporty/sablona/fonty`. Osnova: [`docs/report_osnova.md`](docs/report_osnova.md),
+vzorový pilot: [`reporty/ukazky/`](reporty/ukazky/).
 Podadresář `_interni/` obsahuje i skrytá čísla pro kontrolu dopočtu a do gitu nepatří.
 
 Chceš-li `dev` začít úplně od nuly (smaže vše v něm):

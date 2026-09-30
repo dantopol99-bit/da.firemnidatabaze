@@ -349,5 +349,49 @@ ukazatele:
     zdroj: ČSÚ DataStat – tabulka v tomto členění neexistuje (RES05 jen území × FO/PO; RES06 registrace a RESDP00 demografie podniků jen za ČR podle odvětví)
     uroven: []
     chybejici_hodnoty: Nelze naplnit.
-    vyklad: Náhradou je ZANIK_PO_RES (jen PO) a věková struktura existujících subjektů.
+    vyklad: Mimo v0 (rozhodnutí 10) – vznikne později z archivu snímků RES. Náhradou je dynamika území (RES05), kontext ČR z demografie podniků (RESDP00), ZANIK_PO_RES a věková struktura.
     stav: nelze naplnit
+
+  - kod: SPOLEHLIVOST_JEN_SEKCE
+    nazev: Spolehlivost zařazení – subjekty zařazené jen do sekce vůči počtu oboru (%)
+    typ: podil
+    definice: Registrované subjekty v území s převažující činností uvedenou jen písmenem sekce oboru (např. „J“ u oddílu 62) děleno počtem oboru v území (rozhodnutí 9).
+    vzorec: "100 × DOPL_JEN_VYSSI(sekce) / REG_POCET"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Jen pro obor na úrovni oddílu a nižší. Nezveřejní se, je-li počet „jen do sekce“ pod prahem (pak je podíl nutně malý).
+    vyklad: "Nad 25 % nese report varování na titulní straně i v metodické poznámce: skutečný počet oboru může být výrazně vyšší."
+    stav: naplněno
+
+  - kod: DEMOGR_AKTIVNI
+    nazev: Aktivní podniky v ČR (demografie podniků)
+    typ: pocet
+    definice: Počet aktivních podniků podle statistiky demografie podniků ČSÚ, FO a PO zvlášť, odvětví oboru a všechna odvětví.
+    vzorec: převzato (RESDP00, ukazatel 6594_RESDP)
+    zdroj: ČSÚ, DataStat, sada RESDP00
+    uroven: [CR]
+    chybejici_hodnoty: "Odvětví jen B–R (K = peněžní zprostředkování, S = osobní služby); A, O, T, U v RESDP00 nejsou. Poslední rok bývá předběžný."
+    vyklad: Jiná jednotka (aktivní podnik), nesrovnatelné s registrovanými subjekty RES; jen kontext za ČR (rozhodnutí 10).
+    stav: částečně
+
+  - kod: DEMOGR_MIRA_VZNIKU
+    nazev: Míra vzniků podniků v ČR (%)
+    typ: kontext
+    definice: Vzniklé podniky / aktivní podniky × 100 podle ČSÚ, FO a PO zvlášť.
+    vzorec: převzato (RESDP00, ukazatel 9507)
+    zdroj: ČSÚ, DataStat, sada RESDP00
+    uroven: [CR]
+    chybejici_hodnoty: jako DEMOGR_AKTIVNI
+    vyklad: Kontext dynamiky oboru za ČR; dynamika obor × území je mimo v0 (vznikne z archivu snímků RES).
+    stav: částečně
+
+  - kod: DEMOGR_MIRA_ZANIKU
+    nazev: Míra zániků podniků v ČR (%)
+    typ: kontext
+    definice: Zaniklé podniky / aktivní podniky × 100 podle ČSÚ, FO a PO zvlášť.
+    vzorec: převzato (RESDP00, ukazatel 9508)
+    zdroj: ČSÚ, DataStat, sada RESDP00
+    uroven: [CR]
+    chybejici_hodnoty: Zánik se zjišťuje se zpožděním; poslední rok bez zániků se nezobrazuje.
+    vyklad: jako DEMOGR_MIRA_VZNIKU
+    stav: částečně
