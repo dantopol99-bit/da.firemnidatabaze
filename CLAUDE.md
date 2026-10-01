@@ -8,6 +8,11 @@ v [docs/report_metodika.md](docs/report_metodika.md).
 - PR po otevření hlídat nemusíš (neodebírej aktivitu PR, neplánuj kontroly).
 - CI (GitHub Actions ani jiné) nezakládej.
 
+## Větve
+- Před založením nebo resetem větve zkontroluj otevřené PR (i na pracovní větvi této session).
+- Na větev s otevřeným PR nikdy nedělej force-push ani reset; další práci přidávej běžnými commity.
+- Při pochybnosti, zda je PR sloučený nebo zda větev smíš přepsat, se zeptej.
+
 ## Před každým PR
 - Spusť celou sadu testů: `python -m unittest discover -s tests`.
 - Bez zelených testů PR neotvírej. Testy, které se přeskočí kvůli chybějící databázi nebo typstu,

@@ -426,3 +426,53 @@ def radky_demografie(obsah: bytes, definice_sady: dict) -> list[dict]:
             "hodnota": float(r["Hodnota"]), "predbezna": bool(r.get("OBS_STATUS")),
         })
     return radky
+
+
+# ---------------------------------------------------------------------------
+# Zaměstnanost a mzdy (DataStat MZDCRR, MZDR) – předdefinované výběry
+# ---------------------------------------------------------------------------
+
+# výběr → (sada, zjišťování, popis); kraj × sekce existuje jen v ročním zjišťování (MZDCRR)
+MZDY_VYBERY = {
+    "MZDCRRT2": ("MZDCRR", "rocni", "kraj × sekce CZ-NACE, roční zjišťování, pracovištní metoda"),
+    "MZDCRRT1": ("MZDCRR", "rocni", "ČR × sekce CZ-NACE, roční zjišťování"),
+    "MZDRT2": ("MZDR", "ctvrtletni", "ČR × sekce CZ-NACE, čtvrtletní zjišťování, kumulace za rok"),
+    "MZDRT5": ("MZDR", "ctvrtletni", "ČR a kraje, všechna odvětví, čtvrtletní zjišťování, pracovištní metoda"),
+}
+# základní ukazatele (meziroční indexy a rozdíly se nenačítají, report je nepoužívá)
+MZDY_UKAZATELE = {
+    "Průměrný evidenční počet zaměstnanců přepočtený (tis. osob)": "ZAM_PREP",
+    "Průměrný evidenční počet zaměstnanců na fyzické osoby (tis. osob)": "ZAM_FYZ",
+    "Průměrná hrubá měsíční mzda na přepočtené počty zaměstnanců (Kč)": "MZDA_PREP",
+    "Průměrná hrubá měsíční mzda na fyzické osoby (Kč)": "MZDA_FYZ",
+}
+
+
+def radky_mzdy(vyber: str, obsah: bytes, definice_sady: dict) -> list[dict]:
+    """Výběr MZDCRR/MZDR (CSV s kódy číselníků) → řádky res.csu_mzdy (jen ČR a kraje)."""
+    kody_csu = {u["nazev"]: u["kod"] for u in definice_sady["ukazatele"]}
+    zjisteni = MZDY_VYBERY[vyber][1]
+    radky = []
+    for r in csv.DictReader(io.StringIO(obsah.decode("utf-8-sig"))):
+        uk = MZDY_UKAZATELE.get(r["Ukazatel"])
+        if uk is None or r["Hodnota"] in ("", None):
+            continue
+        if r.get("Uz2.Polozka"):                                      # MZDCRRT2: jen kraje
+            uzemi_kod, uroven, uzemi = r["Uz2.Polozka"], "KRAJ", r["Kraje"]
+        elif r.get("Uz0.Polozka"):                                    # MZDCRRT1, MZDRT2: ČR
+            uzemi_kod, uroven, uzemi = r["Uz0.Polozka"], "STAT", r["Území"]
+        else:                                                         # MZDRT5: hierarchie ČR › region › kraj
+            if r.get("Uz0123vm.REGION.Polozka") and not r.get("Uz0123vm.KRAJ.Polozka"):
+                continue                                              # regiony soudržnosti report nepoužívá
+            if r.get("Uz0123vm.KRAJ.Polozka"):
+                uzemi_kod, uroven, uzemi = r["Uz0123vm.KRAJ.Polozka"], "KRAJ", r["ČR, regiony, kraje-Kraj"]
+            else:
+                uzemi_kod, uroven, uzemi = r["Uz0123vm.STAT.Polozka"], "STAT", r["ČR, regiony, kraje-Stát"]
+        nace_kod = r.get("CZNACEMZDY.Polozka") or "0"
+        radky.append({
+            "vyber": vyber, "zjisteni": zjisteni, "uzemi_kod": uzemi_kod, "uroven": uroven, "uzemi": uzemi,
+            "nace_kod": nace_kod, "nace": (r.get("Odvětví ekonomické činnosti") or "Celkem").strip(),
+            "rok": int(r["CasR.Polozka"]), "ukazatel_kod": uk, "ukazatel_csu": kody_csu.get(r["Ukazatel"], uk),
+            "ukazatel": r["Ukazatel"], "hodnota": float(r["Hodnota"]), "predbezna": bool(r.get("OBS_STATUS")),
+        })
+    return radky

@@ -431,6 +431,30 @@ def prehled(conn) -> None:
 
 # ---------------------------------------------------------------------------
 
+def nacti_mzdy(conn) -> list[int]:
+    """Zaměstnanci a průměrné mzdy (DataStat MZDCRR, MZDR) – každý výběr ve vlastní dávce."""
+    davky = []
+    for vyber, (sada, _, popis) in z.MZDY_VYBERY.items():
+        url = z.url_datastat(vyber)
+
+        def prace(davka: int, vyber=vyber, sada=sada, popis=popis, url=url):
+            definice = json.loads(z.stahni_text(z.DATASTAT_SADY + sada))
+            radky = z.radky_mzdy(vyber, z.stahni_text(url), definice)
+            if not radky:
+                raise ValueError(f"{vyber}: žádné hodnoty")
+            for r in radky:
+                r.update(url=url, import_davka_id=davka)
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM res.csu_mzdy WHERE vyber = %s", (vyber,))
+                vloz(cur, "csu_mzdy", radky)
+            conn.commit()
+            print(f"  {vyber}: {len(radky)} hodnot ({popis})")
+            return len(radky), f"DataStat {vyber} ({sada}): {popis}"
+
+        davky.append(v_davce(conn, "CSU-DATASTAT", url, prace))
+    return davky
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="prikaz", required=True)
@@ -438,7 +462,8 @@ def main() -> int:
     p_cis.add_argument("--k-datu", type=date.fromisoformat, default=date.today(), help="platnost číselníků (YYYY-MM-DD)")
     p_sn = sub.add_parser("snimek", help="načte snímek RES")
     p_sn.add_argument("--adresar", type=Path, help="adresář s dříve staženými res_data.csv, res_pf_nace.csv a *-metadata.json")
-    sub.add_parser("agregaty", help="načte agregáty ČSÚ z DataStatu (RES02QT1, OBY02A, RES05, RESDP00)")
+    sub.add_parser("agregaty", help="načte agregáty ČSÚ z DataStatu (RES02QT1, OBY02A, RES05, RESDP00, mzdy)")
+    sub.add_parser("mzdy", help="načte zaměstnance a průměrné mzdy z DataStatu (MZDCRR, MZDR)")
     p_vse = sub.add_parser("vse", help="číselníky + snímek + agregáty")
     p_vse.add_argument("--adresar", type=Path)
     sub.add_parser("prehled", help="vypíše kvalitu, srovnání s ČSÚ, kontrolu jádra a pilot")
@@ -464,6 +489,10 @@ def main() -> int:
             print("Agregáty ČSÚ:")
             for davka in (nacti_agregaty(conn), nacti_obyvatelstvo(conn), nacti_vznik_zanik(conn),
                           nacti_demografii(conn)):
+                print(f"  dávka {davka} OK")
+        if args.prikaz in ("agregaty", "mzdy", "vse"):
+            print("Zaměstnanci a mzdy ČSÚ:")
+            for davka in nacti_mzdy(conn):
                 print(f"  dávka {davka} OK")
         if args.prikaz in ("prehled", "vse"):
             prehled(conn)

@@ -520,3 +520,93 @@ ukazatele:
     chybejici_hodnoty: U divergence pořadí se neuvádí.
     vyklad: Pod 3 % se rozdíl nehlásí a v textu se popisuje jako „srovnatelné“.
     stav: naplněno
+
+  # --- Blok 6: zaměstnanost a mzdy (ČSÚ DataStat MZDCRR, MZDR) ---------------------------
+
+  - kod: MZDY_ZAM_OBOR
+    nazev: Zaměstnanci v oboru a kraji (tis. osob, přepočtené počty)
+    typ: kontext
+    definice: Průměrný evidenční počet zaměstnanců přepočtený na plný úvazek v sekci CZ-NACE oboru a v kraji (pracovištní metoda) nebo v ČR.
+    vzorec: převzato (MZDCRRT2 kraje × sekce, MZDCRRT1 ČR × sekce; ukazatele 299AQ / 299A), zaokrouhleno na 0,1 tis.
+    zdroj: ČSÚ, DataStat, roční zjišťování (sada MZDCRR)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen jednotlivé sekce CZ-NACE (oddíl a nižší úrovně → sekce s označením); okresy ČSÚ nepublikuje (→ kraj s označením); kraj × sekce jen 2010–2022 (2022 předběžně).
+    vyklad: Zaměstnanci v pracovním poměru, ne podnikající fyzické osoby; nesrovnává se s počtem registrovaných subjektů.
+    stav: částečně
+
+  - kod: MZDY_ZAM_PODIL_CR
+    nazev: Podíl kraje na zaměstnancích oboru v ČR (%)
+    typ: podil
+    definice: Zaměstnanci oboru v kraji / zaměstnanci oboru v ČR × 100, obojí z ročního zjišťování.
+    vzorec: "100 × MZDY_ZAM_OBOR(kraj) / MZDY_ZAM_OBOR(ČR)"
+    zdroj: odvozeno z publikovaných údajů ČSÚ (MZDCRR)
+    uroven: [kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Srovnávejte s podílem kraje na registrovaných subjektech oboru (REG_PODIL_CR).
+    stav: částečně
+
+  - kod: MZDY_ZAM_PODIL_UZEMI
+    nazev: Podíl oboru na zaměstnancích území (%)
+    typ: podil
+    definice: Zaměstnanci oboru / zaměstnanci všech odvětví v témže území × 100.
+    vzorec: "100 × MZDY_ZAM_OBOR / zaměstnanci celkem (sekce „Celkem“)"
+    zdroj: odvozeno z publikovaných údajů ČSÚ (MZDCRR)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Váha oboru na trhu práce území; srovnání kraje s ČR ukazuje specializaci podle zaměstnanosti.
+    stav: částečně
+
+  - kod: MZDY_MZDA_OBOR
+    nazev: Průměrná hrubá měsíční mzda v oboru a kraji (Kč)
+    typ: kontext
+    definice: Průměrná hrubá měsíční mzda na přepočtené počty zaměstnanců v sekci CZ-NACE oboru a v kraji nebo v ČR.
+    vzorec: převzato (MZDCRRT2, MZDCRRT1; ukazatel 5958P), zaokrouhleno na celé Kč
+    zdroj: ČSÚ, DataStat, roční zjišťování (sada MZDCRR)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jako MZDY_ZAM_OBOR. Medián za kraj × odvětví ČSÚ nepublikuje (za kraje jen podle pohlaví).
+    vyklad: Průměr je citlivý na vysoké mzdy; medián pro kraj × odvětví není k dispozici.
+    stav: částečně
+
+  - kod: MZDY_MZDA_INDEX_CR
+    nazev: Mzda v oboru a kraji proti oboru v ČR (ČR = 100)
+    typ: index
+    definice: Průměrná mzda oboru v kraji / průměrná mzda oboru v ČR × 100.
+    vzorec: "100 × MZDY_MZDA_OBOR(kraj) / MZDY_MZDA_OBOR(ČR)"
+    zdroj: odvozeno z publikovaných údajů ČSÚ (MZDCRR)
+    uroven: [kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Pod 100 = obor v kraji platí méně než obor v ČR.
+    stav: částečně
+
+  - kod: MZDY_MZDA_INDEX_UZEMI
+    nazev: Mzda v oboru proti všem odvětvím území (= 100)
+    typ: index
+    definice: Průměrná mzda oboru / průměrná mzda všech odvětví v témže území × 100.
+    vzorec: "100 × MZDY_MZDA_OBOR / mzda celkem (sekce „Celkem“)"
+    zdroj: odvozeno z publikovaných údajů ČSÚ (MZDCRR)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Postavení oboru mezi odvětvími téhož území.
+    stav: částečně
+
+  - kod: MZDY_ZAM_UROVEN
+    nazev: Zaměstnanci v nejbližší publikované úrovni (tis. osob, přepočtené počty)
+    typ: kontext
+    definice: Kraj za všechna odvětví nebo ČR za sekci oboru – pro roky, za které ČSÚ obor × kraj nepublikuje.
+    vzorec: převzato (MZDRT5, MZDRT2; ukazatel 299A), zaokrouhleno na 0,1 tis.
+    zdroj: ČSÚ, DataStat, čtvrtletní zjišťování (sada MZDR), kumulace za rok
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Kraj × odvětví čtvrtletní zjišťování nepublikuje.
+    vyklad: Jiné zjišťování než MZDY_ZAM_OBOR; řady se nespojují.
+    stav: částečně
+
+  - kod: MZDY_MZDA_UROVEN
+    nazev: Průměrná mzda v nejbližší publikované úrovni (Kč)
+    typ: kontext
+    definice: Kraj za všechna odvětví nebo ČR za sekci oboru – pro roky, za které ČSÚ obor × kraj nepublikuje.
+    vzorec: převzato (MZDRT5, MZDRT2; ukazatel 5958P), zaokrouhleno na celé Kč
+    zdroj: ČSÚ, DataStat, čtvrtletní zjišťování (sada MZDR), kumulace za rok
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Kraj × odvětví čtvrtletní zjišťování nepublikuje.
+    vyklad: Jiné zjišťování než MZDY_MZDA_OBOR; řady se nespojují.
+    stav: částečně

@@ -173,6 +173,35 @@
    "id": "Z05"
   },
   {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "podíl oboru na zaměstnancích, kraj proti ČR",
+   "sila": 0.3797,
+   "hodnota": 37.46,
+   "srovnani": 27.15,
+   "rozdil_pct": 38.0,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Podíl sekce C na zaměstnancích kraje 2022 (%)",
+     "hodnota": 37.46,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2022",
+     "sloupec": "zam_podil_uzemi"
+    },
+    {
+     "popis": "Podíl sekce C na zaměstnancích ČR 2022 (%)",
+     "hodnota": 27.15,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "zam_podil_uzemi"
+    }
+   ],
+   "popis": "Sekce C tvořila v roce 2022 v Kraji Vysočina 37,46 % zaměstnanců (přepočtené počty), v Česku 27,15 % (relativně o 38 % vyšší).",
+   "poradi": 6,
+   "id": "Z06"
+  },
+  {
    "typ": "rozdily_uvnitr_uzemi",
    "typ_nazev": "rozdíly uvnitř území",
    "podtyp": "rozpětí hustoty mezi okresy",
@@ -198,8 +227,8 @@
     }
    ],
    "popis": "Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava.",
-   "poradi": 6,
-   "id": "Z06"
+   "poradi": 7,
+   "id": "Z07"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -227,8 +256,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Česku 2,27 (relativně o 33,9 % nižší).",
-   "poradi": 7,
-   "id": "Z07"
+   "poradi": 8,
+   "id": "Z08"
   },
   {
    "typ": "odchylka_od_cr",
@@ -256,8 +285,8 @@
     }
    ],
    "popis": "Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,6 %, v Česku 26,1 % (relativně o 28,7 % nižší).",
-   "poradi": 8,
-   "id": "Z08"
+   "poradi": 9,
+   "id": "Z09"
   },
   {
    "typ": "odchylka_od_cr",
@@ -285,8 +314,8 @@
     }
    ],
    "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Kraji Vysočina 37 %, v Česku 50,9 % (relativně o 27,3 % nižší).",
-   "poradi": 9,
-   "id": "Z09"
+   "poradi": 10,
+   "id": "Z10"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -314,8 +343,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Havlíčkův Brod 1,66 registrovaných subjektů oboru, v Česku 2,27 (relativně o 26,9 % nižší).",
-   "poradi": 10,
-   "id": "Z10"
+   "poradi": 11,
+   "id": "Z11"
   },
   {
    "typ": "odchylka_od_cr",
@@ -343,8 +372,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v Kraji Vysočina 1,7 registrovaných subjektů oboru, v Česku 2,27 (relativně o 25,1 % nižší).",
-   "poradi": 11,
-   "id": "Z11"
+   "poradi": 12,
+   "id": "Z12"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -372,8 +401,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Třebíč 1,72 registrovaných subjektů oboru, v Česku 2,27 (relativně o 24,2 % nižší).",
-   "poradi": 12,
-   "id": "Z12"
+   "poradi": 13,
+   "id": "Z13"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -401,8 +430,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Žďár nad Sázavou 1,73 registrovaných subjektů oboru, v Česku 2,27 (relativně o 23,8 % nižší).",
-   "poradi": 13,
-   "id": "Z13"
+   "poradi": 14,
+   "id": "Z14"
   },
   {
    "typ": "odchylka_od_cr",
@@ -430,8 +459,8 @@
     }
    ],
    "popis": "Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 21,5 %, v Česku 27,7 % (relativně o 22,4 % nižší).",
-   "poradi": 14,
-   "id": "Z14"
+   "poradi": 15,
+   "id": "Z15"
   },
   {
    "typ": "odchylka_od_cr",
@@ -459,8 +488,8 @@
     }
    ],
    "popis": "Věk subjektu – „6–10 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15 %, v Česku 19,2 % (relativně o 21,9 % nižší).",
-   "poradi": 15,
-   "id": "Z15"
+   "poradi": 16,
+   "id": "Z16"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -488,8 +517,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 18,8 % vyšší).",
-   "poradi": 16,
-   "id": "Z16"
+   "poradi": 17,
+   "id": "Z17"
   },
   {
    "typ": "odchylka_od_cr",
@@ -517,8 +546,8 @@
     }
    ],
    "popis": "Věk subjektu – „21–30 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15,8 %, v Česku 13,4 % (relativně o 17,9 % vyšší).",
-   "poradi": 17,
-   "id": "Z17"
+   "poradi": 18,
+   "id": "Z18"
   },
   {
    "typ": "odchylka_od_cr",
@@ -546,8 +575,8 @@
     }
    ],
    "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 11,5 %, v Česku 13,5 % (relativně o 14,8 % nižší).",
-   "poradi": 18,
-   "id": "Z18"
+   "poradi": 19,
+   "id": "Z19"
   },
   {
    "typ": "odchylka_od_cr",
@@ -575,8 +604,8 @@
     }
    ],
    "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Kraji Vysočina 41,8 %, v Česku 48,6 % (relativně o 14 % nižší).",
-   "poradi": 19,
-   "id": "Z19"
+   "poradi": 20,
+   "id": "Z20"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -604,8 +633,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 11,8 % nižší).",
-   "poradi": 20,
-   "id": "Z20"
+   "poradi": 21,
+   "id": "Z21"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -633,8 +662,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Česku 2,27 (relativně o 11 % nižší).",
-   "poradi": 21,
-   "id": "Z21"
+   "poradi": 22,
+   "id": "Z22"
   },
   {
    "typ": "odchylka_od_cr",
@@ -662,8 +691,8 @@
     }
    ],
    "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 76,5 %, v Česku 69,6 % (relativně o 9,9 % vyšší).",
-   "poradi": 22,
-   "id": "Z22"
+   "poradi": 23,
+   "id": "Z23"
   },
   {
    "typ": "odchylka_od_cr",
@@ -691,8 +720,8 @@
     }
    ],
    "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 78,5 %, v Česku 72,3 % (relativně o 8,6 % vyšší).",
-   "poradi": 23,
-   "id": "Z23"
+   "poradi": 24,
+   "id": "Z24"
   },
   {
    "typ": "divergence_poradi",
@@ -720,8 +749,8 @@
     }
    ],
    "popis": "Kraj je mezi 14 kraji 12. podle počtu registrovaných subjektů oboru a 13. podle hustoty na 1 000 obyvatel.",
-   "poradi": 24,
-   "id": "Z24"
+   "poradi": 25,
+   "id": "Z25"
   },
   {
    "typ": "odchylka_od_cr",
@@ -749,8 +778,8 @@
     }
    ],
    "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 26,5 %, v Česku 28,4 % (relativně o 6,7 % nižší).",
-   "poradi": 25,
-   "id": "Z25"
+   "poradi": 26,
+   "id": "Z26"
   },
   {
    "typ": "odchylka_od_cr",
@@ -778,8 +807,37 @@
     }
    ],
    "popis": "Lokalizační koeficient oboru je v Kraji Vysočina 0,94 proti 1 za ČR (relativně o 6 % nižší).",
-   "poradi": 26,
-   "id": "Z26"
+   "poradi": 27,
+   "id": "Z27"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "průměrná mzda v oboru proti ČR",
+   "sila": 0.0505,
+   "hodnota": 37229,
+   "srovnani": 39208,
+   "rozdil_pct": 5.0,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Průměrná mzda v sekci C 2022 – kraj (Kč)",
+     "hodnota": 37229,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2022",
+     "sloupec": "mzda"
+    },
+    {
+     "popis": "Průměrná mzda v sekci C 2022 – Česko (Kč)",
+     "hodnota": 39208,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "mzda"
+    }
+   ],
+   "popis": "Průměrná hrubá měsíční mzda v sekci C byla v roce 2022 v Kraji Vysočina 37 229 Kč, v Česku 39 208 Kč (relativně o 5 % nižší).",
+   "poradi": 28,
+   "id": "Z28"
   },
   {
    "typ": "odchylka_od_cr",
@@ -807,8 +865,37 @@
     }
    ],
    "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 24,8 %, v Česku 26 % (relativně o 4,6 % nižší).",
-   "poradi": 27,
-   "id": "Z27"
+   "poradi": 29,
+   "id": "Z29"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "mzda v oboru proti všem odvětvím území, kraj proti ČR",
+   "sila": 0.0404,
+   "hodnota": 100.4,
+   "srovnani": 96.5,
+   "rozdil_pct": 4.0,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Mzda v sekci C proti všem odvětvím kraje 2022",
+     "hodnota": 100.4,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2022",
+     "sloupec": "mzda_index_uzemi"
+    },
+    {
+     "popis": "Mzda v sekci C proti všem odvětvím ČR 2022",
+     "hodnota": 96.5,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "mzda_index_uzemi"
+    }
+   ],
+   "popis": "Průměrná mzda v sekci C dosahovala v roce 2022 v Kraji Vysočina 100,4 % průměrné mzdy všech odvětví kraje, v Česku 96,5 % (relativně o 4 % vyšší).",
+   "poradi": 30,
+   "id": "Z30"
   },
   {
    "typ": "odchylka_od_cr",
@@ -836,8 +923,65 @@
     }
    ],
    "popis": "Velikost FO – „bez zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 42,4 %, v Česku 41 % (relativně o 3,4 % vyšší).",
-   "poradi": 28,
-   "id": "Z28"
+   "poradi": 31,
+   "id": "Z31"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "vývoj: počet zaměstnanců proti ČR",
+   "sila": 0.0316,
+   "hodnota": 0.92,
+   "srovnani": 0.95,
+   "rozdil_pct": 3.2,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "počet zaměstnanců 2018 – kraj",
+     "hodnota": 70.2,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2018",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2022 – kraj",
+     "hodnota": 64.4,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2022",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2018 – Česko",
+     "hodnota": 1157.3,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2018",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2022 – Česko",
+     "hodnota": 1095.2,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "Index 2022/2018 – kraj",
+     "hodnota": 0.92,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "hodnota"
+    },
+    {
+     "popis": "Index 2022/2018 – Česko",
+     "hodnota": 0.95,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "srovnani"
+    }
+   ],
+   "popis": "V sekci C se počet zaměstnanců mezi lety 2018 a 2022 změnil v Kraji Vysočina z 70,2 tis. na 64,4 tis. (index 0,92), v Česku z 1 157,3 tis. na 1 095,2 tis. (index 0,95); index je relativně o 3,2 % nižší než v Česku.",
+   "poradi": 32,
+   "id": "Z32"
   }
  ]
 }

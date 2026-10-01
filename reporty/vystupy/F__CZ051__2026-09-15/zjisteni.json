@@ -447,6 +447,35 @@
    "id": "Z13"
   },
   {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "podíl oboru na zaměstnancích, kraj proti ČR",
+   "sila": 0.167,
+   "hodnota": 4.44,
+   "srovnani": 5.33,
+   "rozdil_pct": 16.7,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Podíl sekce F na zaměstnancích kraje 2022 (%)",
+     "hodnota": 4.44,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2022",
+     "sloupec": "zam_podil_uzemi"
+    },
+    {
+     "popis": "Podíl sekce F na zaměstnancích ČR 2022 (%)",
+     "hodnota": 5.33,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "zam_podil_uzemi"
+    }
+   ],
+   "popis": "Sekce F tvořila v roce 2022 v Libereckém kraji 4,44 % zaměstnanců (přepočtené počty), v Česku 5,33 % (relativně o 16,7 % nižší).",
+   "poradi": 14,
+   "id": "Z14"
+  },
+  {
    "typ": "rozdily_uvnitr_uzemi",
    "typ_nazev": "rozdíly uvnitř území",
    "podtyp": "hustota okresu proti ČR",
@@ -472,8 +501,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
-   "poradi": 14,
-   "id": "Z14"
+   "poradi": 15,
+   "id": "Z15"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -501,8 +530,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
-   "poradi": 15,
-   "id": "Z15"
+   "poradi": 16,
+   "id": "Z16"
   },
   {
    "typ": "odchylka_od_cr",
@@ -530,8 +559,8 @@
     }
    ],
    "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,8 %, v Česku 38,8 % (relativně o 15,5 % vyšší).",
-   "poradi": 16,
-   "id": "Z16"
+   "poradi": 17,
+   "id": "Z17"
   },
   {
    "typ": "odchylka_od_cr",
@@ -559,8 +588,8 @@
     }
    ],
    "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,9 %, v Česku 50,7 % (relativně o 11,4 % nižší).",
-   "poradi": 17,
-   "id": "Z17"
+   "poradi": 18,
+   "id": "Z18"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -588,8 +617,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší).",
-   "poradi": 18,
-   "id": "Z18"
+   "poradi": 19,
+   "id": "Z19"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -617,8 +646,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší).",
-   "poradi": 19,
-   "id": "Z19"
+   "poradi": 20,
+   "id": "Z20"
   },
   {
    "typ": "odchylka_od_cr",
@@ -646,8 +675,8 @@
     }
    ],
    "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 85,9 %, v Česku 79 % (relativně o 8,7 % vyšší).",
-   "poradi": 20,
-   "id": "Z20"
+   "poradi": 21,
+   "id": "Z21"
   },
   {
    "typ": "zmena_trendu",
@@ -689,8 +718,8 @@
     }
    ],
    "popis": "Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, průměr let 2024–2025 je 3,2 % (relativně o 8,4 % vyšší).",
-   "poradi": 21,
-   "id": "Z21"
+   "poradi": 22,
+   "id": "Z22"
   },
   {
    "typ": "odchylka_od_cr",
@@ -718,8 +747,8 @@
     }
    ],
    "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší).",
-   "poradi": 22,
-   "id": "Z22"
+   "poradi": 23,
+   "id": "Z23"
   },
   {
    "typ": "odchylka_od_cr",
@@ -747,8 +776,37 @@
     }
    ],
    "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,3 %, v Česku 82,5 % (relativně o 7 % vyšší).",
-   "poradi": 23,
-   "id": "Z23"
+   "poradi": 24,
+   "id": "Z24"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "mzda v oboru proti všem odvětvím území, kraj proti ČR",
+   "sila": 0.0664,
+   "hodnota": 91.5,
+   "srovnani": 85.8,
+   "rozdil_pct": 6.6,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Mzda v sekci F proti všem odvětvím kraje 2022",
+     "hodnota": 91.5,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2022",
+     "sloupec": "mzda_index_uzemi"
+    },
+    {
+     "popis": "Mzda v sekci F proti všem odvětvím ČR 2022",
+     "hodnota": 85.8,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "mzda_index_uzemi"
+    }
+   ],
+   "popis": "Průměrná mzda v sekci F dosahovala v roce 2022 v Libereckém kraji 91,5 % průměrné mzdy všech odvětví kraje, v Česku 85,8 % (relativně o 6,6 % vyšší).",
+   "poradi": 25,
+   "id": "Z25"
   },
   {
    "typ": "aktivita_oboru",
@@ -776,8 +834,8 @@
     }
    ],
    "popis": "Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,8 %, ve všech oborech 59,1 % (ČSÚ; relativně o 6,3 % vyšší).",
-   "poradi": 24,
-   "id": "Z24"
+   "poradi": 26,
+   "id": "Z26"
   },
   {
    "typ": "odchylka_od_cr",
@@ -805,8 +863,8 @@
     }
    ],
    "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,3 %, v Česku 9,9 % (relativně o 6,1 % nižší).",
-   "poradi": 25,
-   "id": "Z25"
+   "poradi": 27,
+   "id": "Z27"
   },
   {
    "typ": "odchylka_od_cr",
@@ -834,8 +892,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,14 (relativně o 5,9 % vyšší).",
-   "poradi": 26,
-   "id": "Z26"
+   "poradi": 28,
+   "id": "Z28"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -863,8 +921,65 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Semily 31,61 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,2 % nižší).",
-   "poradi": 27,
-   "id": "Z27"
+   "poradi": 29,
+   "id": "Z29"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "vývoj: počet zaměstnanců proti ČR",
+   "sila": 0.0388,
+   "hodnota": 1.07,
+   "srovnani": 1.03,
+   "rozdil_pct": 3.9,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "počet zaměstnanců 2018 – kraj",
+     "hodnota": 6.0,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2018",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2022 – kraj",
+     "hodnota": 6.4,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2022",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2018 – Česko",
+     "hodnota": 207.9,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2018",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2022 – Česko",
+     "hodnota": 214.9,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "Index 2022/2018 – kraj",
+     "hodnota": 1.07,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "hodnota"
+    },
+    {
+     "popis": "Index 2022/2018 – Česko",
+     "hodnota": 1.03,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "srovnani"
+    }
+   ],
+   "popis": "V sekci F se počet zaměstnanců mezi lety 2018 a 2022 změnil v Libereckém kraji z 6 tis. na 6,4 tis. (index 1,07), v Česku z 207,9 tis. na 214,9 tis. (index 1,03); index je relativně o 3,9 % vyšší než v Česku.",
+   "poradi": 30,
+   "id": "Z30"
   },
   {
    "typ": "odchylka_od_cr",
@@ -892,8 +1007,37 @@
     }
    ],
    "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,6 %, v Česku 44 % (relativně o 3,6 % vyšší).",
-   "poradi": 28,
-   "id": "Z28"
+   "poradi": 31,
+   "id": "Z31"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "průměrná mzda v oboru proti ČR",
+   "sila": 0.0349,
+   "hodnota": 33623,
+   "srovnani": 34840,
+   "rozdil_pct": 3.5,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Průměrná mzda v sekci F 2022 – kraj (Kč)",
+     "hodnota": 33623,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2022",
+     "sloupec": "mzda"
+    },
+    {
+     "popis": "Průměrná mzda v sekci F 2022 – Česko (Kč)",
+     "hodnota": 34840,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "mzda"
+    }
+   ],
+   "popis": "Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší).",
+   "poradi": 32,
+   "id": "Z32"
   },
   {
    "typ": "odchylka_od_cr",
@@ -921,8 +1065,8 @@
     }
    ],
    "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší).",
-   "poradi": 29,
-   "id": "Z29"
+   "poradi": 33,
+   "id": "Z33"
   }
  ]
 }

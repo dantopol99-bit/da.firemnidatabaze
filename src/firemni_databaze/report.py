@@ -259,6 +259,113 @@ def nacti_demografii(cur, sekce: str | None) -> list[tuple]:
     return cur.fetchall()
 
 
+MZDY_ROKY = 5               # počet posledních let v tabulkách zaměstnanosti a mezd
+
+
+def nacti_mzdy(cur, sekce: str | None) -> dict:
+    """Zaměstnanci a mzdy ČSÚ (res.csu_mzdy): {(výběr, území, NACE, rok, ukazatel): (hodnota, předběžná)}."""
+    cur.execute("SELECT to_regclass('res.csu_mzdy')")
+    if cur.fetchone()[0] is None:
+        return {}
+    cur.execute("SELECT vyber, uzemi_kod, nace_kod, rok, ukazatel_kod, hodnota, predbezna FROM res.csu_mzdy "
+                "WHERE nace_kod = ANY(%s) AND ukazatel_kod IN ('ZAM_PREP', 'MZDA_PREP')",
+                (["0"] + ([sekce] if sekce else []),))
+    return {(v, u, n, r, k): (float(h), p) for v, u, n, r, k, h, p in cur.fetchall()}
+
+
+def tabulky_mzdy(uz: "Uzemi", srovnani: list["Uzemi"], obor: list[dict], kraje: dict, mzdy: dict) -> list[dict]:
+    """T20 obor × kraj (roční zjišťování MZDCRR) a T21 nejbližší publikované úrovně pro novější roky (MZDR).
+
+    Jen publikovaná čísla ČSÚ a poměry mezi nimi; nic se nedopočítává z jiných úrovní. Zaměstnanci
+    v tis. osob (přepočtené počty) na 1 desetinné místo, mzda v Kč na celé koruny (jako ČSÚ publikuje)."""
+    sekce = {o["sekce"] for o in obor}
+    sl20 = [{"kod": "zam", "nazev": "Zaměstnanci v oboru (tis., přepočtené)", "ukazatel": "MZDY_ZAM_OBOR"},
+            {"kod": "zam_podil_cr", "nazev": "Podíl na zaměstnancích oboru v ČR (%)", "ukazatel": "MZDY_ZAM_PODIL_CR"},
+            {"kod": "zam_podil_uzemi", "nazev": "Podíl oboru na zaměstnancích území (%)", "ukazatel": "MZDY_ZAM_PODIL_UZEMI"},
+            {"kod": "mzda", "nazev": "Průměrná mzda v oboru (Kč)", "ukazatel": "MZDY_MZDA_OBOR"},
+            {"kod": "mzda_index_cr", "nazev": "Mzda proti oboru v ČR (ČR = 100)", "ukazatel": "MZDY_MZDA_INDEX_CR"},
+            {"kod": "mzda_index_uzemi", "nazev": "Mzda proti všem odvětvím území (= 100)", "ukazatel": "MZDY_MZDA_INDEX_UZEMI"}]
+    sl21 = [{"kod": "zam", "nazev": "Zaměstnanci (tis., přepočtené)", "ukazatel": "MZDY_ZAM_UROVEN"},
+            {"kod": "mzda", "nazev": "Průměrná mzda (Kč)", "ukazatel": "MZDY_MZDA_UROVEN"}]
+    nazev20 = "Zaměstnanci a průměrné mzdy v oboru – kraje a ČR (ČSÚ, roční zjišťování)"
+    nazev21 = "Zaměstnanci a průměrné mzdy – novější roky v nejbližších publikovaných úrovních (ČSÚ, čtvrtletní zjišťování)"
+    if len(sekce) != 1 or not mzdy:
+        duvod = ("ČSÚ publikuje zaměstnance a mzdy jen po jednotlivých sekcích CZ-NACE; obor zasahuje do více sekcí"
+                 if mzdy else "údaje ČSÚ o zaměstnancích a mzdách nejsou načtené (res_import mzdy)")
+        return [tabulka_nezverejnena("T20_mzdy_obor", nazev20, duvod, sl20),
+                tabulka_nezverejnena("T21_mzdy_aktualni", nazev21, duvod, sl21)]
+    s = next(iter(sekce))
+    jen_sekce = any(o["uroven"] > 1 for o in obor)
+    kraj_uz = uz.kraj_kod                                   # u okresu jeho kraj (okresy ČSÚ nepublikuje)
+    uzemi = ([("CZ", "Česko")] if uz.typ == "CR" else
+             [(kraj_uz, kraje[kraj_uz]["nazev"]), ("CZ", "Česko")]
+             + [(k.kod, k.nazev) for k in srovnani if k.kod != kraj_uz])
+
+    def h(vyber, u, n, rok, uk):
+        x = mzdy.get((vyber, u, n, rok, uk))
+        return x[0] if x else None
+
+    def predb(vyber, u, n, rok):
+        return any(mzdy.get((vyber, u, n, rok, uk), (0, False))[1] for uk in ("ZAM_PREP", "MZDA_PREP"))
+
+    # --- T20: obor × kraj, roční zjišťování (MZDCRRT2 kraje, MZDCRRT1 ČR) ---------------------
+    roky20 = sorted({k[3] for k in mzdy if k[0] in ("MZDCRRT1", "MZDCRRT2") and k[2] == s})[-MZDY_ROKY:]
+    radky20 = []
+    for kod, nazev in uzemi:
+        vyber = "MZDCRRT1" if kod == "CZ" else "MZDCRRT2"
+        for rok in roky20:
+            zam, zam_all = h(vyber, kod, s, rok, "ZAM_PREP"), h(vyber, kod, "0", rok, "ZAM_PREP")
+            mzda, mzda_all = h(vyber, kod, s, rok, "MZDA_PREP"), h(vyber, kod, "0", rok, "MZDA_PREP")
+            zam_cr, mzda_cr = h("MZDCRRT1", "CZ", s, rok, "ZAM_PREP"), h("MZDCRRT1", "CZ", s, rok, "MZDA_PREP")
+            hod = {"zam": round(zam, 1) if zam is not None else None,
+                   "zam_podil_cr": round(100 * zam / zam_cr, 2) if zam and zam_cr and kod != "CZ" else None,
+                   "zam_podil_uzemi": round(100 * zam / zam_all, 2) if zam and zam_all else None,
+                   "mzda": round(mzda) if mzda is not None else None,
+                   "mzda_index_cr": round(100 * mzda / mzda_cr, 1) if mzda and mzda_cr and kod != "CZ" else None,
+                   "mzda_index_uzemi": round(100 * mzda / mzda_all, 1) if mzda and mzda_all else None}
+            radky20.append({"popis": f"{nazev} – {rok}", "typ": "polozka", "uzemi": kod, "rok": rok, "hodnoty": hod,
+                            "poznamka": "předběžné hodnoty" if predb(vyber, kod, s, rok) else None})
+    pozn20 = [f"Zdroj: ČSÚ, DataStat, výběry MZDCRRT2 (kraje × sekce CZ-NACE) a MZDCRRT1 (ČR × sekce) – roční "
+              f"zjišťování, pracovištní metoda (kraj podle místa pracoviště). ČSÚ je publikuje za roky "
+              f"{min(k[3] for k in mzdy if k[0] == 'MZDCRRT2')}–{max(k[3] for k in mzdy if k[0] == 'MZDCRRT2')}.",
+              "Zaměstnanci = průměrný evidenční počet zaměstnanců přepočtený na plný úvazek; mzda = průměrná hrubá "
+              "měsíční mzda na přepočtené počty. Nezahrnuje podnikající fyzické osoby bez pracovního poměru, "
+              "proto se nesrovnává s počty registrovaných subjektů.",
+              "Průměr, ne medián: medián mezd ČSÚ za kraje publikuje jen podle pohlaví a bez členění podle odvětví."]
+    if jen_sekce:
+        pozn20.insert(0, f"Nejbližší publikovaná úroveň: sekce {s} – ČSÚ zaměstnance a mzdy podle oddílů a "
+                         f"nižších úrovní CZ-NACE nepublikuje.")
+    if uz.typ == "OKRES":
+        pozn20.insert(0, f"Nejbližší publikovaná úroveň: kraj {kraje[kraj_uz]['nazev']} – ČSÚ zaměstnance a mzdy "
+                         f"za okresy nepublikuje.")
+    t20 = {"kod": "T20_mzdy_obor", "nazev": nazev20 + (f" – sekce {s}" if jen_sekce else ""), "sloupce": sl20,
+           "radky": radky20, "zverejneno": bool(radky20), "duvod": None if radky20 else "ČSÚ údaje nepublikuje",
+           "poznamky": pozn20, "sekce": s}
+
+    # --- T21: novější roky – kraj všechna odvětví, ČR obor (MZDRT5, MZDRT2) ------------------
+    posl20 = roky20[-1] if roky20 else 0
+    roky21 = sorted({k[3] for k in mzdy if k[0] in ("MZDRT5", "MZDRT2") and k[3] > posl20})
+    radky21 = []
+    urovne = [(f"{nazev} – všechna odvětví", "MZDRT5", kod, "0") for kod, nazev in uzemi if kod != "CZ"]
+    urovne += [("Česko – všechna odvětví", "MZDRT5", "CZ", "0"), (f"Česko – sekce {s}", "MZDRT2", "CZ", s)]
+    for popis, vyber, kod, n in urovne:
+        for rok in roky21:
+            zam, mzda = h(vyber, kod, n, rok, "ZAM_PREP"), h(vyber, kod, n, rok, "MZDA_PREP")
+            radky21.append({"popis": f"{popis} – {rok}", "typ": "polozka", "uzemi": kod, "nace": n, "rok": rok,
+                            "hodnoty": {"zam": round(zam, 1) if zam is not None else None,
+                                        "mzda": round(mzda) if mzda is not None else None},
+                            "poznamka": "předběžné hodnoty" if predb(vyber, kod, n, rok) else None})
+    t21 = {"kod": "T21_mzdy_aktualni", "nazev": nazev21, "sloupce": sl21, "radky": radky21,
+           "zverejneno": bool(radky21), "duvod": None if radky21 else "novější roky ČSÚ zatím nepublikuje",
+           "poznamky": [f"Obor × kraj ČSÚ za roky po {posl20} nepublikuje: roční zjišťování podle krajů a sekcí "
+                        f"končí rokem {posl20} a čtvrtletní zjišťování kombinaci kraj × odvětví nepublikuje. "
+                        f"Uvádějí se proto nejbližší publikované úrovně: kraje za všechna odvětví a ČR za sekci {s}.",
+                        "Zdroj: ČSÚ, DataStat, výběry MZDRT5 (ČR a kraje, pracovištní metoda) a MZDRT2 (ČR × sekce) "
+                        "– čtvrtletní zjišťování, kumulace za rok. Hodnoty se od ročního zjišťování mírně liší; "
+                        "obě řady se nespojují."]}
+    return [t20, t21]
+
+
 def nacti_dynamiku(cur, uzemi_kod: str) -> list[tuple]:
     cur.execute("SELECT forma_kod, obdobi, ukazatel_kod, hodnota FROM res.csu_vznik_zanik WHERE uzemi_kod = %s "
                 "AND obdobi >= %s ORDER BY obdobi", (uzemi_kod, f"{ZANIKY_OD_ROKU}-Q1"))
@@ -391,6 +498,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
         obor = urci_obor(cur, zadani.obor)
         d = nacti_data(cur, obor, datum)
         dynamika = nacti_dynamiku(cur, uz.kod)
+        mzdy = nacti_mzdy(cur, next(iter({o["sekce"] for o in obor})) if len({o["sekce"] for o in obor}) == 1 else None)
         sekce_oboru = {o["sekce"] for o in obor}
         demografie = nacti_demografii(cur, next(iter(sekce_oboru)) if len(sekce_oboru) == 1 else None)
         n_zadani = pocet_oboru(cur, obor, uz, datum)
@@ -1128,7 +1236,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
                         + (" Odvětví RESDP00 je širší nebo užší než sekce oboru." if kod_oboru and kod_oboru not in "BCDEFGHIJLMNPQR" else "")]}
 
     tabulky = ([t01_tab, t02, t03] + ([t04] if t04 else []) + tabulky_uzemi + tabulky_bench
-               + [t10, t18, t11, t12])
+               + tabulky_mzdy(uz, srovnani, obor, kraje, mzdy) + [t10, t18, t11, t12])
     for t in tabulky:
         for r in t["radky"]:
             for sl in t["sloupce"]:
@@ -1157,6 +1265,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
             f"ČSÚ, DataStat, výběr RES02QT1 – podíl subjektů se zjištěnou aktivitou, {d['obdobi_aktivity']}",
             "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
             "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
+            "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy",
         ],
         "licence": {"nazev": "CC BY 4.0", "url": LICENCE_URL},
         "vygenerovano": datetime.now(timezone.utc).isoformat(timespec="seconds"),

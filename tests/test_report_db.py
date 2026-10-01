@@ -233,7 +233,8 @@ class TestReport(unittest.TestCase):
         self.assertEqual([x["sila"] for x in z], sorted((x["sila"] for x in z), reverse=True))
         self.assertTrue(all(x["sila"] >= 0.03 for x in z))
         typy = {x["typ"] for x in z}
-        for typ in ("odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru", "divergence_poradi"):
+        for typ in ("odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru", "divergence_poradi",
+                    "mzdy_zamestnanost"):
             self.assertIn(typ, typy)
         tab = {t["kod"]: t for t in vysledek["tabulky"]}
         for x in z:
@@ -244,6 +245,37 @@ class TestReport(unittest.TestCase):
                 self.assertEqual(r["hodnoty"][c["sloupec"]], c["hodnota"], (x["id"], c))
         soubor = json.loads((adresar / "zjisteni.json").read_text(encoding="utf-8"))
         self.assertEqual(soubor["zjisteni"], z)
+
+    def test_mzdy_jen_publikovana_cisla(self):
+        """T20 = hodnoty ČSÚ z res.csu_mzdy (kraj × sekce, ČR × sekce) beze změny kromě zaokrouhlení."""
+        vysledek, _, _ = self.vystupy["F_LBK"]
+        t20 = tabulka(vysledek, "T20_mzdy_obor")
+        self.assertTrue(t20["zverejneno"])
+        with CONN.cursor() as cur:
+            cur.execute("SELECT vyber, uzemi_kod, rok, ukazatel_kod, hodnota FROM res.csu_mzdy "
+                        "WHERE vyber IN ('MZDCRRT1', 'MZDCRRT2') AND nace_kod = 'F'")
+            db = {(u, r, k): float(h) for _, u, r, k, h in cur.fetchall()}
+        CONN.rollback()
+        for r in t20["radky"]:
+            self.assertEqual(r["hodnoty"]["mzda"], round(db[(r["uzemi"], r["rok"], "MZDA_PREP")]))
+            self.assertEqual(r["hodnoty"]["zam"], round(db[(r["uzemi"], r["rok"], "ZAM_PREP")], 1))
+        self.assertEqual({r["uzemi"] for r in t20["radky"]}, {"CZ051", "CZ", "CZ052", "CZ041"})
+        t21 = tabulka(vysledek, "T21_mzdy_aktualni")
+        self.assertTrue(all(r["rok"] > max(x["rok"] for x in t20["radky"]) for r in t21["radky"]))
+        self.assertFalse(any(r["uzemi"] != "CZ" and r["nace"] != "0" for r in t21["radky"]))  # kraj × obor nepublikováno
+
+    def test_mzdy_nejblizsi_uroven(self):
+        # okres → kraj, oddíl → sekce, s označením; obor přes více sekcí → nezveřejněno
+        v62, _, _ = self.vystupy["62_JES"]
+        t20 = tabulka(v62, "T20_mzdy_obor")
+        self.assertTrue(any("okresy nepublikuje" in p for p in t20["poznamky"]))
+        self.assertTrue(any("sekce J" in p for p in t20["poznamky"]))
+        self.assertEqual({r["uzemi"] for r in t20["radky"]}, {"CZ071", "CZ"})
+        v4142, _, _ = self.vystupy["41_42_CR"]
+        self.assertTrue(tabulka(v4142, "T20_mzdy_obor")["zverejneno"])          # 41 a 42 jsou obě v sekci F
+        vysledek, _ = spocitej(CONN, Zadani(["F", "G"], "CZ051"))
+        CONN.rollback()
+        self.assertFalse(tabulka(vysledek, "T20_mzdy_obor")["zverejneno"])
 
     def test_zadny_vystup_nema_v_uzemi_nazev(self):
         from firemni_databaze.report_cestina import tabulka as lokativy

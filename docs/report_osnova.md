@@ -14,7 +14,7 @@ Data: výhradně `vysledek.json` z výpočetní vrstvy (Blok 2). Šablona nic ne
 | 3 | **Postavení území** | výklad; tab. základní ukazatele; tab. srovnání s ČR a zadanými kraji; graf kraje podle hustoty; graf kraje podle LQ; tab. pořadí 14 krajů; tab. okresy kraje (u kraje a okresu) | T01–T04 |
 | 4 | **Struktura** | výklad; graf a tab. FO/PO + srovnání s ČR a kraji; tab. právní formy + srovnání; graf a tab. velikostní profil FO a PO zvlášť, vždy s „Neuvedeno“ (rozhodnutí 2, 11), + srovnání; graf a tab. věková struktura existujících subjektů + srovnání | T05–T09, T13–T17, T01 (věk) |
 | 5 | **Ekonomický profil a koncentrace** – *zatím nedostupné* | tržby a aktiva PO v oboru, koncentrace (podíl největších subjektů), srovnání s ČR a kraji. Důvod: účetní výkazy zatím nejsou načtené. Plánovaný zdroj: **účetní výkazy ze Sbírky listin** | – |
-| 6 | **Zaměstnanost a mzdy** – *zatím nedostupné* | počet zaměstnanců a průměrná mzda v oboru a území, srovnání s ČR a kraji. Důvod: statistika za obor × kraj zatím není mezi zdroji (RES má jen kategorie počtu zaměstnanců). Plánovaný zdroj: **ČSÚ** | – |
+| 6 | **Zaměstnanost a mzdy** | výklad (co je vidět, zjištění, výklad analytika); graf průměrné mzdy v sekci oboru (kraj, ČR, srovnávací kraje); tab. zaměstnanci a mzdy obor × kraj z ročního zjišťování ČSÚ (podíl na ČR, podíl oboru na zaměstnancích území, mzda proti ČR a proti všem odvětvím); tab. novější roky v nejbližších publikovaných úrovních (kraj za všechna odvětví, ČR za sekci). Okres → kraj, oddíl → sekce, vždy s označením | T20, T21 |
 | 7 | **Dynamika území a kontext ČR** | výklad; graf a tab. vznik a zánik v území, všechny obory (RES05), rok 2023 označen jako mimořádný; tab. zaniklé PO v oboru od 2023 (RES); graf a tab. míra zániku PO (území, ČR, srovnávací kraje; za rok i za srovnatelné období); graf a tab. demografie podniků ČR (RESDP00) s poznámkou o jiné jednotce (rozhodnutí 10) | T10, T18, T11, T12 |
 | 8 | **Rizikový profil (insolvence)** – *zatím nedostupné* | podíl zaniklých PO s insolvenčním řízením po letech zániku, míra zahájených řízení PO a podnikajících FO (jen agregovaně), výsledky řízení; srovnání s ČR a kraji. Důvod: webové služby ISIR nejsou z cloudového prostředí dostupné, data přibudou po jednorázovém běhu z české IP nebo ze serveru. Plánovaný zdroj: **insolvenční rejstřík (ISIR)** | – |
 | 9 | **Veřejné zakázky a dotace** – *zatím nedostupné* | podíl subjektů oboru s veřejnou zakázkou nebo dotací a jejich objem; srovnání s ČR a kraji. Důvod: data zatím nejsou načtená ani spárovaná se subjekty RES. Plánovaný zdroj: **Platforma veřejné kontroly** | – |
@@ -22,7 +22,7 @@ Data: výhradně `vysledek.json` z výpočetní vrstvy (Blok 2). Šablona nic ne
 | 11 | **Příloha: zjištění detektoru** | všechna zjištění seřazená podle síly (id, typ, síla, věta, odkazy na tabulky) | `zjisteni` |
 | 12 | **Příloha: odchylky od osnovy** | nezveřejněné tabulky a kapitoly „zatím nedostupné“ s důvodem | `tabulky[].zverejneno`, `duvod` |
 
-**Kapitoly „zatím nedostupné“** (5, 6, 8, 9) jsou v osnově na místě, kde budou v hotovém reportu, a vysází
+**Kapitoly „zatím nedostupné“** (5, 8, 9) jsou v osnově na místě, kde budou v hotovém reportu, a vysází
 se vždy: nadpis, rámeček „Stav: zatím nedostupné“ s důvodem, plánovaným zdrojem a plánovaným obsahem.
 Nemají výklad ani oddíly v souboru analytika; oddíly přibudou spolu s daty. Jsou i v příloze odchylek.
 Definice: `report_pdf.NEDOSTUPNE_KAPITOLY`, pořadí: `report_pdf.PORADI_KAPITOL`.
