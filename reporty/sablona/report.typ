@@ -167,7 +167,9 @@
   ]))
 #v(0.8em)
 #set list(marker: text(fill: modra)[■], spacing: 0.8em)
+// body shrnutí píše analytik (rozhodnutí 12); dlaždice a varování jsou strojové
 #for b in d.shrnuti.body [- #b]
+#if d.shrnuti.varovani.len() > 0 { v(0.6em); varovani_box(d.shrnuti.varovani) }
 
 // ---------------------------------------------------------------------------
 // Kapitoly: postavení území, struktura, dynamika
@@ -224,6 +226,13 @@
 // ---------------------------------------------------------------------------
 // Příloha
 // ---------------------------------------------------------------------------
+
+= Příloha: zjištění detektoru
+#text(size: 8.5pt, fill: sedy)[Všechna zjištění seřazená podle síly; věcný popis bez interpretace (rozhodnutí 12).]
+#block[
+  #set text(size: 8.3pt)
+  #for z in d.zjisteni [- #z]
+]
 
 = Příloha: odchylky od osnovy
 #for o in d.odchylky [- #o]

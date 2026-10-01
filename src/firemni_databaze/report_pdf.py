@@ -254,7 +254,11 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         dlazdice.append({"popis": v.t01_popis("PORADI_POCET").replace(" podle počtu", ""),
                          "hodnota": f"{cz(v.t01('PORADI_POCET'))}.",
                          "pozn": f"podle hustoty {cz(v.t01('PORADI_HUSTOTA'))}." if v.t01("PORADI_HUSTOTA") else "podle počtu"})
-    shrnuti = {"dlazdice": dlazdice, "body": vy.shrnuti(v, L)}
+    # body shrnutí píše analytik (rozhodnutí 12, rozšíření); dlaždice a varování jsou strojové
+    body = [b["text"] for b in (vyklad_analytika or {}).get("shrnuti", [])]
+    if not body:
+        body = ["Shrnutí analytika zatím chybí."]
+    shrnuti = {"dlazdice": dlazdice, "body": body, "varovani": meta["varovani"]}
 
     # --- metodika --------------------------------------------------------------------
     pr = meta["pravidla"]
@@ -276,7 +280,8 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
             "„proč to tak může být“ a „co z toho plyne“ píše analytik. Na oba texty platí kontrola čísel.",
             "Zjištění: síla je relativní rozdíl |hodnota / srovnání − 1| (u pořadí rozdíl pořadí dělený počtem území "
             "bez jednoho); zjištění se řadí podle síly. Rozdíl pod 3 % relativně se nehlásí a popisuje se jako "
-            "„srovnatelné“. Shrnutí tvoří nejsilnější zjištění, nejvýš dvě téhož typu.",
+            "„srovnatelné“. Nejsilnější zjištění jsou v kapitolách, všechna v příloze. Shrnutí na straně 2 píše "
+            "analytik, dlaždice jsou strojové.",
             "Srovnání struktury s ČR a srovnávacími kraji: týž obor, položky podle zkoumaného území; práh a "
             "slučování platí pro každé území zvlášť.",
         ],
@@ -314,6 +319,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         "shrnuti": shrnuti,
         "kapitoly": kapitoly,
         "metodika": metodika,
+        "zjisteni": vy.zjisteni_priloha(v, L),
         "odchylky": odchylky or ["Žádné – všechny kapitoly mají údaje."],
     }
 
@@ -345,8 +351,10 @@ def vysazej(adresar_vysledku: Path, cil: Path, koncept: bool = True, adresar_vyk
     soubor = vy.soubor_vykladu(slug(vysledek), adresar_vykladu)
     stav, vyklad_analytika = vy.nacti_vyklad_analytika(soubor)
     if not koncept and stav != "hotovy":
+        prazdne = [vy.ODDILY[k] for k, b in vyklad_analytika.items() if not b]
         raise ChybaSazby(f"výklad nelze označit jako schválený: soubor analytika {soubor} "
-                         + ("chybí" if stav == "chybi" else f"obsahuje „{vy.ZASTUPNY_TEXT}“ nebo prázdnou kapitolu"))
+                         + ("chybí" if stav == "chybi" else f"obsahuje „{vy.ZASTUPNY_TEXT}“ nebo prázdný oddíl"
+                            + (f" ({', '.join(prazdne)})" if prazdne else "")))
     for bloky in vyklad_analytika.values():
         for b in bloky:
             if ZAKAZANA_SLOVA.search(b["text"]):
