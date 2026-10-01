@@ -40,13 +40,14 @@
    "ČSÚ, DataStat, sada OBY02A – počet obyvatel k 31. 12. 2025",
    "ČSÚ, DataStat, výběr RES02QT1 – podíl subjektů se zjištěnou aktivitou, 2026-Q2",
    "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
-   "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)"
+   "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
+   "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy"
   ],
   "licence": {
    "nazev": "CC BY 4.0",
    "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
   },
-  "vygenerovano": "2026-10-01T09:24:49+00:00",
+  "vygenerovano": "2026-10-01T11:25:48+00:00",
   "ukazatele": [
    {
     "kod": "REG_POCET",
@@ -391,6 +392,70 @@
     "definice": "Absolutní hodnota 100 × (hodnota / srovnání − 1), zaokrouhleno na 0,1; směr (vyšší / nižší) je ve větě zjištění.",
     "chybejici_hodnoty": "U divergence pořadí se neuvádí.",
     "vyklad": "Pod 3 % se rozdíl nehlásí a v textu se popisuje jako „srovnatelné“."
+   },
+   {
+    "kod": "MZDY_ZAM_OBOR",
+    "nazev": "Zaměstnanci v oboru a kraji (tis. osob, přepočtené počty)",
+    "typ": "kontext",
+    "definice": "Průměrný evidenční počet zaměstnanců přepočtený na plný úvazek v sekci CZ-NACE oboru a v kraji (pracovištní metoda) nebo v ČR.",
+    "chybejici_hodnoty": "Jen jednotlivé sekce CZ-NACE (oddíl a nižší úrovně → sekce s označením); okresy ČSÚ nepublikuje (→ kraj s označením); kraj × sekce jen 2010–2022 (2022 předběžně).",
+    "vyklad": "Zaměstnanci v pracovním poměru, ne podnikající fyzické osoby; nesrovnává se s počtem registrovaných subjektů."
+   },
+   {
+    "kod": "MZDY_ZAM_PODIL_CR",
+    "nazev": "Podíl kraje na zaměstnancích oboru v ČR (%)",
+    "typ": "podil",
+    "definice": "Zaměstnanci oboru v kraji / zaměstnanci oboru v ČR × 100, obojí z ročního zjišťování.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Srovnávejte s podílem kraje na registrovaných subjektech oboru (REG_PODIL_CR)."
+   },
+   {
+    "kod": "MZDY_ZAM_PODIL_UZEMI",
+    "nazev": "Podíl oboru na zaměstnancích území (%)",
+    "typ": "podil",
+    "definice": "Zaměstnanci oboru / zaměstnanci všech odvětví v témže území × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Váha oboru na trhu práce území; srovnání kraje s ČR ukazuje specializaci podle zaměstnanosti."
+   },
+   {
+    "kod": "MZDY_MZDA_OBOR",
+    "nazev": "Průměrná hrubá měsíční mzda v oboru a kraji (Kč)",
+    "typ": "kontext",
+    "definice": "Průměrná hrubá měsíční mzda na přepočtené počty zaměstnanců v sekci CZ-NACE oboru a v kraji nebo v ČR.",
+    "chybejici_hodnoty": "Jako MZDY_ZAM_OBOR. Medián za kraj × odvětví ČSÚ nepublikuje (za kraje jen podle pohlaví).",
+    "vyklad": "Průměr je citlivý na vysoké mzdy; medián pro kraj × odvětví není k dispozici."
+   },
+   {
+    "kod": "MZDY_MZDA_INDEX_CR",
+    "nazev": "Mzda v oboru a kraji proti oboru v ČR (ČR = 100)",
+    "typ": "index",
+    "definice": "Průměrná mzda oboru v kraji / průměrná mzda oboru v ČR × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Pod 100 = obor v kraji platí méně než obor v ČR."
+   },
+   {
+    "kod": "MZDY_MZDA_INDEX_UZEMI",
+    "nazev": "Mzda v oboru proti všem odvětvím území (= 100)",
+    "typ": "index",
+    "definice": "Průměrná mzda oboru / průměrná mzda všech odvětví v témže území × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Postavení oboru mezi odvětvími téhož území."
+   },
+   {
+    "kod": "MZDY_ZAM_UROVEN",
+    "nazev": "Zaměstnanci v nejbližší publikované úrovni (tis. osob, přepočtené počty)",
+    "typ": "kontext",
+    "definice": "Kraj za všechna odvětví nebo ČR za sekci oboru – pro roky, za které ČSÚ obor × kraj nepublikuje.",
+    "chybejici_hodnoty": "Kraj × odvětví čtvrtletní zjišťování nepublikuje.",
+    "vyklad": "Jiné zjišťování než MZDY_ZAM_OBOR; řady se nespojují."
+   },
+   {
+    "kod": "MZDY_MZDA_UROVEN",
+    "nazev": "Průměrná mzda v nejbližší publikované úrovni (Kč)",
+    "typ": "kontext",
+    "definice": "Kraj za všechna odvětví nebo ČR za sekci oboru – pro roky, za které ČSÚ obor × kraj nepublikuje.",
+    "chybejici_hodnoty": "Kraj × odvětví čtvrtletní zjišťování nepublikuje.",
+    "vyklad": "Jiné zjišťování než MZDY_MZDA_OBOR; řady se nespojují."
    }
   ]
  },
@@ -2161,6 +2226,557 @@
    ]
   },
   {
+   "kod": "T20_mzdy_obor",
+   "nazev": "Zaměstnanci a průměrné mzdy v oboru – kraje a ČR (ČSÚ, roční zjišťování) – sekce C",
+   "sloupce": [
+    {
+     "kod": "zam",
+     "nazev": "Zaměstnanci v oboru (tis., přepočtené)",
+     "ukazatel": "MZDY_ZAM_OBOR"
+    },
+    {
+     "kod": "zam_podil_cr",
+     "nazev": "Podíl na zaměstnancích oboru v ČR (%)",
+     "ukazatel": "MZDY_ZAM_PODIL_CR"
+    },
+    {
+     "kod": "zam_podil_uzemi",
+     "nazev": "Podíl oboru na zaměstnancích území (%)",
+     "ukazatel": "MZDY_ZAM_PODIL_UZEMI"
+    },
+    {
+     "kod": "mzda",
+     "nazev": "Průměrná mzda v oboru (Kč)",
+     "ukazatel": "MZDY_MZDA_OBOR"
+    },
+    {
+     "kod": "mzda_index_cr",
+     "nazev": "Mzda proti oboru v ČR (ČR = 100)",
+     "ukazatel": "MZDY_MZDA_INDEX_CR"
+    },
+    {
+     "kod": "mzda_index_uzemi",
+     "nazev": "Mzda proti všem odvětvím území (= 100)",
+     "ukazatel": "MZDY_MZDA_INDEX_UZEMI"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Kraj Vysočina – 2018",
+     "typ": "polozka",
+     "uzemi": "CZ063",
+     "rok": 2018,
+     "hodnoty": {
+      "zam": 70.2,
+      "zam_podil_cr": 6.07,
+      "zam_podil_uzemi": 39.95,
+      "mzda": 30306,
+      "mzda_index_cr": 94.9,
+      "mzda_index_uzemi": 102.8
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Kraj Vysočina – 2019",
+     "typ": "polozka",
+     "uzemi": "CZ063",
+     "rok": 2019,
+     "hodnoty": {
+      "zam": 68.6,
+      "zam_podil_cr": 6.01,
+      "zam_podil_uzemi": 39.33,
+      "mzda": 31908,
+      "mzda_index_cr": 93.8,
+      "mzda_index_uzemi": 100.6
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Kraj Vysočina – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ063",
+     "rok": 2020,
+     "hodnoty": {
+      "zam": 64.9,
+      "zam_podil_cr": 5.9,
+      "zam_podil_uzemi": 38.02,
+      "mzda": 32334,
+      "mzda_index_cr": 93.5,
+      "mzda_index_uzemi": 97.7
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Kraj Vysočina – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ063",
+     "rok": 2021,
+     "hodnoty": {
+      "zam": 64.5,
+      "zam_podil_cr": 5.88,
+      "zam_podil_uzemi": 37.68,
+      "mzda": 34734,
+      "mzda_index_cr": 95.4,
+      "mzda_index_uzemi": 98.2
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Kraj Vysočina – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ063",
+     "rok": 2022,
+     "hodnoty": {
+      "zam": 64.4,
+      "zam_podil_cr": 5.88,
+      "zam_podil_uzemi": 37.46,
+      "mzda": 37229,
+      "mzda_index_cr": 95.0,
+      "mzda_index_uzemi": 100.4
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Česko – 2018",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2018,
+     "hodnoty": {
+      "zam": 1157.3,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 28.36,
+      "mzda": 31925,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 99.5
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – 2019",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2019,
+     "hodnoty": {
+      "zam": 1141.0,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 28.06,
+      "mzda": 34003,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 98.3
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2020,
+     "hodnoty": {
+      "zam": 1100.0,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 27.55,
+      "mzda": 34587,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 95.6
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2021,
+     "hodnoty": {
+      "zam": 1096.5,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 27.4,
+      "mzda": 36403,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 95.1
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2022,
+     "hodnoty": {
+      "zam": 1095.2,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 27.15,
+      "mzda": 39208,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 96.5
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Jihočeský kraj – 2018",
+     "typ": "polozka",
+     "uzemi": "CZ031",
+     "rok": 2018,
+     "hodnoty": {
+      "zam": 73.1,
+      "zam_podil_cr": 6.32,
+      "zam_podil_uzemi": 32.75,
+      "mzda": 29431,
+      "mzda_index_cr": 92.2,
+      "mzda_index_uzemi": 101.5
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Jihočeský kraj – 2019",
+     "typ": "polozka",
+     "uzemi": "CZ031",
+     "rok": 2019,
+     "hodnoty": {
+      "zam": 72.1,
+      "zam_podil_cr": 6.32,
+      "zam_podil_uzemi": 32.26,
+      "mzda": 31610,
+      "mzda_index_cr": 93.0,
+      "mzda_index_uzemi": 100.7
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Jihočeský kraj – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ031",
+     "rok": 2020,
+     "hodnoty": {
+      "zam": 69.4,
+      "zam_podil_cr": 6.31,
+      "zam_podil_uzemi": 31.59,
+      "mzda": 31937,
+      "mzda_index_cr": 92.3,
+      "mzda_index_uzemi": 97.4
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Jihočeský kraj – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ031",
+     "rok": 2021,
+     "hodnoty": {
+      "zam": 69.0,
+      "zam_podil_cr": 6.29,
+      "zam_podil_uzemi": 31.49,
+      "mzda": 34200,
+      "mzda_index_cr": 93.9,
+      "mzda_index_uzemi": 97.6
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Jihočeský kraj – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ031",
+     "rok": 2022,
+     "hodnoty": {
+      "zam": 68.4,
+      "zam_podil_cr": 6.25,
+      "zam_podil_uzemi": 31.26,
+      "mzda": 37038,
+      "mzda_index_cr": 94.5,
+      "mzda_index_uzemi": 99.5
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Pardubický kraj – 2018",
+     "typ": "polozka",
+     "uzemi": "CZ053",
+     "rok": 2018,
+     "hodnoty": {
+      "zam": 69.9,
+      "zam_podil_cr": 6.04,
+      "zam_podil_uzemi": 38.18,
+      "mzda": 29905,
+      "mzda_index_cr": 93.7,
+      "mzda_index_uzemi": 103.2
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Pardubický kraj – 2019",
+     "typ": "polozka",
+     "uzemi": "CZ053",
+     "rok": 2019,
+     "hodnoty": {
+      "zam": 69.5,
+      "zam_podil_cr": 6.09,
+      "zam_podil_uzemi": 37.87,
+      "mzda": 31800,
+      "mzda_index_cr": 93.5,
+      "mzda_index_uzemi": 102.4
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Pardubický kraj – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ053",
+     "rok": 2020,
+     "hodnoty": {
+      "zam": 67.2,
+      "zam_podil_cr": 6.11,
+      "zam_podil_uzemi": 37.11,
+      "mzda": 32655,
+      "mzda_index_cr": 94.4,
+      "mzda_index_uzemi": 100.3
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Pardubický kraj – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ053",
+     "rok": 2021,
+     "hodnoty": {
+      "zam": 66.5,
+      "zam_podil_cr": 6.06,
+      "zam_podil_uzemi": 36.76,
+      "mzda": 34151,
+      "mzda_index_cr": 93.8,
+      "mzda_index_uzemi": 99.0
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Pardubický kraj – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ053",
+     "rok": 2022,
+     "hodnoty": {
+      "zam": 67.4,
+      "zam_podil_cr": 6.15,
+      "zam_podil_uzemi": 36.77,
+      "mzda": 36454,
+      "mzda_index_cr": 93.0,
+      "mzda_index_uzemi": 100.5
+     },
+     "poznamka": "předběžné hodnoty"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Nejbližší publikovaná úroveň: sekce C – ČSÚ zaměstnance a mzdy podle oddílů a nižších úrovní CZ-NACE nepublikuje.",
+    "Zdroj: ČSÚ, DataStat, výběry MZDCRRT2 (kraje × sekce CZ-NACE) a MZDCRRT1 (ČR × sekce) – roční zjišťování, pracovištní metoda (kraj podle místa pracoviště). ČSÚ je publikuje za roky 2010–2022.",
+    "Zaměstnanci = průměrný evidenční počet zaměstnanců přepočtený na plný úvazek; mzda = průměrná hrubá měsíční mzda na přepočtené počty. Nezahrnuje podnikající fyzické osoby bez pracovního poměru, proto se nesrovnává s počty registrovaných subjektů.",
+    "Průměr, ne medián: medián mezd ČSÚ za kraje publikuje jen podle pohlaví a bez členění podle odvětví."
+   ],
+   "sekce": "C"
+  },
+  {
+   "kod": "T21_mzdy_aktualni",
+   "nazev": "Zaměstnanci a průměrné mzdy – novější roky v nejbližších publikovaných úrovních (ČSÚ, čtvrtletní zjišťování)",
+   "sloupce": [
+    {
+     "kod": "zam",
+     "nazev": "Zaměstnanci (tis., přepočtené)",
+     "ukazatel": "MZDY_ZAM_UROVEN"
+    },
+    {
+     "kod": "mzda",
+     "nazev": "Průměrná mzda (Kč)",
+     "ukazatel": "MZDY_MZDA_UROVEN"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Kraj Vysočina – všechna odvětví – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ063",
+     "nace": "0",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 170.8,
+      "mzda": 39133
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Kraj Vysočina – všechna odvětví – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ063",
+     "nace": "0",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 173.9,
+      "mzda": 41419
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Kraj Vysočina – všechna odvětví – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ063",
+     "nace": "0",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 175.3,
+      "mzda": 44279
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Jihočeský kraj – všechna odvětví – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ031",
+     "nace": "0",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 218.1,
+      "mzda": 39080
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Jihočeský kraj – všechna odvětví – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ031",
+     "nace": "0",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 221.2,
+      "mzda": 41541
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Jihočeský kraj – všechna odvětví – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ031",
+     "nace": "0",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 223.9,
+      "mzda": 44054
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Pardubický kraj – všechna odvětví – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ053",
+     "nace": "0",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 183.1,
+      "mzda": 38132
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Pardubický kraj – všechna odvětví – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ053",
+     "nace": "0",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 184.3,
+      "mzda": 40776
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Pardubický kraj – všechna odvětví – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ053",
+     "nace": "0",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 185.9,
+      "mzda": 43581
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Česko – všechna odvětví – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "0",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 4047.6,
+      "mzda": 42801
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – všechna odvětví – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "0",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 4048.6,
+      "mzda": 45643
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – všechna odvětví – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "0",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 4034.5,
+      "mzda": 48670
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Česko – sekce C – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "C",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 1078.6,
+      "mzda": 41683
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – sekce C – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "C",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 1058.2,
+      "mzda": 44840
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – sekce C – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "C",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 1037.0,
+      "mzda": 47870
+     },
+     "poznamka": "předběžné hodnoty"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Obor × kraj ČSÚ za roky po 2022 nepublikuje: roční zjišťování podle krajů a sekcí končí rokem 2022 a čtvrtletní zjišťování kombinaci kraj × odvětví nepublikuje. Uvádějí se proto nejbližší publikované úrovně: kraje za všechna odvětví a ČR za sekci C.",
+    "Zdroj: ČSÚ, DataStat, výběry MZDRT5 (ČR a kraje, pracovištní metoda) a MZDRT2 (ČR × sekce) – čtvrtletní zjišťování, kumulace za rok. Hodnoty se od ročního zjišťování mírně liší; obě řady se nespojují."
+   ]
+  },
+  {
    "kod": "T10_zaniky_po",
    "nazev": "Zaniklé právnické osoby v oboru a území podle roku zániku (RES, od 2023)",
    "sloupce": [
@@ -3002,11 +3618,24 @@
      }
     },
     {
-     "popis": "Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava.",
+     "popis": "Sekce C tvořila v roce 2022 v Kraji Vysočina 37,46 % zaměstnanců (přepočtené počty), v Česku 27,15 % (relativně o 38 % vyšší).",
      "typ": "polozka",
      "id": "Z06",
      "hodnoty": {
       "id": "Z06",
+      "typ": "mzdy a zaměstnanost",
+      "sila": 0.3797,
+      "hodnota": 37.46,
+      "srovnani": 27.15,
+      "rozdil_pct": 38.0
+     }
+    },
+    {
+     "popis": "Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava.",
+     "typ": "polozka",
+     "id": "Z07",
+     "hodnoty": {
+      "id": "Z07",
       "typ": "rozdíly uvnitř území",
       "sila": 0.3467,
       "hodnota": 2.02,
@@ -3017,9 +3646,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Česku 2,27 (relativně o 33,9 % nižší).",
      "typ": "polozka",
-     "id": "Z07",
+     "id": "Z08",
      "hodnoty": {
-      "id": "Z07",
+      "id": "Z08",
       "typ": "rozdíly uvnitř území",
       "sila": 0.3392,
       "hodnota": 1.5,
@@ -3030,9 +3659,9 @@
     {
      "popis": "Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,6 %, v Česku 26,1 % (relativně o 28,7 % nižší).",
      "typ": "polozka",
-     "id": "Z08",
+     "id": "Z09",
      "hodnoty": {
-      "id": "Z08",
+      "id": "Z09",
       "typ": "odchylka od ČR",
       "sila": 0.2874,
       "hodnota": 18.6,
@@ -3043,9 +3672,9 @@
     {
      "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Kraji Vysočina 37 %, v Česku 50,9 % (relativně o 27,3 % nižší).",
      "typ": "polozka",
-     "id": "Z09",
+     "id": "Z10",
      "hodnoty": {
-      "id": "Z09",
+      "id": "Z10",
       "typ": "odchylka od ČR",
       "sila": 0.2731,
       "hodnota": 37.0,
@@ -3056,9 +3685,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Havlíčkův Brod 1,66 registrovaných subjektů oboru, v Česku 2,27 (relativně o 26,9 % nižší).",
      "typ": "polozka",
-     "id": "Z10",
+     "id": "Z11",
      "hodnoty": {
-      "id": "Z10",
+      "id": "Z11",
       "typ": "rozdíly uvnitř území",
       "sila": 0.2687,
       "hodnota": 1.66,
@@ -3069,9 +3698,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v Kraji Vysočina 1,7 registrovaných subjektů oboru, v Česku 2,27 (relativně o 25,1 % nižší).",
      "typ": "polozka",
-     "id": "Z11",
+     "id": "Z12",
      "hodnoty": {
-      "id": "Z11",
+      "id": "Z12",
       "typ": "odchylka od ČR",
       "sila": 0.2511,
       "hodnota": 1.7,
@@ -3082,9 +3711,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Třebíč 1,72 registrovaných subjektů oboru, v Česku 2,27 (relativně o 24,2 % nižší).",
      "typ": "polozka",
-     "id": "Z12",
+     "id": "Z13",
      "hodnoty": {
-      "id": "Z12",
+      "id": "Z13",
       "typ": "rozdíly uvnitř území",
       "sila": 0.2423,
       "hodnota": 1.72,
@@ -3095,9 +3724,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Žďár nad Sázavou 1,73 registrovaných subjektů oboru, v Česku 2,27 (relativně o 23,8 % nižší).",
      "typ": "polozka",
-     "id": "Z13",
+     "id": "Z14",
      "hodnoty": {
-      "id": "Z13",
+      "id": "Z14",
       "typ": "rozdíly uvnitř území",
       "sila": 0.2379,
       "hodnota": 1.73,
@@ -3108,9 +3737,9 @@
     {
      "popis": "Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 21,5 %, v Česku 27,7 % (relativně o 22,4 % nižší).",
      "typ": "polozka",
-     "id": "Z14",
+     "id": "Z15",
      "hodnoty": {
-      "id": "Z14",
+      "id": "Z15",
       "typ": "odchylka od ČR",
       "sila": 0.2238,
       "hodnota": 21.5,
@@ -3121,9 +3750,9 @@
     {
      "popis": "Věk subjektu – „6–10 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15 %, v Česku 19,2 % (relativně o 21,9 % nižší).",
      "typ": "polozka",
-     "id": "Z15",
+     "id": "Z16",
      "hodnoty": {
-      "id": "Z15",
+      "id": "Z16",
       "typ": "odchylka od ČR",
       "sila": 0.2188,
       "hodnota": 15.0,
@@ -3134,9 +3763,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 18,8 % vyšší).",
      "typ": "polozka",
-     "id": "Z16",
+     "id": "Z17",
      "hodnoty": {
-      "id": "Z16",
+      "id": "Z17",
       "typ": "rozdíly uvnitř území",
       "sila": 0.1882,
       "hodnota": 2.02,
@@ -3147,9 +3776,9 @@
     {
      "popis": "Věk subjektu – „21–30 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15,8 %, v Česku 13,4 % (relativně o 17,9 % vyšší).",
      "typ": "polozka",
-     "id": "Z17",
+     "id": "Z18",
      "hodnoty": {
-      "id": "Z17",
+      "id": "Z18",
       "typ": "odchylka od ČR",
       "sila": 0.1791,
       "hodnota": 15.8,
@@ -3160,9 +3789,9 @@
     {
      "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 11,5 %, v Česku 13,5 % (relativně o 14,8 % nižší).",
      "typ": "polozka",
-     "id": "Z18",
+     "id": "Z19",
      "hodnoty": {
-      "id": "Z18",
+      "id": "Z19",
       "typ": "odchylka od ČR",
       "sila": 0.1481,
       "hodnota": 11.5,
@@ -3173,9 +3802,9 @@
     {
      "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Kraji Vysočina 41,8 %, v Česku 48,6 % (relativně o 14 % nižší).",
      "typ": "polozka",
-     "id": "Z19",
+     "id": "Z20",
      "hodnoty": {
-      "id": "Z19",
+      "id": "Z20",
       "typ": "odchylka od ČR",
       "sila": 0.1399,
       "hodnota": 41.8,
@@ -3186,9 +3815,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 11,8 % nižší).",
      "typ": "polozka",
-     "id": "Z20",
+     "id": "Z21",
      "hodnoty": {
-      "id": "Z20",
+      "id": "Z21",
       "typ": "rozdíly uvnitř území",
       "sila": 0.1176,
       "hodnota": 1.5,
@@ -3199,9 +3828,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Česku 2,27 (relativně o 11 % nižší).",
      "typ": "polozka",
-     "id": "Z21",
+     "id": "Z22",
      "hodnoty": {
-      "id": "Z21",
+      "id": "Z22",
       "typ": "rozdíly uvnitř území",
       "sila": 0.1101,
       "hodnota": 2.02,
@@ -3212,9 +3841,9 @@
     {
      "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 76,5 %, v Česku 69,6 % (relativně o 9,9 % vyšší).",
      "typ": "polozka",
-     "id": "Z22",
+     "id": "Z23",
      "hodnoty": {
-      "id": "Z22",
+      "id": "Z23",
       "typ": "odchylka od ČR",
       "sila": 0.0991,
       "hodnota": 76.5,
@@ -3225,9 +3854,9 @@
     {
      "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 78,5 %, v Česku 72,3 % (relativně o 8,6 % vyšší).",
      "typ": "polozka",
-     "id": "Z23",
+     "id": "Z24",
      "hodnoty": {
-      "id": "Z23",
+      "id": "Z24",
       "typ": "odchylka od ČR",
       "sila": 0.0858,
       "hodnota": 78.5,
@@ -3238,9 +3867,9 @@
     {
      "popis": "Kraj je mezi 14 kraji 12. podle počtu registrovaných subjektů oboru a 13. podle hustoty na 1 000 obyvatel.",
      "typ": "polozka",
-     "id": "Z24",
+     "id": "Z25",
      "hodnoty": {
-      "id": "Z24",
+      "id": "Z25",
       "typ": "divergence pořadí",
       "sila": 0.0769,
       "hodnota": 12,
@@ -3251,9 +3880,9 @@
     {
      "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 26,5 %, v Česku 28,4 % (relativně o 6,7 % nižší).",
      "typ": "polozka",
-     "id": "Z25",
+     "id": "Z26",
      "hodnoty": {
-      "id": "Z25",
+      "id": "Z26",
       "typ": "odchylka od ČR",
       "sila": 0.0669,
       "hodnota": 26.5,
@@ -3264,9 +3893,9 @@
     {
      "popis": "Lokalizační koeficient oboru je v Kraji Vysočina 0,94 proti 1 za ČR (relativně o 6 % nižší).",
      "typ": "polozka",
-     "id": "Z26",
+     "id": "Z27",
      "hodnoty": {
-      "id": "Z26",
+      "id": "Z27",
       "typ": "odchylka od ČR",
       "sila": 0.06,
       "hodnota": 0.94,
@@ -3275,11 +3904,24 @@
      }
     },
     {
+     "popis": "Průměrná hrubá měsíční mzda v sekci C byla v roce 2022 v Kraji Vysočina 37 229 Kč, v Česku 39 208 Kč (relativně o 5 % nižší).",
+     "typ": "polozka",
+     "id": "Z28",
+     "hodnoty": {
+      "id": "Z28",
+      "typ": "mzdy a zaměstnanost",
+      "sila": 0.0505,
+      "hodnota": 37229,
+      "srovnani": 39208,
+      "rozdil_pct": 5.0
+     }
+    },
+    {
      "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 24,8 %, v Česku 26 % (relativně o 4,6 % nižší).",
      "typ": "polozka",
-     "id": "Z27",
+     "id": "Z29",
      "hodnoty": {
-      "id": "Z27",
+      "id": "Z29",
       "typ": "odchylka od ČR",
       "sila": 0.0462,
       "hodnota": 24.8,
@@ -3288,16 +3930,42 @@
      }
     },
     {
+     "popis": "Průměrná mzda v sekci C dosahovala v roce 2022 v Kraji Vysočina 100,4 % průměrné mzdy všech odvětví kraje, v Česku 96,5 % (relativně o 4 % vyšší).",
+     "typ": "polozka",
+     "id": "Z30",
+     "hodnoty": {
+      "id": "Z30",
+      "typ": "mzdy a zaměstnanost",
+      "sila": 0.0404,
+      "hodnota": 100.4,
+      "srovnani": 96.5,
+      "rozdil_pct": 4.0
+     }
+    },
+    {
      "popis": "Velikost FO – „bez zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 42,4 %, v Česku 41 % (relativně o 3,4 % vyšší).",
      "typ": "polozka",
-     "id": "Z28",
+     "id": "Z31",
      "hodnoty": {
-      "id": "Z28",
+      "id": "Z31",
       "typ": "odchylka od ČR",
       "sila": 0.0341,
       "hodnota": 42.4,
       "srovnani": 41.0,
       "rozdil_pct": 3.4
+     }
+    },
+    {
+     "popis": "V sekci C se počet zaměstnanců mezi lety 2018 a 2022 změnil v Kraji Vysočina z 70,2 tis. na 64,4 tis. (index 0,92), v Česku z 1 157,3 tis. na 1 095,2 tis. (index 0,95); index je relativně o 3,2 % nižší než v Česku.",
+     "typ": "polozka",
+     "id": "Z32",
+     "hodnoty": {
+      "id": "Z32",
+      "typ": "mzdy a zaměstnanost",
+      "sila": 0.0316,
+      "hodnota": 0.92,
+      "srovnani": 0.95,
+      "rozdil_pct": 3.2
      }
     }
    ],
@@ -3455,6 +4123,35 @@
    "id": "Z05"
   },
   {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "podíl oboru na zaměstnancích, kraj proti ČR",
+   "sila": 0.3797,
+   "hodnota": 37.46,
+   "srovnani": 27.15,
+   "rozdil_pct": 38.0,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Podíl sekce C na zaměstnancích kraje 2022 (%)",
+     "hodnota": 37.46,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2022",
+     "sloupec": "zam_podil_uzemi"
+    },
+    {
+     "popis": "Podíl sekce C na zaměstnancích ČR 2022 (%)",
+     "hodnota": 27.15,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "zam_podil_uzemi"
+    }
+   ],
+   "popis": "Sekce C tvořila v roce 2022 v Kraji Vysočina 37,46 % zaměstnanců (přepočtené počty), v Česku 27,15 % (relativně o 38 % vyšší).",
+   "poradi": 6,
+   "id": "Z06"
+  },
+  {
    "typ": "rozdily_uvnitr_uzemi",
    "typ_nazev": "rozdíly uvnitř území",
    "podtyp": "rozpětí hustoty mezi okresy",
@@ -3480,8 +4177,8 @@
     }
    ],
    "popis": "Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava.",
-   "poradi": 6,
-   "id": "Z06"
+   "poradi": 7,
+   "id": "Z07"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -3509,8 +4206,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Česku 2,27 (relativně o 33,9 % nižší).",
-   "poradi": 7,
-   "id": "Z07"
+   "poradi": 8,
+   "id": "Z08"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3538,8 +4235,8 @@
     }
    ],
    "popis": "Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,6 %, v Česku 26,1 % (relativně o 28,7 % nižší).",
-   "poradi": 8,
-   "id": "Z08"
+   "poradi": 9,
+   "id": "Z09"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3567,8 +4264,8 @@
     }
    ],
    "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Kraji Vysočina 37 %, v Česku 50,9 % (relativně o 27,3 % nižší).",
-   "poradi": 9,
-   "id": "Z09"
+   "poradi": 10,
+   "id": "Z10"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -3596,8 +4293,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Havlíčkův Brod 1,66 registrovaných subjektů oboru, v Česku 2,27 (relativně o 26,9 % nižší).",
-   "poradi": 10,
-   "id": "Z10"
+   "poradi": 11,
+   "id": "Z11"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3625,8 +4322,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v Kraji Vysočina 1,7 registrovaných subjektů oboru, v Česku 2,27 (relativně o 25,1 % nižší).",
-   "poradi": 11,
-   "id": "Z11"
+   "poradi": 12,
+   "id": "Z12"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -3654,8 +4351,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Třebíč 1,72 registrovaných subjektů oboru, v Česku 2,27 (relativně o 24,2 % nižší).",
-   "poradi": 12,
-   "id": "Z12"
+   "poradi": 13,
+   "id": "Z13"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -3683,8 +4380,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Žďár nad Sázavou 1,73 registrovaných subjektů oboru, v Česku 2,27 (relativně o 23,8 % nižší).",
-   "poradi": 13,
-   "id": "Z13"
+   "poradi": 14,
+   "id": "Z14"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3712,8 +4409,8 @@
     }
    ],
    "popis": "Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 21,5 %, v Česku 27,7 % (relativně o 22,4 % nižší).",
-   "poradi": 14,
-   "id": "Z14"
+   "poradi": 15,
+   "id": "Z15"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3741,8 +4438,8 @@
     }
    ],
    "popis": "Věk subjektu – „6–10 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15 %, v Česku 19,2 % (relativně o 21,9 % nižší).",
-   "poradi": 15,
-   "id": "Z15"
+   "poradi": 16,
+   "id": "Z16"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -3770,8 +4467,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 18,8 % vyšší).",
-   "poradi": 16,
-   "id": "Z16"
+   "poradi": 17,
+   "id": "Z17"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3799,8 +4496,8 @@
     }
    ],
    "popis": "Věk subjektu – „21–30 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15,8 %, v Česku 13,4 % (relativně o 17,9 % vyšší).",
-   "poradi": 17,
-   "id": "Z17"
+   "poradi": 18,
+   "id": "Z18"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3828,8 +4525,8 @@
     }
    ],
    "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 11,5 %, v Česku 13,5 % (relativně o 14,8 % nižší).",
-   "poradi": 18,
-   "id": "Z18"
+   "poradi": 19,
+   "id": "Z19"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3857,8 +4554,8 @@
     }
    ],
    "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Kraji Vysočina 41,8 %, v Česku 48,6 % (relativně o 14 % nižší).",
-   "poradi": 19,
-   "id": "Z19"
+   "poradi": 20,
+   "id": "Z20"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -3886,8 +4583,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 11,8 % nižší).",
-   "poradi": 20,
-   "id": "Z20"
+   "poradi": 21,
+   "id": "Z21"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -3915,8 +4612,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Česku 2,27 (relativně o 11 % nižší).",
-   "poradi": 21,
-   "id": "Z21"
+   "poradi": 22,
+   "id": "Z22"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3944,8 +4641,8 @@
     }
    ],
    "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 76,5 %, v Česku 69,6 % (relativně o 9,9 % vyšší).",
-   "poradi": 22,
-   "id": "Z22"
+   "poradi": 23,
+   "id": "Z23"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3973,8 +4670,8 @@
     }
    ],
    "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 78,5 %, v Česku 72,3 % (relativně o 8,6 % vyšší).",
-   "poradi": 23,
-   "id": "Z23"
+   "poradi": 24,
+   "id": "Z24"
   },
   {
    "typ": "divergence_poradi",
@@ -4002,8 +4699,8 @@
     }
    ],
    "popis": "Kraj je mezi 14 kraji 12. podle počtu registrovaných subjektů oboru a 13. podle hustoty na 1 000 obyvatel.",
-   "poradi": 24,
-   "id": "Z24"
+   "poradi": 25,
+   "id": "Z25"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4031,8 +4728,8 @@
     }
    ],
    "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 26,5 %, v Česku 28,4 % (relativně o 6,7 % nižší).",
-   "poradi": 25,
-   "id": "Z25"
+   "poradi": 26,
+   "id": "Z26"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4060,8 +4757,37 @@
     }
    ],
    "popis": "Lokalizační koeficient oboru je v Kraji Vysočina 0,94 proti 1 za ČR (relativně o 6 % nižší).",
-   "poradi": 26,
-   "id": "Z26"
+   "poradi": 27,
+   "id": "Z27"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "průměrná mzda v oboru proti ČR",
+   "sila": 0.0505,
+   "hodnota": 37229,
+   "srovnani": 39208,
+   "rozdil_pct": 5.0,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Průměrná mzda v sekci C 2022 – kraj (Kč)",
+     "hodnota": 37229,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2022",
+     "sloupec": "mzda"
+    },
+    {
+     "popis": "Průměrná mzda v sekci C 2022 – Česko (Kč)",
+     "hodnota": 39208,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "mzda"
+    }
+   ],
+   "popis": "Průměrná hrubá měsíční mzda v sekci C byla v roce 2022 v Kraji Vysočina 37 229 Kč, v Česku 39 208 Kč (relativně o 5 % nižší).",
+   "poradi": 28,
+   "id": "Z28"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4089,8 +4815,37 @@
     }
    ],
    "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 24,8 %, v Česku 26 % (relativně o 4,6 % nižší).",
-   "poradi": 27,
-   "id": "Z27"
+   "poradi": 29,
+   "id": "Z29"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "mzda v oboru proti všem odvětvím území, kraj proti ČR",
+   "sila": 0.0404,
+   "hodnota": 100.4,
+   "srovnani": 96.5,
+   "rozdil_pct": 4.0,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Mzda v sekci C proti všem odvětvím kraje 2022",
+     "hodnota": 100.4,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2022",
+     "sloupec": "mzda_index_uzemi"
+    },
+    {
+     "popis": "Mzda v sekci C proti všem odvětvím ČR 2022",
+     "hodnota": 96.5,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "mzda_index_uzemi"
+    }
+   ],
+   "popis": "Průměrná mzda v sekci C dosahovala v roce 2022 v Kraji Vysočina 100,4 % průměrné mzdy všech odvětví kraje, v Česku 96,5 % (relativně o 4 % vyšší).",
+   "poradi": 30,
+   "id": "Z30"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4118,8 +4873,65 @@
     }
    ],
    "popis": "Velikost FO – „bez zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 42,4 %, v Česku 41 % (relativně o 3,4 % vyšší).",
-   "poradi": 28,
-   "id": "Z28"
+   "poradi": 31,
+   "id": "Z31"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "vývoj: počet zaměstnanců proti ČR",
+   "sila": 0.0316,
+   "hodnota": 0.92,
+   "srovnani": 0.95,
+   "rozdil_pct": 3.2,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "počet zaměstnanců 2018 – kraj",
+     "hodnota": 70.2,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2018",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2022 – kraj",
+     "hodnota": 64.4,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Kraj Vysočina – 2022",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2018 – Česko",
+     "hodnota": 1157.3,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2018",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2022 – Česko",
+     "hodnota": 1095.2,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "Index 2022/2018 – kraj",
+     "hodnota": 0.92,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "hodnota"
+    },
+    {
+     "popis": "Index 2022/2018 – Česko",
+     "hodnota": 0.95,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "srovnani"
+    }
+   ],
+   "popis": "V sekci C se počet zaměstnanců mezi lety 2018 a 2022 změnil v Kraji Vysočina z 70,2 tis. na 64,4 tis. (index 0,92), v Česku z 1 157,3 tis. na 1 095,2 tis. (index 0,95); index je relativně o 3,2 % nižší než v Česku.",
+   "poradi": 32,
+   "id": "Z32"
   }
  ]
 }

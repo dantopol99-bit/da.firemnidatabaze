@@ -5,7 +5,8 @@ za pozornost, a každou popíše jednou věcnou větou bez interpretace. „Pro�
 z toho plyne“ píše analytik (reporty/vyklad/<id_reportu>.md), ne stroj.
 
 Každé zjištění má:
-  typ          odchylka_od_cr | zmena_trendu | rozdily_uvnitr_uzemi | aktivita_oboru | divergence_poradi
+  typ          odchylka_od_cr | zmena_trendu | rozdily_uvnitr_uzemi | aktivita_oboru | divergence_poradi |
+               mzdy_zamestnanost
   sila         číselná a porovnatelná: |hodnota / srovnání − 1| (relativní rozdíl);
                u divergence pořadí |p1 − p2| / (počet území − 1); obojí bezrozměrné, 0 = žádný rozdíl
   hodnota, srovnani, rozdil_pct (absolutně, %), smer (vyšší / nižší)
@@ -22,13 +23,15 @@ from firemni_databaze.report_vyklad import cz
 
 PRAH_ZJISTENI = 0.03        # 3 % relativně
 MIN_PODIL_STRUKTURY = 5.0   # %
-PORADI_TYPU = ["odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru", "divergence_poradi"]
+PORADI_TYPU = ["odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru", "divergence_poradi",
+               "mzdy_zamestnanost"]
 NAZVY_TYPU = {
     "odchylka_od_cr": "odchylka od ČR",
     "zmena_trendu": "změna trendu",
     "rozdily_uvnitr_uzemi": "rozdíly uvnitř území",
     "aktivita_oboru": "aktivita oboru vůči kraji",
     "divergence_poradi": "divergence pořadí",
+    "mzdy_zamestnanost": "mzdy a zaměstnanost",
 }
 STRUKTURA = {   # benchmarková tabulka → (název členění, jmenovatel podílu)
     "T13_bench_fo_po": ("Typ osoby", "registrovaných subjektech oboru"),
@@ -250,6 +253,66 @@ class _Detektor:
                     sila=abs(q1 - q2) / (n_ok - 1), rozdil=False)
 
 
+def _mzdy(self) -> None:
+    """Typ mzdy_zamestnanost: T20 (ČSÚ, obor × kraj, roční zjišťování) – kraj proti ČR v posledním roce
+    a vývoj (index posledního roku k prvnímu) proti ČR."""
+    t20 = self.tab.get("T20_mzdy_obor")
+    if not t20 or self.uz["typ"] == "CR":
+        return
+    kraj = self.uz["kraj"]
+    v_kraji = lokativ(kraj) + (" (nejbližší publikovaná úroveň)" if self.uz["typ"] == "OKRES" else "")
+    sekce = t20.get("sekce", "")
+    uz = [r for r in t20["radky"] if r["uzemi"] == kraj]
+    cr = {r["rok"]: r for r in t20["radky"] if r["uzemi"] == "CZ"}
+    if not uz:
+        return
+    posl, prvni = uz[-1], uz[0]
+    c, c0 = cr.get(posl["rok"]), cr.get(prvni["rok"])
+    if not c:
+        return
+    rok, rok0 = posl["rok"], prvni["rok"]
+
+    def cislo(r, sl, popis):
+        return _cislo(popis, r["hodnoty"][sl], "T20_mzdy_obor", r["popis"], sl)
+
+    a, b = posl["hodnoty"]["mzda"], c["hodnoty"]["mzda"]
+    self.pridej("mzdy_zamestnanost", "průměrná mzda v oboru proti ČR", a, b,
+                [cislo(posl, "mzda", f"Průměrná mzda v sekci {sekce} {rok} – kraj (Kč)"),
+                 cislo(c, "mzda", f"Průměrná mzda v sekci {sekce} {rok} – Česko (Kč)")],
+                lambda d: f"Průměrná hrubá měsíční mzda v sekci {sekce} byla v roce {rok} {v_kraji} {cz(a)} Kč, "
+                          f"{self.v_cr} {cz(b)} Kč ({d}).")
+    a, b = posl["hodnoty"]["mzda_index_uzemi"], c["hodnoty"]["mzda_index_uzemi"]
+    self.pridej("mzdy_zamestnanost", "mzda v oboru proti všem odvětvím území, kraj proti ČR", a, b,
+                [cislo(posl, "mzda_index_uzemi", f"Mzda v sekci {sekce} proti všem odvětvím kraje {rok}"),
+                 cislo(c, "mzda_index_uzemi", f"Mzda v sekci {sekce} proti všem odvětvím ČR {rok}")],
+                lambda d: f"Průměrná mzda v sekci {sekce} dosahovala v roce {rok} {v_kraji} {cz(a)} % průměrné mzdy "
+                          f"všech odvětví kraje, {self.v_cr} {cz(b)} % ({d}).")
+    a, b = posl["hodnoty"]["zam_podil_uzemi"], c["hodnoty"]["zam_podil_uzemi"]
+    self.pridej("mzdy_zamestnanost", "podíl oboru na zaměstnancích, kraj proti ČR", a, b,
+                [cislo(posl, "zam_podil_uzemi", f"Podíl sekce {sekce} na zaměstnancích kraje {rok} (%)"),
+                 cislo(c, "zam_podil_uzemi", f"Podíl sekce {sekce} na zaměstnancích ČR {rok} (%)")],
+                lambda d: f"Sekce {sekce} tvořila v roce {rok} {v_kraji} {cz(a)} % zaměstnanců (přepočtené počty), "
+                          f"{self.v_cr} {cz(b)} % ({d}).")
+    if c0 and rok0 != rok:
+        for sl, co, jednotka in (("mzda", "průměrná mzda", " Kč"), ("zam", "počet zaměstnanců", " tis.")):
+            a0, a1, b0, b1 = prvni["hodnoty"][sl], posl["hodnoty"][sl], c0["hodnoty"][sl], c["hodnoty"][sl]
+            if not all((a0, a1, b0, b1)):
+                continue
+            i_uz, i_cr = round(a1 / a0, 2), round(b1 / b0, 2)
+            self.pridej("mzdy_zamestnanost", f"vývoj: {co} proti ČR", i_uz, i_cr, [
+                cislo(prvni, sl, f"{co} {rok0} – kraj"), cislo(posl, sl, f"{co} {rok} – kraj"),
+                cislo(c0, sl, f"{co} {rok0} – Česko"), cislo(c, sl, f"{co} {rok} – Česko"),
+                _cislo(f"Index {rok}/{rok0} – kraj", i_uz, "T19_zjisteni", "", "hodnota"),
+                _cislo(f"Index {rok}/{rok0} – Česko", i_cr, "T19_zjisteni", "", "srovnani")],
+                lambda d, a0=a0, a1=a1, b0=b0, b1=b1, i_uz=i_uz, i_cr=i_cr, co=co, j=jednotka:
+                    f"V sekci {sekce} se {co} mezi lety {rok0} a {rok} změnil{'a' if co.endswith('mzda') else ''} "
+                    f"{v_kraji} z {cz(a0)}{j} na {cz(a1)}{j} (index {cz(i_uz)}), {self.v_cr} z {cz(b0)}{j} na "
+                    f"{cz(b1)}{j} (index {cz(i_cr)}); index je {d} než {self.v_cr}.")
+
+
+_Detektor.mzdy = _mzdy
+
+
 def detekuj(vysledek: dict) -> list[dict]:
     """Zjištění seřazená podle síly (sestupně); id Z01… podle pořadí."""
     d = _Detektor(vysledek)
@@ -258,6 +321,7 @@ def detekuj(vysledek: dict) -> list[dict]:
     d.rozdily_uvnitr()
     d.aktivita()
     d.divergence()
+    d.mzdy()
     z = sorted(d.zjisteni, key=lambda x: (-x["sila"], PORADI_TYPU.index(x["typ"]), x["podtyp"]))
     for i, x in enumerate(z, start=1):
         x["poradi"] = i

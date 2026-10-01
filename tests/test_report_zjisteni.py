@@ -85,7 +85,7 @@ class TestDetektor(unittest.TestCase):
     def test_struktura_zjisteni(self):
         for z in self.zjisteni:
             self.assertIn(z["typ"], ("odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru",
-                                     "divergence_poradi"))
+                                     "divergence_poradi", "mzdy_zamestnanost"))
             self.assertIsInstance(z["sila"], float)
             self.assertTrue(z["cisla"])
             self.assertTrue(all(c["tabulka"] for c in z["cisla"]))

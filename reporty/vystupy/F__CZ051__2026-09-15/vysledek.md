@@ -207,6 +207,58 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 
 > Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
 
+## T20_mzdy_obor: Zaměstnanci a průměrné mzdy v oboru – kraje a ČR (ČSÚ, roční zjišťování)
+
+| Položka | Zaměstnanci v oboru (tis., přepočtené) | Podíl na zaměstnancích oboru v ČR (%) | Podíl oboru na zaměstnancích území (%) | Průměrná mzda v oboru (Kč) | Mzda proti oboru v ČR (ČR = 100) | Mzda proti všem odvětvím území (= 100) | Poznámka |
+|---|---|---|---|---|---|---|---|
+| Liberecký kraj – 2018 | 6 | 2,89 | 4,07 | 27 419 | 96,9 | 91,6 |  |
+| Liberecký kraj – 2019 | 6,2 | 2,96 | 4,23 | 29 459 | 97,6 | 91,2 |  |
+| Liberecký kraj – 2020 | 6,3 | 3,01 | 4,4 | 30 489 | 97 | 91,9 |  |
+| Liberecký kraj – 2021 | 6,4 | 2,99 | 4,4 | 31 437 | 96,5 | 90,8 |  |
+| Liberecký kraj – 2022 | 6,4 | 2,98 | 4,44 | 33 623 | 96,5 | 91,5 | předběžné hodnoty |
+| Česko – 2018 | 207,9 | – | 5,1 | 28 298 | – | 88,2 |  |
+| Česko – 2019 | 209,8 | – | 5,16 | 30 187 | – | 87,2 |  |
+| Česko – 2020 | 209,3 | – | 5,24 | 31 444 | – | 86,9 |  |
+| Česko – 2021 | 214,2 | – | 5,35 | 32 582 | – | 85,1 |  |
+| Česko – 2022 | 214,9 | – | 5,33 | 34 840 | – | 85,8 | předběžné hodnoty |
+| Královéhradecký kraj – 2018 | 8,6 | 4,14 | 4,33 | 26 064 | 92,1 | 87,2 |  |
+| Královéhradecký kraj – 2019 | 8,3 | 3,96 | 4,14 | 28 413 | 94,1 | 87,4 |  |
+| Královéhradecký kraj – 2020 | 8,3 | 3,97 | 4,25 | 29 419 | 93,6 | 86,5 |  |
+| Královéhradecký kraj – 2021 | 8,4 | 3,92 | 4,19 | 30 779 | 94,5 | 85,4 |  |
+| Královéhradecký kraj – 2022 | 8,2 | 3,82 | 4,13 | 33 274 | 95,5 | 87,8 | předběžné hodnoty |
+| Karlovarský kraj – 2018 | 4,1 | 1,97 | 4,57 | 24 923 | 88,1 | 89 |  |
+| Karlovarský kraj – 2019 | 4,1 | 1,95 | 4,66 | 27 237 | 90,2 | 90,2 |  |
+| Karlovarský kraj – 2020 | 4,2 | 2,01 | 5,01 | 28 492 | 90,6 | 91,3 |  |
+| Karlovarský kraj – 2021 | 4 | 1,87 | 4,88 | 29 271 | 89,8 | 88,1 |  |
+| Karlovarský kraj – 2022 | 3,9 | 1,81 | 4,76 | 31 502 | 90,4 | 89,7 | předběžné hodnoty |
+
+> Zdroj: ČSÚ, DataStat, výběry MZDCRRT2 (kraje × sekce CZ-NACE) a MZDCRRT1 (ČR × sekce) – roční zjišťování, pracovištní metoda (kraj podle místa pracoviště). ČSÚ je publikuje za roky 2010–2022.
+> Zaměstnanci = průměrný evidenční počet zaměstnanců přepočtený na plný úvazek; mzda = průměrná hrubá měsíční mzda na přepočtené počty. Nezahrnuje podnikající fyzické osoby bez pracovního poměru, proto se nesrovnává s počty registrovaných subjektů.
+> Průměr, ne medián: medián mezd ČSÚ za kraje publikuje jen podle pohlaví a bez členění podle odvětví.
+
+## T21_mzdy_aktualni: Zaměstnanci a průměrné mzdy – novější roky v nejbližších publikovaných úrovních (ČSÚ, čtvrtletní zjišťování)
+
+| Položka | Zaměstnanci (tis., přepočtené) | Průměrná mzda (Kč) | Poznámka |
+|---|---|---|---|
+| Liberecký kraj – všechna odvětví – 2023 | 143,3 | 38 599 |  |
+| Liberecký kraj – všechna odvětví – 2024 | 146,2 | 41 450 |  |
+| Liberecký kraj – všechna odvětví – 2025 | 148,6 | 44 006 | předběžné hodnoty |
+| Královéhradecký kraj – všechna odvětví – 2023 | 197,4 | 39 788 |  |
+| Královéhradecký kraj – všechna odvětví – 2024 | 196,7 | 42 122 |  |
+| Královéhradecký kraj – všechna odvětví – 2025 | 197,5 | 44 862 | předběžné hodnoty |
+| Karlovarský kraj – všechna odvětví – 2023 | 83,8 | 37 041 |  |
+| Karlovarský kraj – všechna odvětví – 2024 | 85,6 | 39 257 |  |
+| Karlovarský kraj – všechna odvětví – 2025 | 87,4 | 41 903 | předběžné hodnoty |
+| Česko – všechna odvětví – 2023 | 4 047,6 | 42 801 |  |
+| Česko – všechna odvětví – 2024 | 4 048,6 | 45 643 |  |
+| Česko – všechna odvětví – 2025 | 4 034,5 | 48 670 | předběžné hodnoty |
+| Česko – sekce F – 2023 | 217,4 | 36 084 |  |
+| Česko – sekce F – 2024 | 217,5 | 39 153 |  |
+| Česko – sekce F – 2025 | 216,8 | 42 337 | předběžné hodnoty |
+
+> Obor × kraj ČSÚ za roky po 2022 nepublikuje: roční zjišťování podle krajů a sekcí končí rokem 2022 a čtvrtletní zjišťování kombinaci kraj × odvětví nepublikuje. Uvádějí se proto nejbližší publikované úrovně: kraje za všechna odvětví a ČR za sekci F.
+> Zdroj: ČSÚ, DataStat, výběry MZDRT5 (ČR a kraje, pracovištní metoda) a MZDRT2 (ČR × sekce) – čtvrtletní zjišťování, kumulace za rok. Hodnoty se od ročního zjišťování mírně liší; obě řady se nespojují.
+
 ## T10_zaniky_po: Zaniklé právnické osoby v oboru a území podle roku zániku (RES, od 2023)
 
 | Položka | Počet zaniklých PO | Poznámka |
@@ -294,21 +346,25 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 | Lokalizační koeficient oboru je v Libereckém kraji 1,19 proti 1 za ČR (relativně o 19 % vyšší). | Z11 | odchylka od ČR | 0,19 | 1,19 | 1 | 19 |  |
 | Věk subjektu – „méně než 3 roky“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,4 %, v Česku 14 % (relativně o 18,6 % nižší). | Z12 | odchylka od ČR | 0,19 | 11,4 | 14 | 18,6 |  |
 | Na 1 000 obyvatel připadá v okrese Česká Lípa 25,67 registrovaných subjektů oboru, v Česku 31,14 (relativně o 17,6 % nižší). | Z13 | rozdíly uvnitř území | 0,18 | 25,67 | 31,14 | 17,6 |  |
-| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší). | Z14 | rozdíly uvnitř území | 0,16 | 36,1 | 31,14 | 15,9 |  |
-| Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší). | Z15 | rozdíly uvnitř území | 0,16 | 36,08 | 31,14 | 15,9 |  |
-| Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,8 %, v Česku 38,8 % (relativně o 15,5 % vyšší). | Z16 | odchylka od ČR | 0,15 | 44,8 | 38,8 | 15,5 |  |
-| Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,9 %, v Česku 50,7 % (relativně o 11,4 % nižší). | Z17 | odchylka od ČR | 0,11 | 44,9 | 50,7 | 11,4 |  |
-| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší). | Z18 | rozdíly uvnitř území | 0,09 | 36,1 | 32,99 | 9,4 |  |
-| Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší). | Z19 | rozdíly uvnitř území | 0,09 | 36,08 | 32,99 | 9,4 |  |
-| Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 85,9 %, v Česku 79 % (relativně o 8,7 % vyšší). | Z20 | odchylka od ČR | 0,09 | 85,9 | 79 | 8,7 |  |
-| Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, průměr let 2024–2025 je 3,2 % (relativně o 8,4 % vyšší). | Z21 | změna trendu | 0,08 | 3,47 | 3,2 | 8,4 |  |
-| Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší). | Z22 | odchylka od ČR | 0,08 | 22,1 | 23,9 | 7,5 |  |
-| Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,3 %, v Česku 82,5 % (relativně o 7 % vyšší). | Z23 | odchylka od ČR | 0,07 | 88,3 | 82,5 | 7 |  |
-| Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,8 %, ve všech oborech 59,1 % (ČSÚ; relativně o 6,3 % vyšší). | Z24 | aktivita oboru vůči kraji | 0,06 | 62,8 | 59,1 | 6,3 |  |
-| Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,3 %, v Česku 9,9 % (relativně o 6,1 % nižší). | Z25 | odchylka od ČR | 0,06 | 9,3 | 9,9 | 6,1 |  |
-| Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,14 (relativně o 5,9 % vyšší). | Z26 | odchylka od ČR | 0,06 | 32,99 | 31,14 | 5,9 |  |
-| Na 1 000 obyvatel připadá v okrese Semily 31,61 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,2 % nižší). | Z27 | rozdíly uvnitř území | 0,04 | 31,61 | 32,99 | 4,2 |  |
-| Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,6 %, v Česku 44 % (relativně o 3,6 % vyšší). | Z28 | odchylka od ČR | 0,04 | 45,6 | 44 | 3,6 |  |
-| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší). | Z29 | odchylka od ČR | 0,03 | 9,5 | 9,2 | 3,3 |  |
+| Sekce F tvořila v roce 2022 v Libereckém kraji 4,44 % zaměstnanců (přepočtené počty), v Česku 5,33 % (relativně o 16,7 % nižší). | Z14 | mzdy a zaměstnanost | 0,17 | 4,44 | 5,33 | 16,7 |  |
+| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší). | Z15 | rozdíly uvnitř území | 0,16 | 36,1 | 31,14 | 15,9 |  |
+| Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší). | Z16 | rozdíly uvnitř území | 0,16 | 36,08 | 31,14 | 15,9 |  |
+| Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,8 %, v Česku 38,8 % (relativně o 15,5 % vyšší). | Z17 | odchylka od ČR | 0,15 | 44,8 | 38,8 | 15,5 |  |
+| Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,9 %, v Česku 50,7 % (relativně o 11,4 % nižší). | Z18 | odchylka od ČR | 0,11 | 44,9 | 50,7 | 11,4 |  |
+| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší). | Z19 | rozdíly uvnitř území | 0,09 | 36,1 | 32,99 | 9,4 |  |
+| Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší). | Z20 | rozdíly uvnitř území | 0,09 | 36,08 | 32,99 | 9,4 |  |
+| Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 85,9 %, v Česku 79 % (relativně o 8,7 % vyšší). | Z21 | odchylka od ČR | 0,09 | 85,9 | 79 | 8,7 |  |
+| Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, průměr let 2024–2025 je 3,2 % (relativně o 8,4 % vyšší). | Z22 | změna trendu | 0,08 | 3,47 | 3,2 | 8,4 |  |
+| Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší). | Z23 | odchylka od ČR | 0,08 | 22,1 | 23,9 | 7,5 |  |
+| Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,3 %, v Česku 82,5 % (relativně o 7 % vyšší). | Z24 | odchylka od ČR | 0,07 | 88,3 | 82,5 | 7 |  |
+| Průměrná mzda v sekci F dosahovala v roce 2022 v Libereckém kraji 91,5 % průměrné mzdy všech odvětví kraje, v Česku 85,8 % (relativně o 6,6 % vyšší). | Z25 | mzdy a zaměstnanost | 0,07 | 91,5 | 85,8 | 6,6 |  |
+| Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,8 %, ve všech oborech 59,1 % (ČSÚ; relativně o 6,3 % vyšší). | Z26 | aktivita oboru vůči kraji | 0,06 | 62,8 | 59,1 | 6,3 |  |
+| Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,3 %, v Česku 9,9 % (relativně o 6,1 % nižší). | Z27 | odchylka od ČR | 0,06 | 9,3 | 9,9 | 6,1 |  |
+| Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,14 (relativně o 5,9 % vyšší). | Z28 | odchylka od ČR | 0,06 | 32,99 | 31,14 | 5,9 |  |
+| Na 1 000 obyvatel připadá v okrese Semily 31,61 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,2 % nižší). | Z29 | rozdíly uvnitř území | 0,04 | 31,61 | 32,99 | 4,2 |  |
+| V sekci F se počet zaměstnanců mezi lety 2018 a 2022 změnil v Libereckém kraji z 6 tis. na 6,4 tis. (index 1,07), v Česku z 207,9 tis. na 214,9 tis. (index 1,03); index je relativně o 3,9 % vyšší než v Česku. | Z30 | mzdy a zaměstnanost | 0,04 | 1,07 | 1,03 | 3,9 |  |
+| Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,6 %, v Česku 44 % (relativně o 3,6 % vyšší). | Z31 | odchylka od ČR | 0,04 | 45,6 | 44 | 3,6 |  |
+| Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší). | Z32 | mzdy a zaměstnanost | 0,03 | 33 623 | 34 840 | 3,5 |  |
+| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší). | Z33 | odchylka od ČR | 0,03 | 9,5 | 9,2 | 3,3 |  |
 
 > Síla = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Rozdíly pod 3 % relativně se nehlásí. Položky struktury s podílem pod 5 % v území i v ČR se nehlásí. Popisy jsou věcné, bez interpretace.

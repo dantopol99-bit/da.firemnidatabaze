@@ -218,6 +218,41 @@ je proto v katalogu „nelze naplnit“. Náhradou v reportu jsou dynamika územ
 z RES (T10) a věková struktura (T09). V RES05 je vidět mimořádný výkyv: v 1. čtvrtletí 2023 zaniklo
 v ČR **200 977 FO** (obvykle 15–45 tis. za čtvrtletí).
 
+## Zaměstnanost a mzdy (Blok 6, T20–T21)
+
+Co ČSÚ v DataStatu publikuje (ověřeno v katalogu sad a výběrů, 1. 10. 2026):
+
+| výběr (sada) | území | odvětví | roky | zjišťování | použití |
+|---|---|---|---|---|---|
+| **MZDCRRT2** (MZDCRR) | 14 krajů | 19 sekcí CZ-NACE + celkem | 2010–2022 (2022 předběžně) | roční, pracovištní metoda | T20 – obor × kraj |
+| **MZDCRRT1** (MZDCRR) | ČR | sekce + celkem | 2010–2022 | roční | T20 – ČR |
+| **MZDRT2** (MZDR) | ČR | sekce + B–E + celkem | 2000–2025 | čtvrtletní, kumulace za rok | T21 – ČR × sekce pro novější roky |
+| **MZDRT5** (MZDR) | ČR, regiony, kraje | jen celkem | 2011–2025 | čtvrtletní, pracovištní metoda | T21 – kraje za všechna odvětví |
+| WGEN02BT02 (WGEN02B) | ČR, kraje | jen celkem | 2011–2024 | Struktura mezd | nepoužito: medián za kraje jen podle pohlaví, bez celku a bez odvětví |
+
+- **Kraj × sekce** existuje jen v ročním zjišťování (MZDCRR) a končí rokem 2022. V čtvrtletním
+  zjišťování (MZDR) ČSÚ kombinaci kraj × odvětví zakazuje (pravidla výběru sady). Okresy ani oddíly
+  CZ-NACE ČSÚ nepublikuje.
+- Obě sady mají přepočtené počty (na plný úvazek) i fyzické osoby; report používá **přepočtené počty**
+  a **průměrnou mzdu na přepočtené počty**. Načítají se oba typy (`res.csu_mzdy`).
+- **Medián** za kraj × odvětví ČSÚ nepublikuje, report proto uvádí průměr a říká to v poznámce.
+- **Nic se nedopočítává z jiných úrovní.** Kde obor × kraj chybí, kapitola to říká a použije nejbližší
+  publikovanou úroveň s označením: okres → kraj, oddíl/skupina/třída → sekce, roky po 2022 → kraj za
+  všechna odvětví a ČR za sekci (T21). Obor přes více sekcí → T20 a T21 se nezveřejní s důvodem.
+  Roční a čtvrtletní zjišťování se v řadách nespojují (hodnoty se mírně liší).
+- Odvozené ukazatele jsou jen poměry publikovaných čísel téhož zjišťování a roku: podíl kraje na ČR,
+  podíl oboru na zaměstnancích území, mzda proti ČR (ČR = 100) a proti všem odvětvím území (= 100).
+  Zaměstnanci se zaokrouhlují na 0,1 tis., mzdy na celé Kč (jak ČSÚ publikuje). Práh 10 subjektů se
+  na publikované údaje ČSÚ nevztahuje.
+- **Zaměstnanci ≠ registrované subjekty**: statistika zahrnuje jen zaměstnance v pracovním poměru
+  (přepočtené počty), ne podnikající fyzické osoby. Pilot: 6,4 tis. zaměstnanců stavebnictví
+  v Libereckém kraji proti 14 799 registrovaným subjektům, z nichž 88,3 % jsou FO.
+- **Detektor** má typ `mzdy_zamestnanost`: mzda v oboru kraj proti ČR, mzda v oboru proti všem
+  odvětvím (kraj proti ČR), podíl oboru na zaměstnancích (kraj proti ČR), vývoj mzdy a zaměstnanců
+  (index posledního roku k prvnímu) proti ČR. Pravidlo 3 % platí stejně.
+- Import: `python -m firemni_databaze.res_import mzdy` (i součást `agregaty`), každý výběr ve vlastní
+  dávce `dev.import_davka`.
+
 ## Ukazatele, které nelze (plně) naplnit
 
 | ukazatel | proč |
@@ -230,3 +265,4 @@ v ČR **200 977 FO** (obvykle 15–45 tis. za čtvrtletí).
 | `AKTIVNI_PODIL_KRAJ` za okres | ČSÚ podíl aktivity za okres podle převažující činnosti nepublikuje, uvádí se krajský |
 | `OBYVATELE` okresu Praha | v OBY02A nemá Praha okres; použije se kraj Hlavní město Praha (totožné území) |
 | `PORADI_*` pro ČR | nemá smysl |
+| `MZDY_*` obor × kraj jen částečně | ČSÚ publikuje jen sekce, jen kraje, jen roky 2010–2022 (roční zjišťování); medián vůbec |

@@ -40,13 +40,14 @@
    "ČSÚ, DataStat, sada OBY02A – počet obyvatel k 31. 12. 2025",
    "ČSÚ, DataStat, výběr RES02QT1 – podíl subjektů se zjištěnou aktivitou, 2026-Q2",
    "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
-   "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)"
+   "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
+   "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy"
   ],
   "licence": {
    "nazev": "CC BY 4.0",
    "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
   },
-  "vygenerovano": "2026-10-01T10:58:04+00:00",
+  "vygenerovano": "2026-10-01T11:16:16+00:00",
   "ukazatele": [
    {
     "kod": "REG_POCET",
@@ -383,6 +384,70 @@
     "definice": "Absolutní hodnota 100 × (hodnota / srovnání − 1), zaokrouhleno na 0,1; směr (vyšší / nižší) je ve větě zjištění.",
     "chybejici_hodnoty": "U divergence pořadí se neuvádí.",
     "vyklad": "Pod 3 % se rozdíl nehlásí a v textu se popisuje jako „srovnatelné“."
+   },
+   {
+    "kod": "MZDY_ZAM_OBOR",
+    "nazev": "Zaměstnanci v oboru a kraji (tis. osob, přepočtené počty)",
+    "typ": "kontext",
+    "definice": "Průměrný evidenční počet zaměstnanců přepočtený na plný úvazek v sekci CZ-NACE oboru a v kraji (pracovištní metoda) nebo v ČR.",
+    "chybejici_hodnoty": "Jen jednotlivé sekce CZ-NACE (oddíl a nižší úrovně → sekce s označením); okresy ČSÚ nepublikuje (→ kraj s označením); kraj × sekce jen 2010–2022 (2022 předběžně).",
+    "vyklad": "Zaměstnanci v pracovním poměru, ne podnikající fyzické osoby; nesrovnává se s počtem registrovaných subjektů."
+   },
+   {
+    "kod": "MZDY_ZAM_PODIL_CR",
+    "nazev": "Podíl kraje na zaměstnancích oboru v ČR (%)",
+    "typ": "podil",
+    "definice": "Zaměstnanci oboru v kraji / zaměstnanci oboru v ČR × 100, obojí z ročního zjišťování.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Srovnávejte s podílem kraje na registrovaných subjektech oboru (REG_PODIL_CR)."
+   },
+   {
+    "kod": "MZDY_ZAM_PODIL_UZEMI",
+    "nazev": "Podíl oboru na zaměstnancích území (%)",
+    "typ": "podil",
+    "definice": "Zaměstnanci oboru / zaměstnanci všech odvětví v témže území × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Váha oboru na trhu práce území; srovnání kraje s ČR ukazuje specializaci podle zaměstnanosti."
+   },
+   {
+    "kod": "MZDY_MZDA_OBOR",
+    "nazev": "Průměrná hrubá měsíční mzda v oboru a kraji (Kč)",
+    "typ": "kontext",
+    "definice": "Průměrná hrubá měsíční mzda na přepočtené počty zaměstnanců v sekci CZ-NACE oboru a v kraji nebo v ČR.",
+    "chybejici_hodnoty": "Jako MZDY_ZAM_OBOR. Medián za kraj × odvětví ČSÚ nepublikuje (za kraje jen podle pohlaví).",
+    "vyklad": "Průměr je citlivý na vysoké mzdy; medián pro kraj × odvětví není k dispozici."
+   },
+   {
+    "kod": "MZDY_MZDA_INDEX_CR",
+    "nazev": "Mzda v oboru a kraji proti oboru v ČR (ČR = 100)",
+    "typ": "index",
+    "definice": "Průměrná mzda oboru v kraji / průměrná mzda oboru v ČR × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Pod 100 = obor v kraji platí méně než obor v ČR."
+   },
+   {
+    "kod": "MZDY_MZDA_INDEX_UZEMI",
+    "nazev": "Mzda v oboru proti všem odvětvím území (= 100)",
+    "typ": "index",
+    "definice": "Průměrná mzda oboru / průměrná mzda všech odvětví v témže území × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Postavení oboru mezi odvětvími téhož území."
+   },
+   {
+    "kod": "MZDY_ZAM_UROVEN",
+    "nazev": "Zaměstnanci v nejbližší publikované úrovni (tis. osob, přepočtené počty)",
+    "typ": "kontext",
+    "definice": "Kraj za všechna odvětví nebo ČR za sekci oboru – pro roky, za které ČSÚ obor × kraj nepublikuje.",
+    "chybejici_hodnoty": "Kraj × odvětví čtvrtletní zjišťování nepublikuje.",
+    "vyklad": "Jiné zjišťování než MZDY_ZAM_OBOR; řady se nespojují."
+   },
+   {
+    "kod": "MZDY_MZDA_UROVEN",
+    "nazev": "Průměrná mzda v nejbližší publikované úrovni (Kč)",
+    "typ": "kontext",
+    "definice": "Kraj za všechna odvětví nebo ČR za sekci oboru – pro roky, za které ČSÚ obor × kraj nepublikuje.",
+    "chybejici_hodnoty": "Kraj × odvětví čtvrtletní zjišťování nepublikuje.",
+    "vyklad": "Jiné zjišťování než MZDY_MZDA_OBOR; řady se nespojují."
    }
   ]
  },
@@ -2241,6 +2306,556 @@
    ]
   },
   {
+   "kod": "T20_mzdy_obor",
+   "nazev": "Zaměstnanci a průměrné mzdy v oboru – kraje a ČR (ČSÚ, roční zjišťování)",
+   "sloupce": [
+    {
+     "kod": "zam",
+     "nazev": "Zaměstnanci v oboru (tis., přepočtené)",
+     "ukazatel": "MZDY_ZAM_OBOR"
+    },
+    {
+     "kod": "zam_podil_cr",
+     "nazev": "Podíl na zaměstnancích oboru v ČR (%)",
+     "ukazatel": "MZDY_ZAM_PODIL_CR"
+    },
+    {
+     "kod": "zam_podil_uzemi",
+     "nazev": "Podíl oboru na zaměstnancích území (%)",
+     "ukazatel": "MZDY_ZAM_PODIL_UZEMI"
+    },
+    {
+     "kod": "mzda",
+     "nazev": "Průměrná mzda v oboru (Kč)",
+     "ukazatel": "MZDY_MZDA_OBOR"
+    },
+    {
+     "kod": "mzda_index_cr",
+     "nazev": "Mzda proti oboru v ČR (ČR = 100)",
+     "ukazatel": "MZDY_MZDA_INDEX_CR"
+    },
+    {
+     "kod": "mzda_index_uzemi",
+     "nazev": "Mzda proti všem odvětvím území (= 100)",
+     "ukazatel": "MZDY_MZDA_INDEX_UZEMI"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Liberecký kraj – 2018",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2018,
+     "hodnoty": {
+      "zam": 6.0,
+      "zam_podil_cr": 2.89,
+      "zam_podil_uzemi": 4.07,
+      "mzda": 27419,
+      "mzda_index_cr": 96.9,
+      "mzda_index_uzemi": 91.6
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Liberecký kraj – 2019",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2019,
+     "hodnoty": {
+      "zam": 6.2,
+      "zam_podil_cr": 2.96,
+      "zam_podil_uzemi": 4.23,
+      "mzda": 29459,
+      "mzda_index_cr": 97.6,
+      "mzda_index_uzemi": 91.2
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Liberecký kraj – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2020,
+     "hodnoty": {
+      "zam": 6.3,
+      "zam_podil_cr": 3.01,
+      "zam_podil_uzemi": 4.4,
+      "mzda": 30489,
+      "mzda_index_cr": 97.0,
+      "mzda_index_uzemi": 91.9
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Liberecký kraj – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2021,
+     "hodnoty": {
+      "zam": 6.4,
+      "zam_podil_cr": 2.99,
+      "zam_podil_uzemi": 4.4,
+      "mzda": 31437,
+      "mzda_index_cr": 96.5,
+      "mzda_index_uzemi": 90.8
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Liberecký kraj – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2022,
+     "hodnoty": {
+      "zam": 6.4,
+      "zam_podil_cr": 2.98,
+      "zam_podil_uzemi": 4.44,
+      "mzda": 33623,
+      "mzda_index_cr": 96.5,
+      "mzda_index_uzemi": 91.5
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Česko – 2018",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2018,
+     "hodnoty": {
+      "zam": 207.9,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 5.1,
+      "mzda": 28298,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 88.2
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – 2019",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2019,
+     "hodnoty": {
+      "zam": 209.8,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 5.16,
+      "mzda": 30187,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 87.2
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2020,
+     "hodnoty": {
+      "zam": 209.3,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 5.24,
+      "mzda": 31444,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 86.9
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2021,
+     "hodnoty": {
+      "zam": 214.2,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 5.35,
+      "mzda": 32582,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 85.1
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2022,
+     "hodnoty": {
+      "zam": 214.9,
+      "zam_podil_cr": null,
+      "zam_podil_uzemi": 5.33,
+      "mzda": 34840,
+      "mzda_index_cr": null,
+      "mzda_index_uzemi": 85.8
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Královéhradecký kraj – 2018",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2018,
+     "hodnoty": {
+      "zam": 8.6,
+      "zam_podil_cr": 4.14,
+      "zam_podil_uzemi": 4.33,
+      "mzda": 26064,
+      "mzda_index_cr": 92.1,
+      "mzda_index_uzemi": 87.2
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Královéhradecký kraj – 2019",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2019,
+     "hodnoty": {
+      "zam": 8.3,
+      "zam_podil_cr": 3.96,
+      "zam_podil_uzemi": 4.14,
+      "mzda": 28413,
+      "mzda_index_cr": 94.1,
+      "mzda_index_uzemi": 87.4
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Královéhradecký kraj – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2020,
+     "hodnoty": {
+      "zam": 8.3,
+      "zam_podil_cr": 3.97,
+      "zam_podil_uzemi": 4.25,
+      "mzda": 29419,
+      "mzda_index_cr": 93.6,
+      "mzda_index_uzemi": 86.5
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Královéhradecký kraj – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2021,
+     "hodnoty": {
+      "zam": 8.4,
+      "zam_podil_cr": 3.92,
+      "zam_podil_uzemi": 4.19,
+      "mzda": 30779,
+      "mzda_index_cr": 94.5,
+      "mzda_index_uzemi": 85.4
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Královéhradecký kraj – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2022,
+     "hodnoty": {
+      "zam": 8.2,
+      "zam_podil_cr": 3.82,
+      "zam_podil_uzemi": 4.13,
+      "mzda": 33274,
+      "mzda_index_cr": 95.5,
+      "mzda_index_uzemi": 87.8
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Karlovarský kraj – 2018",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2018,
+     "hodnoty": {
+      "zam": 4.1,
+      "zam_podil_cr": 1.97,
+      "zam_podil_uzemi": 4.57,
+      "mzda": 24923,
+      "mzda_index_cr": 88.1,
+      "mzda_index_uzemi": 89.0
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Karlovarský kraj – 2019",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2019,
+     "hodnoty": {
+      "zam": 4.1,
+      "zam_podil_cr": 1.95,
+      "zam_podil_uzemi": 4.66,
+      "mzda": 27237,
+      "mzda_index_cr": 90.2,
+      "mzda_index_uzemi": 90.2
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Karlovarský kraj – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2020,
+     "hodnoty": {
+      "zam": 4.2,
+      "zam_podil_cr": 2.01,
+      "zam_podil_uzemi": 5.01,
+      "mzda": 28492,
+      "mzda_index_cr": 90.6,
+      "mzda_index_uzemi": 91.3
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Karlovarský kraj – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2021,
+     "hodnoty": {
+      "zam": 4.0,
+      "zam_podil_cr": 1.87,
+      "zam_podil_uzemi": 4.88,
+      "mzda": 29271,
+      "mzda_index_cr": 89.8,
+      "mzda_index_uzemi": 88.1
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Karlovarský kraj – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2022,
+     "hodnoty": {
+      "zam": 3.9,
+      "zam_podil_cr": 1.81,
+      "zam_podil_uzemi": 4.76,
+      "mzda": 31502,
+      "mzda_index_cr": 90.4,
+      "mzda_index_uzemi": 89.7
+     },
+     "poznamka": "předběžné hodnoty"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Zdroj: ČSÚ, DataStat, výběry MZDCRRT2 (kraje × sekce CZ-NACE) a MZDCRRT1 (ČR × sekce) – roční zjišťování, pracovištní metoda (kraj podle místa pracoviště). ČSÚ je publikuje za roky 2010–2022.",
+    "Zaměstnanci = průměrný evidenční počet zaměstnanců přepočtený na plný úvazek; mzda = průměrná hrubá měsíční mzda na přepočtené počty. Nezahrnuje podnikající fyzické osoby bez pracovního poměru, proto se nesrovnává s počty registrovaných subjektů.",
+    "Průměr, ne medián: medián mezd ČSÚ za kraje publikuje jen podle pohlaví a bez členění podle odvětví."
+   ],
+   "sekce": "F"
+  },
+  {
+   "kod": "T21_mzdy_aktualni",
+   "nazev": "Zaměstnanci a průměrné mzdy – novější roky v nejbližších publikovaných úrovních (ČSÚ, čtvrtletní zjišťování)",
+   "sloupce": [
+    {
+     "kod": "zam",
+     "nazev": "Zaměstnanci (tis., přepočtené)",
+     "ukazatel": "MZDY_ZAM_UROVEN"
+    },
+    {
+     "kod": "mzda",
+     "nazev": "Průměrná mzda (Kč)",
+     "ukazatel": "MZDY_MZDA_UROVEN"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Liberecký kraj – všechna odvětví – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "nace": "0",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 143.3,
+      "mzda": 38599
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Liberecký kraj – všechna odvětví – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "nace": "0",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 146.2,
+      "mzda": 41450
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Liberecký kraj – všechna odvětví – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "nace": "0",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 148.6,
+      "mzda": 44006
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Královéhradecký kraj – všechna odvětví – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "nace": "0",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 197.4,
+      "mzda": 39788
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Královéhradecký kraj – všechna odvětví – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "nace": "0",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 196.7,
+      "mzda": 42122
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Královéhradecký kraj – všechna odvětví – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "nace": "0",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 197.5,
+      "mzda": 44862
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Karlovarský kraj – všechna odvětví – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "nace": "0",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 83.8,
+      "mzda": 37041
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Karlovarský kraj – všechna odvětví – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "nace": "0",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 85.6,
+      "mzda": 39257
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Karlovarský kraj – všechna odvětví – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "nace": "0",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 87.4,
+      "mzda": 41903
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Česko – všechna odvětví – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "0",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 4047.6,
+      "mzda": 42801
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – všechna odvětví – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "0",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 4048.6,
+      "mzda": 45643
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – všechna odvětví – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "0",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 4034.5,
+      "mzda": 48670
+     },
+     "poznamka": "předběžné hodnoty"
+    },
+    {
+     "popis": "Česko – sekce F – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "F",
+     "rok": 2023,
+     "hodnoty": {
+      "zam": 217.4,
+      "mzda": 36084
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – sekce F – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "F",
+     "rok": 2024,
+     "hodnoty": {
+      "zam": 217.5,
+      "mzda": 39153
+     },
+     "poznamka": null
+    },
+    {
+     "popis": "Česko – sekce F – 2025",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "nace": "F",
+     "rok": 2025,
+     "hodnoty": {
+      "zam": 216.8,
+      "mzda": 42337
+     },
+     "poznamka": "předběžné hodnoty"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Obor × kraj ČSÚ za roky po 2022 nepublikuje: roční zjišťování podle krajů a sekcí končí rokem 2022 a čtvrtletní zjišťování kombinaci kraj × odvětví nepublikuje. Uvádějí se proto nejbližší publikované úrovně: kraje za všechna odvětví a ČR za sekci F.",
+    "Zdroj: ČSÚ, DataStat, výběry MZDRT5 (ČR a kraje, pracovištní metoda) a MZDRT2 (ČR × sekce) – čtvrtletní zjišťování, kumulace za rok. Hodnoty se od ročního zjišťování mírně liší; obě řady se nespojují."
+   ]
+  },
+  {
    "kod": "T10_zaniky_po",
    "nazev": "Zaniklé právnické osoby v oboru a území podle roku zániku (RES, od 2023)",
    "sloupce": [
@@ -3227,11 +3842,24 @@
      }
     },
     {
-     "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
+     "popis": "Sekce F tvořila v roce 2022 v Libereckém kraji 4,44 % zaměstnanců (přepočtené počty), v Česku 5,33 % (relativně o 16,7 % nižší).",
      "typ": "polozka",
      "id": "Z14",
      "hodnoty": {
       "id": "Z14",
+      "typ": "mzdy a zaměstnanost",
+      "sila": 0.167,
+      "hodnota": 4.44,
+      "srovnani": 5.33,
+      "rozdil_pct": 16.7
+     }
+    },
+    {
+     "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
+     "typ": "polozka",
+     "id": "Z15",
+     "hodnoty": {
+      "id": "Z15",
       "typ": "rozdíly uvnitř území",
       "sila": 0.1593,
       "hodnota": 36.1,
@@ -3242,9 +3870,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
      "typ": "polozka",
-     "id": "Z15",
+     "id": "Z16",
      "hodnoty": {
-      "id": "Z15",
+      "id": "Z16",
       "typ": "rozdíly uvnitř území",
       "sila": 0.1586,
       "hodnota": 36.08,
@@ -3255,9 +3883,9 @@
     {
      "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,8 %, v Česku 38,8 % (relativně o 15,5 % vyšší).",
      "typ": "polozka",
-     "id": "Z16",
+     "id": "Z17",
      "hodnoty": {
-      "id": "Z16",
+      "id": "Z17",
       "typ": "odchylka od ČR",
       "sila": 0.1546,
       "hodnota": 44.8,
@@ -3268,9 +3896,9 @@
     {
      "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,9 %, v Česku 50,7 % (relativně o 11,4 % nižší).",
      "typ": "polozka",
-     "id": "Z17",
+     "id": "Z18",
      "hodnoty": {
-      "id": "Z17",
+      "id": "Z18",
       "typ": "odchylka od ČR",
       "sila": 0.1144,
       "hodnota": 44.9,
@@ -3281,9 +3909,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší).",
      "typ": "polozka",
-     "id": "Z18",
+     "id": "Z19",
      "hodnoty": {
-      "id": "Z18",
+      "id": "Z19",
       "typ": "rozdíly uvnitř území",
       "sila": 0.0943,
       "hodnota": 36.1,
@@ -3294,9 +3922,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší).",
      "typ": "polozka",
-     "id": "Z19",
+     "id": "Z20",
      "hodnoty": {
-      "id": "Z19",
+      "id": "Z20",
       "typ": "rozdíly uvnitř území",
       "sila": 0.0937,
       "hodnota": 36.08,
@@ -3307,9 +3935,9 @@
     {
      "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 85,9 %, v Česku 79 % (relativně o 8,7 % vyšší).",
      "typ": "polozka",
-     "id": "Z20",
+     "id": "Z21",
      "hodnoty": {
-      "id": "Z20",
+      "id": "Z21",
       "typ": "odchylka od ČR",
       "sila": 0.0873,
       "hodnota": 85.9,
@@ -3320,9 +3948,9 @@
     {
      "popis": "Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, průměr let 2024–2025 je 3,2 % (relativně o 8,4 % vyšší).",
      "typ": "polozka",
-     "id": "Z21",
+     "id": "Z22",
      "hodnoty": {
-      "id": "Z21",
+      "id": "Z22",
       "typ": "změna trendu",
       "sila": 0.0844,
       "hodnota": 3.47,
@@ -3333,9 +3961,9 @@
     {
      "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší).",
      "typ": "polozka",
-     "id": "Z22",
+     "id": "Z23",
      "hodnoty": {
-      "id": "Z22",
+      "id": "Z23",
       "typ": "odchylka od ČR",
       "sila": 0.0753,
       "hodnota": 22.1,
@@ -3346,9 +3974,9 @@
     {
      "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,3 %, v Česku 82,5 % (relativně o 7 % vyšší).",
      "typ": "polozka",
-     "id": "Z23",
+     "id": "Z24",
      "hodnoty": {
-      "id": "Z23",
+      "id": "Z24",
       "typ": "odchylka od ČR",
       "sila": 0.0703,
       "hodnota": 88.3,
@@ -3357,11 +3985,24 @@
      }
     },
     {
+     "popis": "Průměrná mzda v sekci F dosahovala v roce 2022 v Libereckém kraji 91,5 % průměrné mzdy všech odvětví kraje, v Česku 85,8 % (relativně o 6,6 % vyšší).",
+     "typ": "polozka",
+     "id": "Z25",
+     "hodnoty": {
+      "id": "Z25",
+      "typ": "mzdy a zaměstnanost",
+      "sila": 0.0664,
+      "hodnota": 91.5,
+      "srovnani": 85.8,
+      "rozdil_pct": 6.6
+     }
+    },
+    {
      "popis": "Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,8 %, ve všech oborech 59,1 % (ČSÚ; relativně o 6,3 % vyšší).",
      "typ": "polozka",
-     "id": "Z24",
+     "id": "Z26",
      "hodnoty": {
-      "id": "Z24",
+      "id": "Z26",
       "typ": "aktivita oboru vůči kraji",
       "sila": 0.0626,
       "hodnota": 62.8,
@@ -3372,9 +4013,9 @@
     {
      "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,3 %, v Česku 9,9 % (relativně o 6,1 % nižší).",
      "typ": "polozka",
-     "id": "Z25",
+     "id": "Z27",
      "hodnoty": {
-      "id": "Z25",
+      "id": "Z27",
       "typ": "odchylka od ČR",
       "sila": 0.0606,
       "hodnota": 9.3,
@@ -3385,9 +4026,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,14 (relativně o 5,9 % vyšší).",
      "typ": "polozka",
-     "id": "Z26",
+     "id": "Z28",
      "hodnoty": {
-      "id": "Z26",
+      "id": "Z28",
       "typ": "odchylka od ČR",
       "sila": 0.0594,
       "hodnota": 32.99,
@@ -3398,9 +4039,9 @@
     {
      "popis": "Na 1 000 obyvatel připadá v okrese Semily 31,61 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,2 % nižší).",
      "typ": "polozka",
-     "id": "Z27",
+     "id": "Z29",
      "hodnoty": {
-      "id": "Z27",
+      "id": "Z29",
       "typ": "rozdíly uvnitř území",
       "sila": 0.0418,
       "hodnota": 31.61,
@@ -3409,11 +4050,24 @@
      }
     },
     {
+     "popis": "V sekci F se počet zaměstnanců mezi lety 2018 a 2022 změnil v Libereckém kraji z 6 tis. na 6,4 tis. (index 1,07), v Česku z 207,9 tis. na 214,9 tis. (index 1,03); index je relativně o 3,9 % vyšší než v Česku.",
+     "typ": "polozka",
+     "id": "Z30",
+     "hodnoty": {
+      "id": "Z30",
+      "typ": "mzdy a zaměstnanost",
+      "sila": 0.0388,
+      "hodnota": 1.07,
+      "srovnani": 1.03,
+      "rozdil_pct": 3.9
+     }
+    },
+    {
      "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,6 %, v Česku 44 % (relativně o 3,6 % vyšší).",
      "typ": "polozka",
-     "id": "Z28",
+     "id": "Z31",
      "hodnoty": {
-      "id": "Z28",
+      "id": "Z31",
       "typ": "odchylka od ČR",
       "sila": 0.0364,
       "hodnota": 45.6,
@@ -3422,11 +4076,24 @@
      }
     },
     {
+     "popis": "Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší).",
+     "typ": "polozka",
+     "id": "Z32",
+     "hodnoty": {
+      "id": "Z32",
+      "typ": "mzdy a zaměstnanost",
+      "sila": 0.0349,
+      "hodnota": 33623,
+      "srovnani": 34840,
+      "rozdil_pct": 3.5
+     }
+    },
+    {
      "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší).",
      "typ": "polozka",
-     "id": "Z29",
+     "id": "Z33",
      "hodnoty": {
-      "id": "Z29",
+      "id": "Z33",
       "typ": "odchylka od ČR",
       "sila": 0.0326,
       "hodnota": 9.5,
@@ -3863,6 +4530,35 @@
    "id": "Z13"
   },
   {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "podíl oboru na zaměstnancích, kraj proti ČR",
+   "sila": 0.167,
+   "hodnota": 4.44,
+   "srovnani": 5.33,
+   "rozdil_pct": 16.7,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Podíl sekce F na zaměstnancích kraje 2022 (%)",
+     "hodnota": 4.44,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2022",
+     "sloupec": "zam_podil_uzemi"
+    },
+    {
+     "popis": "Podíl sekce F na zaměstnancích ČR 2022 (%)",
+     "hodnota": 5.33,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "zam_podil_uzemi"
+    }
+   ],
+   "popis": "Sekce F tvořila v roce 2022 v Libereckém kraji 4,44 % zaměstnanců (přepočtené počty), v Česku 5,33 % (relativně o 16,7 % nižší).",
+   "poradi": 14,
+   "id": "Z14"
+  },
+  {
    "typ": "rozdily_uvnitr_uzemi",
    "typ_nazev": "rozdíly uvnitř území",
    "podtyp": "hustota okresu proti ČR",
@@ -3888,8 +4584,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
-   "poradi": 14,
-   "id": "Z14"
+   "poradi": 15,
+   "id": "Z15"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -3917,8 +4613,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
-   "poradi": 15,
-   "id": "Z15"
+   "poradi": 16,
+   "id": "Z16"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3946,8 +4642,8 @@
     }
    ],
    "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,8 %, v Česku 38,8 % (relativně o 15,5 % vyšší).",
-   "poradi": 16,
-   "id": "Z16"
+   "poradi": 17,
+   "id": "Z17"
   },
   {
    "typ": "odchylka_od_cr",
@@ -3975,8 +4671,8 @@
     }
    ],
    "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,9 %, v Česku 50,7 % (relativně o 11,4 % nižší).",
-   "poradi": 17,
-   "id": "Z17"
+   "poradi": 18,
+   "id": "Z18"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -4004,8 +4700,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší).",
-   "poradi": 18,
-   "id": "Z18"
+   "poradi": 19,
+   "id": "Z19"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -4033,8 +4729,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší).",
-   "poradi": 19,
-   "id": "Z19"
+   "poradi": 20,
+   "id": "Z20"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4062,8 +4758,8 @@
     }
    ],
    "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 85,9 %, v Česku 79 % (relativně o 8,7 % vyšší).",
-   "poradi": 20,
-   "id": "Z20"
+   "poradi": 21,
+   "id": "Z21"
   },
   {
    "typ": "zmena_trendu",
@@ -4105,8 +4801,8 @@
     }
    ],
    "popis": "Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, průměr let 2024–2025 je 3,2 % (relativně o 8,4 % vyšší).",
-   "poradi": 21,
-   "id": "Z21"
+   "poradi": 22,
+   "id": "Z22"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4134,8 +4830,8 @@
     }
    ],
    "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší).",
-   "poradi": 22,
-   "id": "Z22"
+   "poradi": 23,
+   "id": "Z23"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4163,8 +4859,37 @@
     }
    ],
    "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,3 %, v Česku 82,5 % (relativně o 7 % vyšší).",
-   "poradi": 23,
-   "id": "Z23"
+   "poradi": 24,
+   "id": "Z24"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "mzda v oboru proti všem odvětvím území, kraj proti ČR",
+   "sila": 0.0664,
+   "hodnota": 91.5,
+   "srovnani": 85.8,
+   "rozdil_pct": 6.6,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Mzda v sekci F proti všem odvětvím kraje 2022",
+     "hodnota": 91.5,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2022",
+     "sloupec": "mzda_index_uzemi"
+    },
+    {
+     "popis": "Mzda v sekci F proti všem odvětvím ČR 2022",
+     "hodnota": 85.8,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "mzda_index_uzemi"
+    }
+   ],
+   "popis": "Průměrná mzda v sekci F dosahovala v roce 2022 v Libereckém kraji 91,5 % průměrné mzdy všech odvětví kraje, v Česku 85,8 % (relativně o 6,6 % vyšší).",
+   "poradi": 25,
+   "id": "Z25"
   },
   {
    "typ": "aktivita_oboru",
@@ -4192,8 +4917,8 @@
     }
    ],
    "popis": "Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,8 %, ve všech oborech 59,1 % (ČSÚ; relativně o 6,3 % vyšší).",
-   "poradi": 24,
-   "id": "Z24"
+   "poradi": 26,
+   "id": "Z26"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4221,8 +4946,8 @@
     }
    ],
    "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,3 %, v Česku 9,9 % (relativně o 6,1 % nižší).",
-   "poradi": 25,
-   "id": "Z25"
+   "poradi": 27,
+   "id": "Z27"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4250,8 +4975,8 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,14 (relativně o 5,9 % vyšší).",
-   "poradi": 26,
-   "id": "Z26"
+   "poradi": 28,
+   "id": "Z28"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -4279,8 +5004,65 @@
     }
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Semily 31,61 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,2 % nižší).",
-   "poradi": 27,
-   "id": "Z27"
+   "poradi": 29,
+   "id": "Z29"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "vývoj: počet zaměstnanců proti ČR",
+   "sila": 0.0388,
+   "hodnota": 1.07,
+   "srovnani": 1.03,
+   "rozdil_pct": 3.9,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "počet zaměstnanců 2018 – kraj",
+     "hodnota": 6.0,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2018",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2022 – kraj",
+     "hodnota": 6.4,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2022",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2018 – Česko",
+     "hodnota": 207.9,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2018",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "počet zaměstnanců 2022 – Česko",
+     "hodnota": 214.9,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "zam"
+    },
+    {
+     "popis": "Index 2022/2018 – kraj",
+     "hodnota": 1.07,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "hodnota"
+    },
+    {
+     "popis": "Index 2022/2018 – Česko",
+     "hodnota": 1.03,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "srovnani"
+    }
+   ],
+   "popis": "V sekci F se počet zaměstnanců mezi lety 2018 a 2022 změnil v Libereckém kraji z 6 tis. na 6,4 tis. (index 1,07), v Česku z 207,9 tis. na 214,9 tis. (index 1,03); index je relativně o 3,9 % vyšší než v Česku.",
+   "poradi": 30,
+   "id": "Z30"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4308,8 +5090,37 @@
     }
    ],
    "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,6 %, v Česku 44 % (relativně o 3,6 % vyšší).",
-   "poradi": 28,
-   "id": "Z28"
+   "poradi": 31,
+   "id": "Z31"
+  },
+  {
+   "typ": "mzdy_zamestnanost",
+   "typ_nazev": "mzdy a zaměstnanost",
+   "podtyp": "průměrná mzda v oboru proti ČR",
+   "sila": 0.0349,
+   "hodnota": 33623,
+   "srovnani": 34840,
+   "rozdil_pct": 3.5,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Průměrná mzda v sekci F 2022 – kraj (Kč)",
+     "hodnota": 33623,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Liberecký kraj – 2022",
+     "sloupec": "mzda"
+    },
+    {
+     "popis": "Průměrná mzda v sekci F 2022 – Česko (Kč)",
+     "hodnota": 34840,
+     "tabulka": "T20_mzdy_obor",
+     "radek": "Česko – 2022",
+     "sloupec": "mzda"
+    }
+   ],
+   "popis": "Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší).",
+   "poradi": 32,
+   "id": "Z32"
   },
   {
    "typ": "odchylka_od_cr",
@@ -4337,8 +5148,8 @@
     }
    ],
    "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší).",
-   "poradi": 29,
-   "id": "Z29"
+   "poradi": 33,
+   "id": "Z33"
   }
  ]
 }

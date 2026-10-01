@@ -134,7 +134,8 @@ Zdroj, mapování sloupců, kvalita, srovnání s ČSÚ a omezení: [`docs/res_z
 | `03_subjekt.sql` | `res.subjekt` (res_data.csv, PK IČO + datum snímku) a `res.pf_nace` (res_pf_nace.csv) |
 | `04_vysledky.sql` | `res.kvalita` (kvalita snímku), `res.csu_agregat` (publikované počty ČSÚ) |
 | `05_pohledy.sql` | `v_subjekt`, `v_kvalita`, `v_pocty_kraj_sekce`, `v_srovnani_csu`, `v_jadro_kontrola`, `prunik_souhrn()`, pilot |
-| `06_report_zdroje.sql` | `res.csu_obyvatelstvo` (OBY02A), `res.csu_vznik_zanik` (RES05) |
+| `06_report_zdroje.sql` | `res.csu_obyvatelstvo` (OBY02A), `res.csu_vznik_zanik` (RES05), `res.csu_demografie` (RESDP00) |
+| `07_mzdy.sql` | `res.csu_mzdy` – zaměstnanci a průměrné mzdy (MZDCRR, MZDR) |
 
 ```bash
 python -m firemni_databaze.nasad_sql dev            # res používá dev.import_davka
@@ -157,7 +158,7 @@ Metodika a schválená pravidla: [`docs/report_metodika.md`](docs/report_metodik
 [`reporty/katalog_ukazatelu.yaml`](reporty/katalog_ukazatelu.yaml).
 
 ```bash
-python -m firemni_databaze.res_import agregaty      # DataStat: RES02QT1, obyvatelstvo OBY02A, vznik/zánik RES05
+python -m firemni_databaze.res_import agregaty      # DataStat: RES02QT1, OBY02A, RES05, RESDP00, mzdy (MZDCRR, MZDR)
 python -m firemni_databaze.report --obor F --uzemi CZ051 [--srovnani CZ031,CZ053] [--datum 2026-09-15]
 python -m firemni_databaze.report_kontrola reporty/vystupy/*
 ```

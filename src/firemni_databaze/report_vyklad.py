@@ -26,7 +26,8 @@ NBSP = "\u202f"   # úzká nezlomitelná mezera – oddělovač tisíců (kontro
 KOREN = Path(__file__).resolve().parents[2]
 VYKLAD = KOREN / "reporty" / "vyklad"
 ZASTUPNY_TEXT = "ZÁSTUPNÝ TEXT"
-KAPITOLY = {"postaveni": "Postavení území", "struktura": "Struktura", "dynamika": "Dynamika území a kontext ČR"}
+KAPITOLY = {"postaveni": "Postavení území", "struktura": "Struktura", "zamestnanost": "Zaměstnanost a mzdy",
+            "dynamika": "Dynamika území a kontext ČR"}
 ODDILY = {"shrnuti": "Shrnutí", **KAPITOLY}     # oddíly souboru analytika (shrnutí = body strany 2)
 DRUHY_ANALYTIKA = {"Proč to tak může být": "proč", "Co z toho plyne": "plyne"}
 ZJISTENI_NA_KAPITOLU = 5
@@ -142,6 +143,8 @@ def zjisteni_kapitoly(v: Vstup, kapitola: str, L: dict) -> list[dict]:
     def patri(z):
         if z["typ"] == "zmena_trendu":
             return kapitola == "dynamika"
+        if z["typ"] == "mzdy_zamestnanost":
+            return kapitola == "zamestnanost"
         if z["typ"] == "odchylka_od_cr" and z["podtyp"].startswith("struktura"):
             return kapitola == "struktura"
         return kapitola == "postaveni"
@@ -267,6 +270,73 @@ def struktura(v: Vstup, L: dict) -> list[dict]:
 
 
 _FO = {"101", "102", "103", "104", "105", "106", "107", "108", "424", "425"}
+
+
+# ---------------------------------------------------------------------------
+# Co je vidět: zaměstnanost a mzdy (ČSÚ, obor × kraj jen z ročního zjišťování)
+# ---------------------------------------------------------------------------
+
+def zamestnanost(v: Vstup, L: dict) -> list[dict]:
+    t20 = v.t("T20_mzdy_obor")
+    if not t20:
+        duvod = (v.tab.get("T20_mzdy_obor") or {}).get("duvod") or "údaje nejsou k dispozici"
+        return [_blok("vidět", f"Zaměstnance a mzdy za obor ČSÚ v tomto členění nepublikuje: {duvod} ({L['T20']}).")]
+    s = t20.get("sekce", "")
+    kraj = v.uzemi["kraj"] or "CZ"
+    v_kraji = lokativ(kraj)
+    radky = [r for r in t20["radky"] if r["uzemi"] == kraj]
+    cr = {r["rok"]: r for r in t20["radky"] if r["uzemi"] == "CZ"}
+    casti = []
+    if v.uzemi["typ"] == "OKRES":
+        casti.append(f"ČSÚ zaměstnance a mzdy za okresy nepublikuje; uvádí se kraj jako nejbližší publikovaná úroveň "
+                     f"({L['T20']}).")
+    if any("Nejbližší publikovaná úroveň: sekce" in p for p in t20["poznamky"]):
+        casti.append(f"ČSÚ zaměstnance a mzdy publikuje jen po sekcích CZ-NACE; uvádí se sekce {s} ({L['T20']}).")
+    posl = radky[-1] if radky else None
+    c = cr.get(posl["rok"]) if posl else None
+    if posl and c and kraj != "CZ":
+        h, hc = posl["hodnoty"], c["hodnoty"]
+        casti.append(f"Podle ČSÚ (roční zjišťování, pracovištní metoda) pracovalo v roce {posl['rok']} v sekci {s} "
+                     f"{v_kraji} {cz(h['zam'])} tis. zaměstnanců (přepočtené počty), tj. {cz(h['zam_podil_cr'])} % "
+                     f"zaměstnanců sekce v ČR. Sekce tvořila {cz(h['zam_podil_uzemi'])} % zaměstnanců kraje, což je "
+                     f"{vztah(h['zam_podil_uzemi'], hc['zam_podil_uzemi'], lokativ('CZ'))} "
+                     f"({cz(hc['zam_podil_uzemi'])} %) ({L['T20']}).")
+        casti.append(f"Průměrná hrubá měsíční mzda v sekci byla {cz(h['mzda'])} Kč, tj. {cz(h['mzda_index_cr'])} % mzdy "
+                     f"sekce v ČR ({cz(hc['mzda'])} Kč), a dosahovala {cz(h['mzda_index_uzemi'])} % průměrné mzdy "
+                     f"všech odvětví kraje; {lokativ('CZ')} je to {cz(hc['mzda_index_uzemi'])} % ({L['g_mzdy']}, "
+                     f"{L['T20']}).")
+        srov = []
+        for r in t20["radky"]:
+            if r["uzemi"] not in (kraj, "CZ") and r["rok"] == posl["rok"] and r["hodnoty"]["mzda"] is not None:
+                srov.append(f"{lokativ(r['uzemi'])} {cz(r['hodnoty']['mzda'])} Kč "
+                            f"({vztah(r['hodnoty']['mzda'], h['mzda'], v_kraji)})")
+        if srov:
+            casti.append("Ve srovnávacích krajích byla průměrná mzda v sekci " + ", ".join(srov) + f" ({L['T20']}).")
+        prvni, c0 = radky[0], cr.get(radky[0]["rok"])
+        if c0 and prvni is not posl:
+            casti.append(f"Mezi lety {prvni['rok']} a {posl['rok']} vzrostla průměrná mzda v sekci {v_kraji} z "
+                         f"{cz(prvni['hodnoty']['mzda'])} Kč na {cz(h['mzda'])} Kč, {lokativ('CZ')} z "
+                         f"{cz(c0['hodnoty']['mzda'])} Kč na {cz(hc['mzda'])} Kč; počet zaměstnanců sekce {v_kraji} "
+                         f"z {cz(prvni['hodnoty']['zam'])} tis. na {cz(h['zam'])} tis. ({L['T20']}).")
+    t21 = v.radky("T21_mzdy_aktualni")
+    if t21 and posl:
+        rok21 = max(r["rok"] for r in t21)
+        posl21 = {(r["uzemi"], r["nace"]): r for r in t21 if r["rok"] == rok21}
+        k, cr0, crs = posl21.get((kraj, "0")), posl21.get(("CZ", "0")), posl21.get(("CZ", s))
+        veta = (f"Za roky po {posl['rok']} ČSÚ obor × kraj nepublikuje; nejbližší publikované úrovně ukazují pro rok "
+                f"{rok21} průměrnou mzdu")
+        casti_21 = []
+        if k and k["hodnoty"]["mzda"] is not None and kraj != "CZ":
+            casti_21.append(f"{v_kraji} za všechna odvětví {cz(k['hodnoty']['mzda'])} Kč")
+        if cr0 and cr0["hodnoty"]["mzda"] is not None:
+            casti_21.append(f"{lokativ('CZ')} za všechna odvětví {cz(cr0['hodnoty']['mzda'])} Kč")
+        if crs and crs["hodnoty"]["mzda"] is not None:
+            casti_21.append(f"{lokativ('CZ')} v sekci {s} {cz(crs['hodnoty']['mzda'])} Kč")
+        if casti_21:
+            casti.append(veta + " " + ", ".join(casti_21) + f" ({L['T21']}).")
+    if not casti:
+        return [_blok("vidět", f"Údaje ČSÚ o zaměstnancích a mzdách nejsou pro toto území k dispozici ({L['T20']}).")]
+    return [_blok("vidět", " ".join(casti))] + zjisteni_kapitoly(v, "zamestnanost", L)
 
 
 # ---------------------------------------------------------------------------

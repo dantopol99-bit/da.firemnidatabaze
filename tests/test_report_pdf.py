@@ -20,8 +20,9 @@ from tests.test_res_import_db import CONN, SNIMKY
 KOREN = Path(__file__).resolve().parents[1]
 VZOR = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-09-15"
 TYPST = shutil.which("typst")
-L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 20)} | {
-    k: "graf A" for k in ("g_dyn", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik")}
+L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 22)} | {
+    k: "graf A" for k in ("g_dyn", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po",
+                          "g_zanik")}
 VYKLAD_HOTOVY = """# Výklad analytika
 
 <!-- pokyn pro analytika se do sazby nedostane -->
@@ -45,6 +46,16 @@ Hypotéza: obor sídlí jinde, než působí.
 Srovnávat podle hustoty.
 
 ## Struktura
+
+### Proč to tak může být
+
+Text.
+
+### Co z toho plyne
+
+Text.
+
+## Zaměstnanost a mzdy
 
 ### Proč to tak může být
 
@@ -84,7 +95,7 @@ class TestBezDatabaze(unittest.TestCase):
         v = Vstup(json.loads((VZOR / "vysledek.json").read_text(encoding="utf-8")))
         texty = report_vyklad.zjisteni_priloha(v, L)
         bloky = []
-        for f in (report_vyklad.postaveni, report_vyklad.struktura, report_vyklad.dynamika):
+        for f in (report_vyklad.postaveni, report_vyklad.struktura, report_vyklad.zamestnanost, report_vyklad.dynamika):
             bloky += f(v, L)
         return texty + [b["text"] for b in bloky], bloky
 
@@ -158,11 +169,15 @@ class TestBezDatabaze(unittest.TestCase):
                              encoding="utf-8")
             self.assertEqual(report_vyklad.nacti_vyklad_analytika(cesta)[0], "zastupny")
 
-    def test_pilotni_vyklad_je_hotovy(self):
+    def test_pilotni_vyklad_ceka_jen_na_zamestnanost(self):
+        """Text analytika je hotový ve všech oddílech kromě nové kapitoly Zaměstnanost a mzdy (zástupný text)."""
         soubor = KOREN / "reporty" / "vyklad" / "F__CZ051__2026-09-15.md"
         stav, bloky = report_vyklad.nacti_vyklad_analytika(soubor)
-        self.assertEqual(stav, "hotovy")
-        self.assertEqual(set(bloky), {"shrnuti", "postaveni", "struktura", "dynamika"})
+        self.assertEqual(stav, "zastupny")
+        self.assertEqual(set(bloky), {"shrnuti", "postaveni", "struktura", "zamestnanost", "dynamika"})
+        for oddil, b in bloky.items():
+            zastupny = any(report_vyklad.ZASTUPNY_TEXT in x["text"] for x in b)
+            self.assertEqual(zastupny, oddil == "zamestnanost", oddil)
 
 
 @unittest.skipIf(TYPST is None, "typst není v PATH")

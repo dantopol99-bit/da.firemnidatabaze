@@ -52,13 +52,6 @@ NEDOSTUPNE_KAPITOLY = {
         "obsah": "Tržby a aktiva právnických osob v oboru, koncentrace (podíl největších subjektů), srovnání s ČR "
                  "a se srovnávacími kraji.",
     },
-    "zamestnanost": {
-        "nadpis": "Zaměstnanost a mzdy",
-        "duvod": "Statistika zaměstnanosti a mezd za obor a kraj zatím není mezi zdroji reportu; registr RES "
-                 "uvádí jen kategorie počtu zaměstnanců (kapitola Struktura).",
-        "zdroj": "ČSÚ – statistika zaměstnanosti a mezd.",
-        "obsah": "Počet zaměstnanců a průměrná mzda v oboru a území, srovnání s ČR a se srovnávacími kraji.",
-    },
     "rizikovy_profil": {
         "nadpis": "Rizikový profil (insolvence)",
         "duvod": "Webové služby insolvenčního rejstříku nejsou z cloudového prostředí dostupné; data přibudou "
@@ -214,6 +207,27 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         obsah.append(tabulka(v.tab["T17_bench_vekova_struktura"], s.pismeno_tab("T17"), zdroj_res))
     kapitoly.append({"nadpis": "Struktura", "klic": "struktura", "obsah": obsah})
 
+    # --- Zaměstnanost a mzdy (ČSÚ) ----------------------------------------------------
+    obsah = []
+    t20 = v.radky("T20_mzdy_obor")
+    zdroj_mzdy = "Zdroj: ČSÚ, DataStat (MZDCRR – roční zjišťování, pracovištní metoda); vlastní výpočet."
+    if t20:
+        uzemi_t20 = list(dict.fromkeys(r["uzemi"] for r in t20))
+        kraj_t20 = v.uzemi["kraj"] or "CZ"
+        rady = [{"popis": next(r["popis"] for r in t20 if r["uzemi"] == k).rsplit(" – ", 1)[0],
+                 "role": "uzemi" if k == kraj_t20 else "cr" if k == "CZ" else "srovnani",
+                 "body": [(r["rok"], r["hodnoty"]["mzda"]) for r in t20 if r["uzemi"] == k]} for k in uzemi_t20]
+        sekce = v.tab["T20_mzdy_obor"].get("sekce", "")
+        p = s.pismeno_graf("g_mzdy")
+        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.miry_v_case(
+            [{"nazev": f"Průměrná hrubá měsíční mzda v sekci {sekce}", "rady": rady}], adresar / "g_mzdy.svg", "Kč")),
+            "nazev": f"Průměrná hrubá měsíční mzda v sekci {sekce} – kraj, ČR a srovnávací kraje", "zdroj": zdroj_mzdy})
+        obsah.append(tabulka(v.tab["T20_mzdy_obor"], s.pismeno_tab("T20"), zdroj_mzdy))
+    if v.t("T21_mzdy_aktualni"):
+        obsah.append(tabulka(v.tab["T21_mzdy_aktualni"], s.pismeno_tab("T21"),
+                             "Zdroj: ČSÚ, DataStat (MZDR – čtvrtletní zjišťování, kumulace za rok)."))
+    kapitoly.append({"nadpis": "Zaměstnanost a mzdy", "klic": "zamestnanost", "obsah": obsah})
+
     # --- Dynamika území a kontext ČR -------------------------------------------------
     obsah = []
     t11 = v.radky("T11_dynamika_csu")
@@ -269,13 +283,15 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         obsah.append(tabulka(v.tab["T12_demografie_cr"], s.pismeno_tab("T12"), "Zdroj: ČSÚ, DataStat, RESDP00."))
     kapitoly.append({"nadpis": "Dynamika území a kontext ČR", "klic": "dynamika", "obsah": obsah})
 
+
     # --- výklad (po přidělení písmen) --------------------------------------------------
     L = {k: s.L.get(k, "příloha") for k in
-         [f"T{i:02d}" for i in range(1, 20)]
-         + ["g_dyn", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
+         [f"T{i:02d}" for i in range(1, 22)]
+         + ["g_dyn", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
     for k in kapitoly:
         k["nedostupne"] = None
-        k["vyklad"] = {"postaveni": vy.postaveni, "struktura": vy.struktura, "dynamika": vy.dynamika}[k["klic"]](v, L)
+        k["vyklad"] = {"postaveni": vy.postaveni, "struktura": vy.struktura, "zamestnanost": vy.zamestnanost,
+                       "dynamika": vy.dynamika}[k["klic"]](v, L)
         if vyklad_analytika is None:
             k["vyklad"].append(vy._blok("proč", "Výklad analytika zatím chybí."))
         else:
