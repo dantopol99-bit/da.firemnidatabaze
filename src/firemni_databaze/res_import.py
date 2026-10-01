@@ -455,6 +455,33 @@ def nacti_mzdy(conn) -> list[int]:
     return davky
 
 
+def nacti_eurostat(conn) -> list[int]:
+    """Regionální účty Eurostatu – každá sada ve vlastní dávce, s pauzou mezi požadavky."""
+    import time
+    davky = []
+    for i, sada in enumerate(z.EUROSTAT_SADY):
+        url = z.url_eurostat(sada)
+        if i:
+            time.sleep(z.EUROSTAT_PAUZA_S)
+
+        def prace(davka: int, sada=sada, url=url):
+            radky = z.radky_eurostat(sada, z.stahni_text(url, timeout=300))
+            if not radky:
+                raise ValueError(f"{sada}: žádné hodnoty")
+            for r in radky:
+                r.update(url=url, import_davka_id=davka)
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM res.eu_regionalni_ucty WHERE sada = %s", (sada,))
+                vloz(cur, "eu_regionalni_ucty", radky)
+            conn.commit()
+            posledni = max(r["rok"] for r in radky)
+            print(f"  {sada}: {len(radky)} hodnot, poslední rok {posledni}")
+            return len(radky), f"Eurostat {sada}, poslední rok {posledni}, aktualizace {radky[0]['aktualizace']}"
+
+        davky.append(v_davce(conn, "EUROSTAT", url, prace))
+    return davky
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="prikaz", required=True)
@@ -464,6 +491,7 @@ def main() -> int:
     p_sn.add_argument("--adresar", type=Path, help="adresář s dříve staženými res_data.csv, res_pf_nace.csv a *-metadata.json")
     sub.add_parser("agregaty", help="načte agregáty ČSÚ z DataStatu (RES02QT1, OBY02A, RES05, RESDP00, mzdy)")
     sub.add_parser("mzdy", help="načte zaměstnance a průměrné mzdy z DataStatu (MZDCRR, MZDR)")
+    sub.add_parser("eurostat", help="načte regionální účty Eurostatu (HPH, zaměstnanost, náhrady zaměstnancům)")
     p_vse = sub.add_parser("vse", help="číselníky + snímek + agregáty")
     p_vse.add_argument("--adresar", type=Path)
     sub.add_parser("prehled", help="vypíše kvalitu, srovnání s ČSÚ, kontrolu jádra a pilot")
@@ -489,6 +517,10 @@ def main() -> int:
             print("Agregáty ČSÚ:")
             for davka in (nacti_agregaty(conn), nacti_obyvatelstvo(conn), nacti_vznik_zanik(conn),
                           nacti_demografii(conn)):
+                print(f"  dávka {davka} OK")
+        if args.prikaz in ("agregaty", "eurostat", "vse"):
+            print("Regionální účty Eurostatu:")
+            for davka in nacti_eurostat(conn):
                 print(f"  dávka {davka} OK")
         if args.prikaz in ("agregaty", "mzdy", "vse"):
             print("Zaměstnanci a mzdy ČSÚ:")

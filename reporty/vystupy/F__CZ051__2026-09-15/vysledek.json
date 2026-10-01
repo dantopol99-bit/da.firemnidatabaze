@@ -41,13 +41,14 @@
    "ČSÚ, DataStat, výběr RES02QT1 – podíl subjektů se zjištěnou aktivitou, 2026-Q2",
    "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
    "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
-   "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy"
+   "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy",
+   "Eurostat, regionální účty: nama_10r_3gva, nama_10r_3empers, nama_10r_2coe (https://ec.europa.eu/eurostat/databrowser/view/<kód sady>/default/table), staženo 2026-10-01; upraveno (výběr, podíly, poměry, řetězení objemových změn) – za úpravy Eurostat neodpovídá."
   ],
   "licence": {
    "nazev": "CC BY 4.0",
    "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
   },
-  "vygenerovano": "2026-10-01T11:29:41+00:00",
+  "vygenerovano": "2026-10-01T19:50:39+00:00",
   "ukazatele": [
    {
     "kod": "REG_POCET",
@@ -448,6 +449,94 @@
     "definice": "Kraj za všechna odvětví nebo ČR za sekci oboru – pro roky, za které ČSÚ obor × kraj nepublikuje.",
     "chybejici_hodnoty": "Kraj × odvětví čtvrtletní zjišťování nepublikuje.",
     "vyklad": "Jiné zjišťování než MZDY_MZDA_OBOR; řady se nespojují."
+   },
+   {
+    "kod": "EKON_HPH",
+    "nazev": "Hrubá přidaná hodnota skupiny odvětví (mil. Kč, běžné ceny)",
+    "typ": "kontext",
+    "definice": "Hrubá přidaná hodnota v základních cenách ve skupině odvětví A*10, do níž patří obor, v kraji, regionu soudržnosti nebo ČR.",
+    "chybejici_hodnoty": "Jen skupiny A*10 (oddíl a nižší úrovně → skupina s označením; B, D, E → B–E; G, H, I → G–I; M, N → M–N; O–Q; R–U); okresy neexistují (→ kraj s označením).",
+    "vyklad": "Přidaná hodnota podle místa pracoviště jednotek, ne podle sídla subjektu."
+   },
+   {
+    "kod": "EKON_HPH_PODIL_UZEMI",
+    "nazev": "Podíl skupiny odvětví na HPH území (%)",
+    "typ": "podil",
+    "definice": "HPH skupiny / HPH všech odvětví téhož území a roku × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Váha oboru v ekonomice území; srovnání kraje s ČR ukazuje specializaci podle přidané hodnoty."
+   },
+   {
+    "kod": "EKON_HPH_PODIL_CR",
+    "nazev": "Podíl kraje na HPH skupiny odvětví v ČR (%)",
+    "typ": "podil",
+    "definice": "HPH skupiny v kraji / HPH skupiny v ČR × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Srovnávejte s podílem kraje na registrovaných subjektech oboru (REG_PODIL_CR)."
+   },
+   {
+    "kod": "EKON_HPH_RUST",
+    "nazev": "Objemová změna HPH proti předchozímu roku (%)",
+    "typ": "index",
+    "definice": "HPH v cenách předchozího roku / HPH v běžných cenách předchozího roku − 1, × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Reálná (objemová) změna bez vlivu cen."
+   },
+   {
+    "kod": "EKON_HPH_OBJEM_INDEX",
+    "nazev": "Objem HPH (první rok tabulky = 100)",
+    "typ": "index",
+    "definice": "Řetězení meziročních objemových změn HPH od prvního roku tabulky.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány všechny roky.",
+    "vyklad": "Reálný vývoj za celé období tabulky."
+   },
+   {
+    "kod": "EKON_ZAM",
+    "nazev": "Zaměstnaní ve skupině odvětví (tis. osob, národní účty)",
+    "typ": "kontext",
+    "definice": "Zaměstnanost podle národních účtů – zaměstnanci i sebezaměstnaní (včetně podnikajících fyzických osob), podle místa pracoviště.",
+    "chybejici_hodnoty": "Jako EKON_HPH.",
+    "vyklad": "Liší se od přepočtených zaměstnanců ČSÚ (MZDY_ZAM_OBOR) – zahrnuje sebezaměstnané a počítá osoby, ne plné úvazky."
+   },
+   {
+    "kod": "EKON_ZAM_PODIL_SELF",
+    "nazev": "Podíl sebezaměstnaných na zaměstnaných (%)",
+    "typ": "podil",
+    "definice": "Sebezaměstnaní / zaměstnaní celkem × 100 (národní účty).",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Váha samostatně podnikajících v pracovní síle oboru."
+   },
+   {
+    "kod": "EKON_PRODUKTIVITA",
+    "nazev": "Hrubá přidaná hodnota na zaměstnaného (tis. Kč)",
+    "typ": "index",
+    "definice": "HPH v běžných cenách / zaměstnaní (obojí Eurostat, regionální účty), zaokrouhleno na celé tis. Kč.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány oba údaje.",
+    "vyklad": "Nominální produktivita na osobu (ne na odpracovanou hodinu)."
+   },
+   {
+    "kod": "EKON_PRODUKTIVITA_INDEX_CR",
+    "nazev": "Produktivita proti ČR (ČR = 100)",
+    "typ": "index",
+    "definice": "Produktivita skupiny v kraji / produktivita skupiny v ČR × 100.",
+    "chybejici_hodnoty": "Jen jsou-li publikovány všechny údaje.",
+    "vyklad": "Pod 100 = nižší přidaná hodnota na zaměstnaného než v oboru v ČR."
+   },
+   {
+    "kod": "EKON_NAHRADY",
+    "nazev": "Náhrady zaměstnancům ve skupině odvětví (mil. Kč)",
+    "typ": "kontext",
+    "definice": "Mzdy a platy a sociální příspěvky zaměstnavatelů ve skupině A*10, region soudržnosti nebo ČR.",
+    "chybejici_hodnoty": "Za kraje Eurostat nepublikuje – uvádí se region soudržnosti (NUTS 2) s označením.",
+    "vyklad": "Region zahrnuje více krajů."
+   },
+   {
+    "kod": "EKON_NAHRADY_PODIL",
+    "nazev": "Podíl náhrad zaměstnancům na HPH (%)",
+    "typ": "podil",
+    "definice": "Náhrady zaměstnancům / HPH v běžných cenách × 100, týž region a rok.",
+    "chybejici_hodnoty": "Jen region soudržnosti a ČR.",
+    "vyklad": "Nízký podíl = větší část přidané hodnoty připadá na provozní přebytek a příjmy podnikatelů."
    }
   ]
  },
@@ -2306,6 +2395,624 @@
    ]
   },
   {
+   "kod": "T22_ekonomika",
+   "nazev": "Hrubá přidaná hodnota, zaměstnanost a produktivita – kraje a ČR (Eurostat, regionální účty) – Stavebnictví (F)",
+   "sloupce": [
+    {
+     "kod": "hph",
+     "nazev": "HPH skupiny (mil. Kč, běžné ceny)",
+     "ukazatel": "EKON_HPH"
+    },
+    {
+     "kod": "hph_podil_uzemi",
+     "nazev": "Podíl na HPH území (%)",
+     "ukazatel": "EKON_HPH_PODIL_UZEMI"
+    },
+    {
+     "kod": "hph_podil_cr",
+     "nazev": "Podíl na HPH skupiny v ČR (%)",
+     "ukazatel": "EKON_HPH_PODIL_CR"
+    },
+    {
+     "kod": "rust",
+     "nazev": "Objemová změna HPH (%)",
+     "ukazatel": "EKON_HPH_RUST"
+    },
+    {
+     "kod": "objem_index",
+     "nazev": "Objem HPH (1. rok = 100)",
+     "ukazatel": "EKON_HPH_OBJEM_INDEX"
+    },
+    {
+     "kod": "zam",
+     "nazev": "Zaměstnaní (tis.)",
+     "ukazatel": "EKON_ZAM"
+    },
+    {
+     "kod": "podil_self",
+     "nazev": "Sebezaměst­naní (%)",
+     "ukazatel": "EKON_ZAM_PODIL_SELF"
+    },
+    {
+     "kod": "produktivita",
+     "nazev": "HPH na zaměst­naného (tis. Kč)",
+     "ukazatel": "EKON_PRODUKTIVITA"
+    },
+    {
+     "kod": "produktivita_index_cr",
+     "nazev": "Produktivita (ČR = 100)",
+     "ukazatel": "EKON_PRODUKTIVITA_INDEX_CR"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Liberecký kraj – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2020,
+     "hodnoty": {
+      "hph": 9364,
+      "hph_podil_uzemi": 5.57,
+      "hph_podil_cr": 3.2,
+      "rust": -10.9,
+      "objem_index": 100.0,
+      "zam": 12.76,
+      "podil_self": 33.6,
+      "produktivita": 734,
+      "produktivita_index_cr": 97.0
+     }
+    },
+    {
+     "popis": "Liberecký kraj – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2021,
+     "hodnoty": {
+      "hph": 9810,
+      "hph_podil_uzemi": 5.6,
+      "hph_podil_cr": 3.14,
+      "rust": -4.1,
+      "objem_index": 95.9,
+      "zam": 13.02,
+      "podil_self": 32.4,
+      "produktivita": 753,
+      "produktivita_index_cr": 95.9
+     }
+    },
+    {
+     "popis": "Liberecký kraj – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2022,
+     "hodnoty": {
+      "hph": 11251,
+      "hph_podil_uzemi": 5.93,
+      "hph_podil_cr": 3.21,
+      "rust": -3.2,
+      "objem_index": 92.9,
+      "zam": 13.23,
+      "podil_self": 33.8,
+      "produktivita": 850,
+      "produktivita_index_cr": 97.9
+     }
+    },
+    {
+     "popis": "Liberecký kraj – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2023,
+     "hodnoty": {
+      "hph": 12173,
+      "hph_podil_uzemi": 5.69,
+      "hph_podil_cr": 3.09,
+      "rust": -3.6,
+      "objem_index": 89.5,
+      "zam": 13.02,
+      "podil_self": 34.6,
+      "produktivita": 935,
+      "produktivita_index_cr": 100.4
+     }
+    },
+    {
+     "popis": "Liberecký kraj – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ051",
+     "rok": 2024,
+     "hodnoty": {
+      "hph": 12598,
+      "hph_podil_uzemi": 5.45,
+      "hph_podil_cr": 3.08,
+      "rust": 0.4,
+      "objem_index": 89.8,
+      "zam": 13.05,
+      "podil_self": 33.3,
+      "produktivita": 965,
+      "produktivita_index_cr": 99.2
+     }
+    },
+    {
+     "popis": "Česko – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2020,
+     "hodnoty": {
+      "hph": 292311,
+      "hph_podil_uzemi": 5.5,
+      "hph_podil_cr": null,
+      "rust": -7.7,
+      "objem_index": 100.0,
+      "zam": 386.4,
+      "podil_self": 33.5,
+      "produktivita": 756,
+      "produktivita_index_cr": null
+     }
+    },
+    {
+     "popis": "Česko – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2021,
+     "hodnoty": {
+      "hph": 312154,
+      "hph_podil_uzemi": 5.43,
+      "hph_podil_cr": null,
+      "rust": -2.6,
+      "objem_index": 97.4,
+      "zam": 397.13,
+      "podil_self": 32.6,
+      "produktivita": 786,
+      "produktivita_index_cr": null
+     }
+    },
+    {
+     "popis": "Česko – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2022,
+     "hodnoty": {
+      "hph": 350966,
+      "hph_podil_uzemi": 5.47,
+      "hph_podil_cr": null,
+      "rust": -5.4,
+      "objem_index": 92.1,
+      "zam": 404.22,
+      "podil_self": 33.3,
+      "produktivita": 868,
+      "produktivita_index_cr": null
+     }
+    },
+    {
+     "popis": "Česko – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2023,
+     "hodnoty": {
+      "hph": 394052,
+      "hph_podil_uzemi": 5.6,
+      "hph_podil_cr": null,
+      "rust": 0.2,
+      "objem_index": 92.3,
+      "zam": 423.03,
+      "podil_self": 34.2,
+      "produktivita": 931,
+      "produktivita_index_cr": null
+     }
+    },
+    {
+     "popis": "Česko – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2024,
+     "hodnoty": {
+      "hph": 409647,
+      "hph_podil_uzemi": 5.57,
+      "hph_podil_cr": null,
+      "rust": 0.9,
+      "objem_index": 93.1,
+      "zam": 420.98,
+      "podil_self": 33.7,
+      "produktivita": 973,
+      "produktivita_index_cr": null
+     }
+    },
+    {
+     "popis": "Královéhradecký kraj – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2020,
+     "hodnoty": {
+      "hph": 12134,
+      "hph_podil_uzemi": 4.9,
+      "hph_podil_cr": 4.15,
+      "rust": -9.7,
+      "objem_index": 100.0,
+      "zam": 15.7,
+      "podil_self": 34.4,
+      "produktivita": 773,
+      "produktivita_index_cr": 102.2
+     }
+    },
+    {
+     "popis": "Královéhradecký kraj – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2021,
+     "hodnoty": {
+      "hph": 12405,
+      "hph_podil_uzemi": 4.75,
+      "hph_podil_cr": 3.97,
+      "rust": -6.5,
+      "objem_index": 93.5,
+      "zam": 15.79,
+      "podil_self": 34.1,
+      "produktivita": 786,
+      "produktivita_index_cr": 99.9
+     }
+    },
+    {
+     "popis": "Královéhradecký kraj – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2022,
+     "hodnoty": {
+      "hph": 13788,
+      "hph_podil_uzemi": 4.93,
+      "hph_podil_cr": 3.93,
+      "rust": -6.0,
+      "objem_index": 87.9,
+      "zam": 15.95,
+      "podil_self": 34.2,
+      "produktivita": 864,
+      "produktivita_index_cr": 99.6
+     }
+    },
+    {
+     "popis": "Královéhradecký kraj – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2023,
+     "hodnoty": {
+      "hph": 15229,
+      "hph_podil_uzemi": 4.86,
+      "hph_podil_cr": 3.86,
+      "rust": -1.5,
+      "objem_index": 86.5,
+      "zam": 16.96,
+      "podil_self": 33.1,
+      "produktivita": 898,
+      "produktivita_index_cr": 96.4
+     }
+    },
+    {
+     "popis": "Královéhradecký kraj – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ052",
+     "rok": 2024,
+     "hodnoty": {
+      "hph": 16336,
+      "hph_podil_uzemi": 5.03,
+      "hph_podil_cr": 3.99,
+      "rust": 4.0,
+      "objem_index": 90.0,
+      "zam": 16.41,
+      "podil_self": 30.0,
+      "produktivita": 995,
+      "produktivita_index_cr": 102.3
+     }
+    },
+    {
+     "popis": "Karlovarský kraj – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2020,
+     "hodnoty": {
+      "hph": 5039,
+      "hph_podil_uzemi": 5.71,
+      "hph_podil_cr": 1.72,
+      "rust": -9.4,
+      "objem_index": 100.0,
+      "zam": 8.68,
+      "podil_self": 32.4,
+      "produktivita": 581,
+      "produktivita_index_cr": 76.7
+     }
+    },
+    {
+     "popis": "Karlovarský kraj – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2021,
+     "hodnoty": {
+      "hph": 5330,
+      "hph_podil_uzemi": 5.78,
+      "hph_podil_cr": 1.71,
+      "rust": -3.3,
+      "objem_index": 96.7,
+      "zam": 8.34,
+      "podil_self": 32.7,
+      "produktivita": 639,
+      "produktivita_index_cr": 81.3
+     }
+    },
+    {
+     "popis": "Karlovarský kraj – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2022,
+     "hodnoty": {
+      "hph": 5968,
+      "hph_podil_uzemi": 5.79,
+      "hph_podil_cr": 1.7,
+      "rust": -5.5,
+      "objem_index": 91.3,
+      "zam": 8.89,
+      "podil_self": 30.4,
+      "produktivita": 671,
+      "produktivita_index_cr": 77.3
+     }
+    },
+    {
+     "popis": "Karlovarský kraj – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2023,
+     "hodnoty": {
+      "hph": 6599,
+      "hph_podil_uzemi": 5.66,
+      "hph_podil_cr": 1.67,
+      "rust": -1.2,
+      "objem_index": 90.3,
+      "zam": 9.14,
+      "podil_self": 31.7,
+      "produktivita": 722,
+      "produktivita_index_cr": 77.5
+     }
+    },
+    {
+     "popis": "Karlovarský kraj – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ041",
+     "rok": 2024,
+     "hodnoty": {
+      "hph": 6313,
+      "hph_podil_uzemi": 5.12,
+      "hph_podil_cr": 1.54,
+      "rust": -7.3,
+      "objem_index": 83.7,
+      "zam": 9.0,
+      "podil_self": 30.8,
+      "produktivita": 701,
+      "produktivita_index_cr": 72.1
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Skupina odvětví A*10 regionálních účtů: Stavebnictví (F). Odpovídá sekci oboru přesně.",
+    "Zaměstnaní = zaměstnanost podle národních účtů (zaměstnanci i sebezaměstnaní, včetně podnikajících fyzických osob, místo pracoviště); liší se proto od přepočtených zaměstnanců ČSÚ v kapitole Zaměstnanost a mzdy (jen zaměstnanci, přepočet na plný úvazek) i od počtu registrovaných subjektů.",
+    "Objemová změna = HPH v cenách předchozího roku / HPH v běžných cenách předchozího roku − 1; objem (první rok = 100) je řetězením těchto změn. Produktivita = HPH v běžných cenách / zaměstnaní.",
+    "Eurostat u údajů neuvádí příznak předběžnosti; poslední publikovaný rok 2024 se při revizích regionálních účtů může změnit."
+   ],
+   "skupina": "F",
+   "skupina_nazev": "Stavebnictví (F)"
+  },
+  {
+   "kod": "T23_nahrady",
+   "nazev": "Náhrady zaměstnancům a hrubá přidaná hodnota – regiony soudržnosti (Eurostat) – Stavebnictví (F)",
+   "sloupce": [
+    {
+     "kod": "nahrady",
+     "nazev": "Náhrady zaměstnancům (mil. Kč)",
+     "ukazatel": "EKON_NAHRADY"
+    },
+    {
+     "kod": "hph",
+     "nazev": "HPH (mil. Kč, běžné ceny)",
+     "ukazatel": "EKON_HPH"
+    },
+    {
+     "kod": "podil",
+     "nazev": "Náhrady zaměstnancům / HPH skupiny (%)",
+     "ukazatel": "EKON_NAHRADY_PODIL"
+    },
+    {
+     "kod": "podil_vse",
+     "nazev": "Náhrady / HPH, všechna odvětví (%)",
+     "ukazatel": "EKON_NAHRADY_PODIL"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ05",
+     "rok": 2020,
+     "hodnoty": {
+      "nahrady": 14238,
+      "hph": 35275,
+      "podil": 40.4,
+      "podil_vse": 49.8
+     }
+    },
+    {
+     "popis": "Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ05",
+     "rok": 2021,
+     "hodnoty": {
+      "nahrady": 15471,
+      "hph": 36783,
+      "podil": 42.1,
+      "podil_vse": 51.5
+     }
+    },
+    {
+     "popis": "Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ05",
+     "rok": 2022,
+     "hodnoty": {
+      "nahrady": 16567,
+      "hph": 41505,
+      "podil": 39.9,
+      "podil_vse": 49.6
+     }
+    },
+    {
+     "popis": "Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ05",
+     "rok": 2023,
+     "hodnoty": {
+      "nahrady": 18255,
+      "hph": 45320,
+      "podil": 40.3,
+      "podil_vse": 47.6
+     }
+    },
+    {
+     "popis": "Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ05",
+     "rok": 2024,
+     "hodnoty": {
+      "nahrady": 19919,
+      "hph": 47385,
+      "podil": 42.0,
+      "podil_vse": 48.3
+     }
+    },
+    {
+     "popis": "Česko – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2020,
+     "hodnoty": {
+      "nahrady": 127981,
+      "hph": 292311,
+      "podil": 43.8,
+      "podil_vse": 49.4
+     }
+    },
+    {
+     "popis": "Česko – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2021,
+     "hodnoty": {
+      "nahrady": 137713,
+      "hph": 312154,
+      "podil": 44.1,
+      "podil_vse": 48.9
+     }
+    },
+    {
+     "popis": "Česko – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2022,
+     "hodnoty": {
+      "nahrady": 150038,
+      "hph": 350966,
+      "podil": 42.8,
+      "podil_vse": 47.2
+     }
+    },
+    {
+     "popis": "Česko – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2023,
+     "hodnoty": {
+      "nahrady": 164001,
+      "hph": 394052,
+      "podil": 41.6,
+      "podil_vse": 46.7
+     }
+    },
+    {
+     "popis": "Česko – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ",
+     "rok": 2024,
+     "hodnoty": {
+      "nahrady": 176048,
+      "hph": 409647,
+      "podil": 43.0,
+      "podil_vse": 47.7
+     }
+    },
+    {
+     "popis": "Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2020",
+     "typ": "polozka",
+     "uzemi": "CZ04",
+     "rok": 2020,
+     "hodnoty": {
+      "nahrady": 11759,
+      "hph": 25720,
+      "podil": 45.7,
+      "podil_vse": 53.2
+     }
+    },
+    {
+     "popis": "Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2021",
+     "typ": "polozka",
+     "uzemi": "CZ04",
+     "rok": 2021,
+     "hodnoty": {
+      "nahrady": 12292,
+      "hph": 25708,
+      "podil": 47.8,
+      "podil_vse": 52.5
+     }
+    },
+    {
+     "popis": "Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2022",
+     "typ": "polozka",
+     "uzemi": "CZ04",
+     "rok": 2022,
+     "hodnoty": {
+      "nahrady": 12719,
+      "hph": 27487,
+      "podil": 46.3,
+      "podil_vse": 48.7
+     }
+    },
+    {
+     "popis": "Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2023",
+     "typ": "polozka",
+     "uzemi": "CZ04",
+     "rok": 2023,
+     "hodnoty": {
+      "nahrady": 13610,
+      "hph": 30790,
+      "podil": 44.2,
+      "podil_vse": 48.9
+     }
+    },
+    {
+     "popis": "Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2024",
+     "typ": "polozka",
+     "uzemi": "CZ04",
+     "rok": 2024,
+     "hodnoty": {
+      "nahrady": 14888,
+      "hph": 32359,
+      "podil": 46.0,
+      "podil_vse": 51.5
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Nejbližší publikovaná úroveň: region soudržnosti (NUTS 2) – náhrady zaměstnancům Eurostat za kraje nepublikuje. Region zahrnuje více krajů; srovnávací kraj ze stejného regionu má stejné hodnoty.",
+    "Podíl náhrad zaměstnancům na HPH ukazuje, jaká část přidané hodnoty připadá na mzdy a pojistné zaměstnanců; zbytek tvoří hlavně hrubý provozní přebytek a smíšený důchod (příjem podnikatelů)."
+   ],
+   "skupina": "F"
+  },
+  {
    "kod": "T20_mzdy_obor",
    "nazev": "Zaměstnanci a průměrné mzdy v oboru – kraje a ČR (ČSÚ, roční zjišťování)",
    "sloupce": [
@@ -4076,11 +4783,24 @@
      }
     },
     {
-     "popis": "Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší).",
+     "popis": "Objem hrubé přidané hodnoty skupiny Stavebnictví (F) se mezi lety 2020 a 2024 změnil v Libereckém kraji na 89,8 % (rok 2020 = 100), v Česku na 93,1 % (relativně o 3,5 % nižší).",
      "typ": "polozka",
      "id": "Z32",
      "hodnoty": {
       "id": "Z32",
+      "typ": "ekonomika",
+      "sila": 0.0354,
+      "hodnota": 89.8,
+      "srovnani": 93.1,
+      "rozdil_pct": 3.5
+     }
+    },
+    {
+     "popis": "Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší).",
+     "typ": "polozka",
+     "id": "Z33",
+     "hodnoty": {
+      "id": "Z33",
       "typ": "mzdy a zaměstnanost",
       "sila": 0.0349,
       "hodnota": 33623,
@@ -4091,9 +4811,9 @@
     {
      "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší).",
      "typ": "polozka",
-     "id": "Z33",
+     "id": "Z34",
      "hodnoty": {
-      "id": "Z33",
+      "id": "Z34",
       "typ": "odchylka od ČR",
       "sila": 0.0326,
       "hodnota": 9.5,
@@ -5094,6 +5814,35 @@
    "id": "Z31"
   },
   {
+   "typ": "ekonomika",
+   "typ_nazev": "ekonomika",
+   "podtyp": "objemový vývoj HPH proti ČR",
+   "sila": 0.0354,
+   "hodnota": 89.8,
+   "srovnani": 93.1,
+   "rozdil_pct": 3.5,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Objem HPH 2024 (2020 = 100) – kraj",
+     "hodnota": 89.8,
+     "tabulka": "T22_ekonomika",
+     "radek": "Liberecký kraj – 2024",
+     "sloupec": "objem_index"
+    },
+    {
+     "popis": "Objem HPH 2024 (2020 = 100) – Česko",
+     "hodnota": 93.1,
+     "tabulka": "T22_ekonomika",
+     "radek": "Česko – 2024",
+     "sloupec": "objem_index"
+    }
+   ],
+   "popis": "Objem hrubé přidané hodnoty skupiny Stavebnictví (F) se mezi lety 2020 a 2024 změnil v Libereckém kraji na 89,8 % (rok 2020 = 100), v Česku na 93,1 % (relativně o 3,5 % nižší).",
+   "poradi": 32,
+   "id": "Z32"
+  },
+  {
    "typ": "mzdy_zamestnanost",
    "typ_nazev": "mzdy a zaměstnanost",
    "podtyp": "průměrná mzda v oboru proti ČR",
@@ -5119,8 +5868,8 @@
     }
    ],
    "popis": "Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší).",
-   "poradi": 32,
-   "id": "Z32"
+   "poradi": 33,
+   "id": "Z33"
   },
   {
    "typ": "odchylka_od_cr",
@@ -5148,8 +5897,8 @@
     }
    ],
    "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší).",
-   "poradi": 33,
-   "id": "Z33"
+   "poradi": 34,
+   "id": "Z34"
   }
  ]
 }

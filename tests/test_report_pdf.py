@@ -20,8 +20,8 @@ from tests.test_res_import_db import CONN, SNIMKY
 KOREN = Path(__file__).resolve().parents[1]
 VZOR = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-09-15"
 TYPST = shutil.which("typst")
-L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 22)} | {
-    k: "graf A" for k in ("g_dyn", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po",
+L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 24)} | {
+    k: "graf A" for k in ("g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po",
                           "g_zanik")}
 VYKLAD_HOTOVY = """# Výklad analytika
 
@@ -46,6 +46,16 @@ Hypotéza: obor sídlí jinde, než působí.
 Srovnávat podle hustoty.
 
 ## Struktura
+
+### Proč to tak může být
+
+Text.
+
+### Co z toho plyne
+
+Text.
+
+## Ekonomický profil
 
 ### Proč to tak může být
 
@@ -95,7 +105,8 @@ class TestBezDatabaze(unittest.TestCase):
         v = Vstup(json.loads((VZOR / "vysledek.json").read_text(encoding="utf-8")))
         texty = report_vyklad.zjisteni_priloha(v, L)
         bloky = []
-        for f in (report_vyklad.postaveni, report_vyklad.struktura, report_vyklad.zamestnanost, report_vyklad.dynamika):
+        for f in (report_vyklad.postaveni, report_vyklad.struktura, report_vyklad.ekonomika, report_vyklad.zamestnanost,
+                  report_vyklad.dynamika):
             bloky += f(v, L)
         return texty + [b["text"] for b in bloky], bloky
 
@@ -169,15 +180,17 @@ class TestBezDatabaze(unittest.TestCase):
                              encoding="utf-8")
             self.assertEqual(report_vyklad.nacti_vyklad_analytika(cesta)[0], "zastupny")
 
-    def test_pilotni_vyklad_je_hotovy(self):
-        """Pilot má text analytika ve všech oddílech a žádný zástupný text (lze ho vysázet jako schválený)."""
+    def test_pilotni_vyklad_ceka_jen_na_ekonomicky_profil(self):
+        """Text analytika je hotový ve všech oddílech kromě nové kapitoly Ekonomický profil (zástupný text)."""
         soubor = KOREN / "reporty" / "vyklad" / "F__CZ051__2026-09-15.md"
         stav, bloky = report_vyklad.nacti_vyklad_analytika(soubor)
-        self.assertEqual(stav, "hotovy")
-        self.assertEqual(set(bloky), {"shrnuti", "postaveni", "struktura", "zamestnanost", "dynamika"})
+        self.assertEqual(stav, "zastupny")
+        self.assertEqual(set(bloky), {"shrnuti", "postaveni", "struktura", "ekonomicky_profil", "zamestnanost",
+                                      "dynamika"})
         for oddil, b in bloky.items():
             self.assertTrue(b, oddil)
-            self.assertFalse(any(report_vyklad.ZASTUPNY_TEXT in x["text"] for x in b), oddil)
+            zastupny = any(report_vyklad.ZASTUPNY_TEXT in x["text"] for x in b)
+            self.assertEqual(zastupny, oddil == "ekonomicky_profil", oddil)
 
 
 @unittest.skipIf(TYPST is None, "typst není v PATH")
@@ -230,7 +243,7 @@ class TestSazba(unittest.TestCase):
         from pypdf import PdfReader
         from firemni_databaze.report_pdf import NEDOSTUPNE_KAPITOLY, vysazej
         pdf = vysazej(self.vystup, self.tmp / "osnova")
-        poradi = ["Shrnutí klíčových zjištění", "Postavení území", "Struktura", "Ekonomický profil a koncentrace",
+        poradi = ["Shrnutí klíčových zjištění", "Postavení území", "Struktura", "Ekonomický profil",
                   "Zaměstnanost a mzdy", "Dynamika území a kontext ČR", "Rizikový profil (insolvence)",
                   "Veřejné zakázky a dotace", "Metodika, omezení a zdroje", "Příloha: zjištění detektoru",
                   "Příloha: odchylky od osnovy"]
@@ -238,7 +251,8 @@ class TestSazba(unittest.TestCase):
         nadpisy = [s.extract_text().splitlines()[1] for s in PdfReader(pdf).pages[1:]]
         self.assertEqual([n for n in nadpisy if n in poradi], poradi)
         text = " ".join(text_pdf(pdf).split())
-        self.assertEqual(text.count("Stav: zatím nedostupné"), len(NEDOSTUPNE_KAPITOLY))
+        self.assertEqual(text.count("Stav: zatím nedostupné"), len(NEDOSTUPNE_KAPITOLY) + 1)   # + pododdíl koncentrace
+        self.assertIn("Koncentrace a firemní ukazatele", text)
         for n in NEDOSTUPNE_KAPITOLY.values():
             self.assertIn(" ".join(n["zdroj"].split()), text)
 

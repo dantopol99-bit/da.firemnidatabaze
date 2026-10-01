@@ -366,6 +366,156 @@ def tabulky_mzdy(uz: "Uzemi", srovnani: list["Uzemi"], obor: list[dict], kraje: 
     return [t20, t21]
 
 
+# skupiny A*10 regionálních účtů Eurostatu: sekce CZ-NACE → (kód skupiny, název)
+SKUPINY_A10 = {
+    "A": ("A", "Zemědělství, lesnictví a rybářství (A)"),
+    **{s: ("B-E", "Průmysl kromě stavebnictví (B–E)") for s in "BDE"},
+    "C": ("C", "Zpracovatelský průmysl (C)"),
+    "F": ("F", "Stavebnictví (F)"),
+    **{s: ("G-I", "Obchod, doprava, ubytování a stravování (G–I)") for s in "GHI"},
+    "J": ("J", "Informační a komunikační činnosti (J)"),
+    "K": ("K", "Peněžnictví a pojišťovnictví (K)"),
+    "L": ("L", "Činnosti v oblasti nemovitostí (L)"),
+    **{s: ("M_N", "Profesní, vědecké, technické a administrativní činnosti (M–N)") for s in "MN"},
+    **{s: ("O-Q", "Veřejná správa, obrana, vzdělávání, zdravotní a sociální péče (O–Q)") for s in "OPQ"},
+    **{s: ("R-U", "Kulturní, zábavní, rekreační a ostatní činnosti (R–U)") for s in "RSTU"},
+}
+REGIONY_SOUDRZNOSTI = {"CZ01": "Praha", "CZ02": "Střední Čechy", "CZ03": "Jihozápad", "CZ04": "Severozápad",
+                       "CZ05": "Severovýchod", "CZ06": "Jihovýchod", "CZ07": "Střední Morava",
+                       "CZ08": "Moravskoslezsko"}
+EKON_ROKY = 5
+EUROSTAT_CITACE = ("Eurostat, regionální účty: nama_10r_3gva, nama_10r_3empers, nama_10r_2coe "
+                   "(https://ec.europa.eu/eurostat/databrowser/view/<kód sady>/default/table), staženo {datum}; "
+                   "upraveno (výběr, podíly, poměry, řetězení objemových změn) – za úpravy Eurostat neodpovídá.")
+
+
+def nacti_ekonomiku(cur, skupina: str | None) -> dict:
+    """Regionální účty Eurostatu: {(ukazatel, geo, skupina A*10, rok): hodnota} a datum stažení."""
+    cur.execute("SELECT to_regclass('res.eu_regionalni_ucty')")
+    if cur.fetchone()[0] is None or skupina is None:
+        return {}
+    cur.execute("SELECT ukazatel, geo, nace, rok, hodnota, stazeno::date FROM res.eu_regionalni_ucty "
+                "WHERE nace = ANY(%s)", ([skupina, "TOTAL"],))
+    radky = cur.fetchall()
+    out = {(u, g, n, r): float(h) for u, g, n, r, h, _ in radky}
+    if radky:
+        out["_stazeno"] = max(x[5] for x in radky)
+    return out
+
+
+def tabulky_ekonomika(uz: "Uzemi", srovnani: list["Uzemi"], obor: list[dict], kraje: dict, ek: dict) -> list[dict]:
+    """T22 HPH, zaměstnanost a produktivita (kraje, ČR) a T23 náhrady zaměstnancům (regiony soudržnosti).
+
+    Jen publikovaná čísla Eurostatu a poměry mezi nimi v témže roce a území; nic se nedopočítává
+    z jiných úrovní. Objemový vývoj = řetězení meziročních změn z HPH v cenách předchozího roku."""
+    sekce = {o["sekce"] for o in obor}
+    skupiny = {SKUPINY_A10[s] for s in sekce if s in SKUPINY_A10}
+    sl22 = [{"kod": "hph", "nazev": "HPH skupiny (mil. Kč, běžné ceny)", "ukazatel": "EKON_HPH"},
+            {"kod": "hph_podil_uzemi", "nazev": "Podíl na HPH území (%)", "ukazatel": "EKON_HPH_PODIL_UZEMI"},
+            {"kod": "hph_podil_cr", "nazev": "Podíl na HPH skupiny v ČR (%)", "ukazatel": "EKON_HPH_PODIL_CR"},
+            {"kod": "rust", "nazev": "Objemová změna HPH (%)", "ukazatel": "EKON_HPH_RUST"},
+            {"kod": "objem_index", "nazev": "Objem HPH (1. rok = 100)", "ukazatel": "EKON_HPH_OBJEM_INDEX"},
+            {"kod": "zam", "nazev": "Zaměstnaní (tis.)", "ukazatel": "EKON_ZAM"},
+            {"kod": "podil_self", "nazev": "Sebezaměst\u00adnaní (%)", "ukazatel": "EKON_ZAM_PODIL_SELF"},
+            {"kod": "produktivita", "nazev": "HPH na zaměst\u00adnaného (tis. Kč)", "ukazatel": "EKON_PRODUKTIVITA"},
+            {"kod": "produktivita_index_cr", "nazev": "Produktivita (ČR = 100)",
+             "ukazatel": "EKON_PRODUKTIVITA_INDEX_CR"}]
+    sl23 = [{"kod": "nahrady", "nazev": "Náhrady zaměstnancům (mil. Kč)", "ukazatel": "EKON_NAHRADY"},
+            {"kod": "hph", "nazev": "HPH (mil. Kč, běžné ceny)", "ukazatel": "EKON_HPH"},
+            {"kod": "podil", "nazev": "Náhrady zaměstnancům / HPH skupiny (%)", "ukazatel": "EKON_NAHRADY_PODIL"},
+            {"kod": "podil_vse", "nazev": "Náhrady / HPH, všechna odvětví (%)", "ukazatel": "EKON_NAHRADY_PODIL"}]
+    nazev22 = "Hrubá přidaná hodnota, zaměstnanost a produktivita – kraje a ČR (Eurostat, regionální účty)"
+    nazev23 = "Náhrady zaměstnancům a hrubá přidaná hodnota – regiony soudržnosti (Eurostat)"
+    if len(skupiny) != 1 or not ek:
+        duvod = ("obor zasahuje do více skupin odvětví A*10 regionálních účtů" if ek
+                 else "regionální účty Eurostatu nejsou načtené (res_import eurostat)")
+        return [tabulka_nezverejnena("T22_ekonomika", nazev22, duvod, sl22),
+                tabulka_nezverejnena("T23_nahrady", nazev23, duvod, sl23)]
+    sk, sk_nazev = next(iter(skupiny))
+    kraj_uz = uz.kraj_kod
+    uzemi = ([("CZ", "Česko")] if uz.typ == "CR" else
+             [(kraj_uz, kraje[kraj_uz]["nazev"]), ("CZ", "Česko")]
+             + [(k.kod, k.nazev) for k in srovnani if k.kod != kraj_uz])
+    roky_vse = sorted({k[3] for k in ek if isinstance(k, tuple) and k[0] == "HPH_CP" and k[2] == sk})
+    roky = roky_vse[-EKON_ROKY:]
+
+    def h(uk, geo, n, rok):
+        return ek.get((uk, geo, n, rok))
+
+    radky22 = []
+    for geo, nazev in uzemi:
+        objem = 100.0
+        for i, rok in enumerate(roky):
+            hph, hph_vse = h("HPH_CP", geo, sk, rok), h("HPH_CP", geo, "TOTAL", rok)
+            hph_cr = h("HPH_CP", "CZ", sk, rok)
+            pyp, cp_pred = h("HPH_PYP", geo, sk, rok), h("HPH_CP", geo, sk, rok - 1)
+            rust = round(100 * (pyp / cp_pred - 1), 1) if pyp and cp_pred else None
+            if i and pyp and cp_pred:
+                objem *= pyp / cp_pred
+            zam, self_ = h("ZAM_EMP", geo, sk, rok), h("ZAM_SELF", geo, sk, rok)
+            prod = hph / zam if hph and zam else None              # mil. Kč / tis. osob = tis. Kč
+            zam_cr, hph_cr_ = h("ZAM_EMP", "CZ", sk, rok), hph_cr
+            prod_cr = hph_cr_ / zam_cr if hph_cr_ and zam_cr else None
+            radky22.append({"popis": f"{nazev} – {rok}", "typ": "polozka", "uzemi": geo, "rok": rok, "hodnoty": {
+                "hph": round(hph) if hph is not None else None,
+                "hph_podil_uzemi": round(100 * hph / hph_vse, 2) if hph and hph_vse else None,
+                "hph_podil_cr": round(100 * hph / hph_cr, 2) if hph and hph_cr and geo != "CZ" else None,
+                "rust": rust, "objem_index": round(objem, 1),
+                "zam": round(zam, 2) if zam is not None else None,
+                "podil_self": round(100 * self_ / zam, 1) if self_ is not None and zam else None,
+                "produktivita": round(prod) if prod else None,
+                "produktivita_index_cr": round(100 * prod / prod_cr, 1) if prod and prod_cr and geo != "CZ" else None,
+            }})
+    presne = sekce == {sk}                    # skupina A*10 = právě sekce oboru (A, C, F, J, K, L)
+    pozn22 = [f"Skupina odvětví A*10 regionálních účtů: {sk_nazev}. "
+              + ("Odpovídá sekci oboru přesně." if presne else
+                 f"Sekce oboru ({', '.join(sorted(sekce))}) je součástí této širší skupiny – nejbližší publikovaná "
+                 f"úroveň; údaje zahrnují i další sekce skupiny."),
+              "Zaměstnaní = zaměstnanost podle národních účtů (zaměstnanci i sebezaměstnaní, včetně podnikajících "
+              "fyzických osob, místo pracoviště); liší se proto od přepočtených zaměstnanců ČSÚ v kapitole "
+              "Zaměstnanost a mzdy (jen zaměstnanci, přepočet na plný úvazek) i od počtu registrovaných subjektů.",
+              "Objemová změna = HPH v cenách předchozího roku / HPH v běžných cenách předchozího roku − 1; objem "
+              "(první rok = 100) je řetězením těchto změn. Produktivita = HPH v běžných cenách / zaměstnaní.",
+              f"Eurostat u údajů neuvádí příznak předběžnosti; poslední publikovaný rok {roky_vse[-1] if roky_vse else '–'} "
+              f"se při revizích regionálních účtů může změnit."]
+    if any(o["uroven"] > 1 for o in obor):
+        pozn22.insert(0, f"Nejbližší publikovaná úroveň: skupina {sk_nazev} – Eurostat regionální účty podle "
+                         f"oddílů a nižších úrovní CZ-NACE nepublikuje.")
+    if uz.typ == "OKRES":
+        pozn22.insert(0, f"Nejbližší publikovaná úroveň: kraj {kraje[kraj_uz]['nazev']} – regionální účty za okresy "
+                         f"neexistují.")
+    t22 = {"kod": "T22_ekonomika", "nazev": nazev22 + f" – {sk_nazev}", "sloupce": sl22, "radky": radky22,
+           "zverejneno": bool(radky22), "duvod": None if radky22 else "Eurostat údaje nepublikuje",
+           "poznamky": pozn22, "skupina": sk, "skupina_nazev": sk_nazev}
+
+    regiony = []
+    for geo, _ in uzemi:
+        r = geo if geo == "CZ" else geo[:4]
+        if r not in regiony:
+            regiony.append(r)
+    radky23 = []
+    for r in regiony:
+        kraje_r = [kraje[k]["nazev"] for k in kraje if k.startswith(r)] if r != "CZ" else []
+        nazev = "Česko" if r == "CZ" else f"{REGIONY_SOUDRZNOSTI[r]} (region soudržnosti: {', '.join(kraje_r)})"
+        for rok in roky:
+            nah, hph = h("NAHRADY", r, sk, rok), h("HPH_CP", r, sk, rok)
+            nah_v, hph_v = h("NAHRADY", r, "TOTAL", rok), h("HPH_CP", r, "TOTAL", rok)
+            radky23.append({"popis": f"{nazev} – {rok}", "typ": "polozka", "uzemi": r, "rok": rok, "hodnoty": {
+                "nahrady": round(nah) if nah is not None else None, "hph": round(hph) if hph is not None else None,
+                "podil": round(100 * nah / hph, 1) if nah and hph else None,
+                "podil_vse": round(100 * nah_v / hph_v, 1) if nah_v and hph_v else None}})
+    t23 = {"kod": "T23_nahrady", "nazev": nazev23 + f" – {sk_nazev}", "sloupce": sl23, "radky": radky23,
+           "zverejneno": bool(radky23), "duvod": None if radky23 else "Eurostat údaje nepublikuje",
+           "poznamky": ["Nejbližší publikovaná úroveň: region soudržnosti (NUTS 2) – náhrady zaměstnancům Eurostat "
+                        "za kraje nepublikuje. Region zahrnuje více krajů; srovnávací kraj ze stejného regionu má "
+                        "stejné hodnoty.",
+                        "Podíl náhrad zaměstnancům na HPH ukazuje, jaká část přidané hodnoty připadá na mzdy "
+                        "a pojistné zaměstnanců; zbytek tvoří hlavně hrubý provozní přebytek a smíšený důchod "
+                        "(příjem podnikatelů)."],
+           "skupina": sk}
+    return [t22, t23]
+
+
 def nacti_dynamiku(cur, uzemi_kod: str) -> list[tuple]:
     cur.execute("SELECT forma_kod, obdobi, ukazatel_kod, hodnota FROM res.csu_vznik_zanik WHERE uzemi_kod = %s "
                 "AND obdobi >= %s ORDER BY obdobi", (uzemi_kod, f"{ZANIKY_OD_ROKU}-Q1"))
@@ -498,6 +648,9 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
         obor = urci_obor(cur, zadani.obor)
         d = nacti_data(cur, obor, datum)
         dynamika = nacti_dynamiku(cur, uz.kod)
+        _sekce = {o["sekce"] for o in obor}
+        _skupiny = {SKUPINY_A10[s][0] for s in _sekce if s in SKUPINY_A10}
+        ekonomika = nacti_ekonomiku(cur, next(iter(_skupiny)) if len(_skupiny) == 1 else None)
         mzdy = nacti_mzdy(cur, next(iter({o["sekce"] for o in obor})) if len({o["sekce"] for o in obor}) == 1 else None)
         sekce_oboru = {o["sekce"] for o in obor}
         demografie = nacti_demografii(cur, next(iter(sekce_oboru)) if len(sekce_oboru) == 1 else None)
@@ -1236,6 +1389,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
                         + (" Odvětví RESDP00 je širší nebo užší než sekce oboru." if kod_oboru and kod_oboru not in "BCDEFGHIJLMNPQR" else "")]}
 
     tabulky = ([t01_tab, t02, t03] + ([t04] if t04 else []) + tabulky_uzemi + tabulky_bench
+               + tabulky_ekonomika(uz, srovnani, obor, kraje, ekonomika)
                + tabulky_mzdy(uz, srovnani, obor, kraje, mzdy) + [t10, t18, t11, t12])
     for t in tabulky:
         for r in t["radky"]:
@@ -1266,6 +1420,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
             "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
             "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
             "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy",
+            EUROSTAT_CITACE.format(datum=ekonomika.get("_stazeno", "–")),
         ],
         "licence": {"nazev": "CC BY 4.0", "url": LICENCE_URL},
         "vygenerovano": datetime.now(timezone.utc).isoformat(timespec="seconds"),

@@ -192,6 +192,10 @@
   #for o in k.obsah {
     if o.typ == "tabulka" { tabulka(o) } else { graf(o) }
   }
+  #if k.pododdil != none [
+    == #k.pododdil.nadpis
+    #nedostupne_box(k.pododdil)
+  ]
 ]
 
 // ---------------------------------------------------------------------------
