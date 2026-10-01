@@ -62,6 +62,13 @@ Pravidla Bloku 4 zadaná spolu s rozhodnutím 12:
   (14 krajů, 77 okresů, ČR); text nikdy nepoužije „v území <název>“.
 - **Shrnutí** (strana 2): původně 5 nejsilnějších zjištění; od rozšíření rozhodnutí 12 ho píše analytik.
 
+**Rozhodnutí 13 (1. 10. 2026): zdroje dat.** robots.txt a podmínky provozu poskytovatelů zdrojů se
+respektují vždy, bez výjimek, i pro měření a testy. Sbírka listin (`or.justice.cz`, robots.txt
+`Disallow: /ias/` pro všechny automatické klienty; podmínky provozu: omezení nad 3 000 požadavků denně
+nebo 50 za minutu, CAPTCHA) se automaticky nepoužívá. Firemní účetní údaje ze Sbírky listin jen po
+dohodě s Ministerstvem spravedlnosti. Webové služby ISIR (port 8443) z cloudového prostředí nejsou
+dostupné; obcházet přes webové rozhraní se nebudou.
+
 **Upřesnění k rozhodnutí 1:** kontrola zakázaných slov povoluje jen sousloví **„aktivní podnik(y)“**.
 Je to oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10), ne označení
 registrovaných subjektů.
