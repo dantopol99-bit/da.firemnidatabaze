@@ -196,24 +196,41 @@ def vznik_zanik(roky: list[dict], cesta: Path) -> Path:
 # ---------------------------------------------------------------------------
 
 def miry_v_case(panely: list[dict], cesta: Path, popis_osy: str = "%") -> Path:
-    """panely: [{nazev, rady: [{popis, body: [(rok, hodnota)], hlavni: bool}]}] – max 2 řady na panel."""
-    fig, osy = plt.subplots(1, len(panely), figsize=(SIRKA_CM / 2.54, 5.6 / 2.54), dpi=150, sharey=True)
+    """panely: [{nazev, rady: [{popis, body: [(rok, hodnota | None)], role: uzemi|cr|srovnani}]}] – nejvýš 4 řady
+    na panel (zkoumané území modře, ČR tmavě šedě, srovnávací kraje oranžově, odlišené typem čáry a značkou).
+    Starší volání s hlavni=True/False odpovídá roli uzemi/cr. Chybějící hodnota (pod prahem) = mezera v čáře."""
+    fig, osy = plt.subplots(1, len(panely), figsize=(SIRKA_CM / 2.54, 5.8 / 2.54), dpi=150, sharey=True)
     fig.patch.set_facecolor(POVRCH)
     osy = osy if len(panely) > 1 else [osy]
+    styly_srovnani = iter([("--", "s"), (":", "^"), ("-.", "D")])
+    styl_rady: dict[str, tuple[str, str]] = {}
     for ax, p in zip(osy, panely):
         ax.set_facecolor(POVRCH)
+        if len(p["rady"]) > 4:
+            raise ValueError("graf míry v čase: nejvýš 4 řady na panel")
+        vsechny_roky = sorted({rok for r in p["rady"] for rok, _ in r["body"]})
         for r in p["rady"]:
-            roky, hodnoty = zip(*r["body"])
-            ax.plot(roky, hodnoty, color=MODRA if r["hlavni"] else SEDA_TMAVA, linewidth=2 if r["hlavni"] else 1.2,
-                    marker="o", markersize=3.5, label=r["popis"])
+            role = r.get("role") or ("uzemi" if r.get("hlavni") else "cr")
+            if role == "srovnani" and r["popis"] not in styl_rady:
+                styl_rady[r["popis"]] = next(styly_srovnani)
+            cara, znacka = styl_rady.get(r["popis"], ("-", "o"))
+            roky = [rok for rok, _ in r["body"]]
+            hodnoty = [float("nan") if h is None else h for _, h in r["body"]]
+            ax.plot(roky, hodnoty, color=_barva(role), linestyle=cara, marker=znacka, markersize=3.5,
+                    linewidth=2 if role == "uzemi" else 1.2, label=r["popis"], zorder=3 if role == "uzemi" else 2)
         ax.set_title(p["nazev"], fontsize=8.5, color=TEXT, loc="left")
-        ax.set_xticks(roky, [str(r) for r in roky])
-        ax.yaxis.set_major_formatter(lambda v, _: _cz(v))
+        ax.set_xticks(vsechny_roky, [str(r) for r in vsechny_roky])
+        ax.yaxis.set_major_formatter(lambda v, _: _cz(v, 1) if v % 1 else _cz(v))
         _mrizka(ax, "y")
     osy[0].set_ylabel(popis_osy)
-    ruce, popisy = osy[0].get_legend_handles_labels()
-    fig.legend(ruce, popisy, loc="lower center", ncol=len(popisy), fontsize=7.5)
-    fig.tight_layout(pad=0.4, rect=(0, 0.1, 1, 1))
+    ruce, popisy = [], []
+    for ax in osy:
+        for h, l in zip(*ax.get_legend_handles_labels()):
+            if l not in popisy:
+                ruce.append(h)
+                popisy.append(l)
+    fig.legend(ruce, popisy, loc="lower center", ncol=min(len(popisy), 4), fontsize=7.5)
+    fig.tight_layout(pad=0.4, rect=(0, 0.11, 1, 1))
     fig.savefig(cesta, format="svg", facecolor=POVRCH)
     plt.close(fig)
     return cesta

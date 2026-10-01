@@ -22,7 +22,9 @@ dělat analýzy a reporty.
 │   ├── report_xlsx.py      # datová příloha XLSX
 │   ├── report_kontrola.py  # kontrola výstupu a konzistence čísel v PDF
 │   ├── report_grafy.py     # knihovna grafů (6 typů, strop 8)
-│   ├── report_vyklad.py    # návrh analytického výkladu (KONCEPT)
+│   ├── report_vyklad.py    # výklad: „co je vidět“ (stroj) + načtení výkladu analytika
+│   ├── report_zjisteni.py  # detektor zjištění (síla, odkazy na tabulky, věcný popis)
+│   ├── report_cestina.py   # názvy území v 6. pádě z ručně psané tabulky
 │   └── report_pdf.py       # sazba PDF v Typstu z výstupu JSON
 ├── sql/init/               # SQL skripty spouštěné při prvním startu databáze
 ├── sql/dev/                # identitní jádro – tabulky ve schématu dev
@@ -160,8 +162,11 @@ python -m firemni_databaze.report --obor F --uzemi CZ051 [--srovnani CZ031,CZ053
 python -m firemni_databaze.report_kontrola reporty/vystupy/*
 ```
 
-Výstup je v `reporty/vystupy/<obor>__<území>__<datum>/`: `vysledek.json`, `vysledek.md`, `priloha.xlsx`
-(s `--pdf` i `report.pdf`). Sazba potřebuje binárku [Typst](https://github.com/typst/typst/releases) v PATH;
+Výstup je v `reporty/vystupy/<obor>__<území>__<datum>/`: `vysledek.json`, `vysledek.md`, `priloha.xlsx`,
+`zjisteni.json` (s `--pdf` i `report.pdf`). Výklad má dvě vrstvy (rozhodnutí 12): „co je vidět“ a zjištění
+píše stroj, „proč“ a „co z toho plyne“ analytik do `reporty/vyklad/<obor>__<území>__<datum>.md` (založí se
+se zástupným textem; `report_pdf --vyklad-schvalen` do jeho vyplnění selže). Tvary názvů území v 6. pádě:
+`reporty/cestina/lokativ.yaml`. Sazba potřebuje binárku [Typst](https://github.com/typst/typst/releases) v PATH;
 fonty jsou v `reporty/sablona/fonty`. Osnova: [`docs/report_osnova.md`](docs/report_osnova.md),
 vzorový pilot: [`reporty/ukazky/`](reporty/ukazky/).
 Podadresář `_interni/` obsahuje i skrytá čísla pro kontrolu dopočtu a do gitu nepatří.

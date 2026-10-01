@@ -136,6 +136,77 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 
 > Věk = datum snímku − datum vzniku. Jde o strukturu dnes existujících subjektů, ne o počet vzniků v jednotlivých letech (zaniklé subjekty nejsou zahrnuty).
 
+## T13_bench_fo_po: Typ osoby – srovnání s ČR a se srovnávacími kraji (podíl, %)
+
+| Položka | Liberecký kraj (%) | Česko (%) | Královéhradecký kraj (%) | Karlovarský kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| fyzické osoby (FO) | 88,3 | 82,5 | 89,3 | 87,5 | 5,8 |  |
+| právnické osoby a ostatní (PO) | 11,7 | 17,5 | 10,7 | 12,5 | -5,8 |  |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+
+## T14_bench_pravni_forma: Právní forma – srovnání s ČR a se srovnávacími kraji (podíl z celku, %)
+
+| Položka | Liberecký kraj (%) | Česko (%) | Královéhradecký kraj (%) | Karlovarský kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| 101 Fyzická osoba podnikající dle živnostenského zákona | 85,9 | 79 | 86,7 | 84,2 | 6,9 |  |
+| 424 Zahraniční fyzická osoba | 2,2 | 3,3 | 2,2 | 2,9 | -1,1 |  |
+| ostatní formy FO | 0,1 | 0,2 | 0,4 | 0,3 | -0,1 |  |
+| **FO celkem** | 88,3 | 82,5 | 89,3 | 87,5 | 5,8 |  |
+| 112 Společnost s ručením omezeným | 11,1 | 16,6 | 10,1 | 12 | -5,5 |  |
+| 121 Akciová společnost | 0,2 | 0,5 | 0,3 | 0,2 | -0,3 |  |
+| 111 Veřejná obchodní společnost | 0,2 | 0,2 | 0,2 | – | 0 |  |
+| 205 Družstvo | 0,1 | 0,1 | 0,1 | – | 0 |  |
+| ostatní formy PO | 0,1 | 0,2 | 0,1 | 0,3 | -0,1 |  |
+| **PO celkem** | 11,7 | 17,5 | 10,7 | 12,5 | -5,8 |  |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+> Karlovarský kraj: některá položka zveřejněná ve zkoumaném území je zde pod prahem a je sloučena do „ostatní“ (v tomto sloupci pomlčka).
+
+## T15_bench_velikost_fo: Velikostní profil FO – srovnání s ČR a se srovnávacími kraji (podíl z FO, %)
+
+| Položka | Liberecký kraj (%) | Česko (%) | Královéhradecký kraj (%) | Karlovarský kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| bez zaměstnanců | 51,8 | 52,9 | 54 | 44,7 | -1,1 |  |
+| 1–9 zaměstnanců | 2,5 | 2,9 | 2,9 | – | -0,4 |  |
+| 10–49 zaměstnanců | 0,1 | – | 0,1 | – | – |  |
+| Neuvedeno | 45,6 | 44 | 42,9 | 52 | 1,6 |  |
+| ostatní (sloučené malé položky) | – | 0,1 | – | 3,3 | – | ve zkoumaném území žádné |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+> „Neuvedeno“ (KATPO 000) je samostatný řádek, nesčítá se s „bez zaměstnanců“.
+> Karlovarský kraj, Česko: některá položka zveřejněná ve zkoumaném území je zde pod prahem a je sloučena do „ostatní“ (v tomto sloupci pomlčka).
+
+## T16_bench_velikost_po: Velikostní profil PO – srovnání s ČR a se srovnávacími kraji (podíl z PO, %)
+
+| Položka | Liberecký kraj (%) | Česko (%) | Královéhradecký kraj (%) | Karlovarský kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| 1–9 zaměstnanců | 44,8 | 38,8 | 46,3 | 43,3 | 6 |  |
+| 10–49 zaměstnanců | 9,5 | 9,2 | 12,3 | 12,4 | 0,3 |  |
+| Neuvedeno | 44,9 | 50,7 | 40,1 | 43,2 | -5,8 |  |
+| ostatní (sloučené malé položky) | 0,8 | 1,3 | 1,3 | 1,1 | -0,5 |  |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+> „Neuvedeno“ (KATPO 000) je samostatný řádek, nesčítá se s „bez zaměstnanců“.
+
+## T17_bench_vekova_struktura: Věková struktura existujících subjektů – srovnání s ČR a se srovnávacími kraji (podíl, %)
+
+| Položka | Liberecký kraj (%) | Česko (%) | Královéhradecký kraj (%) | Karlovarský kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| méně než 3 roky | 11,4 | 14 | 12,2 | 13,5 | -2,6 |  |
+| 3–5 let | 9,3 | 9,9 | 8,4 | 9,1 | -0,6 |  |
+| 6–10 let | 13,2 | 12,9 | 11,5 | 11,3 | 0,3 |  |
+| 11–20 let | 22,1 | 23,9 | 22,9 | 24 | -1,8 |  |
+| 21–30 let | 24,4 | 23,9 | 26,9 | 24,4 | 0,5 |  |
+| 31 a více let | 19,4 | 15,5 | 18,3 | 17,6 | 3,9 |  |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+
 ## T10_zaniky_po: Zaniklé právnické osoby v oboru a území podle roku zániku (RES, od 2023)
 
 | Položka | Počet zaniklých PO | Poznámka |
@@ -147,6 +218,32 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 | **celkem** | 249 |  |
 
 > Jen PO: zaniklé FO mají v otevřených datech jen IČO a datum zániku (GDPR). Zaniklé subjekty jsou v RES jen 4 roky po zániku.
+
+## T18_mira_zaniku_po: Míra zániku právnických osob v oboru (RES, 2023–2026)
+
+| Položka | Stav PO k 1. 1. | Zaniklé PO za rok | Míra zániku za rok (%) | Zaniklé PO 1. 1.–15. 9. | Míra zániku 1. 1.–15. 9. (%) | Poznámka |
+|---|---|---|---|---|---|---|
+| Liberecký kraj – 2023 | 1 684 | 35 | 2,08 | – | – | část skryta (práh, dopočet) |
+| Liberecký kraj – 2024 | 1 740 | 51 | 2,93 | 33 | 1,9 |  |
+| Liberecký kraj – 2025 | 1 759 | 103 | 5,86 | 79 | 4,49 |  |
+| Liberecký kraj – 2026 | 1 727 | – | – | 60 | 3,47 | neúplný rok – jen srovnatelné období |
+| Česko – 2023 | 51 800 | 1 333 | 2,57 | 927 | 1,79 |  |
+| Česko – 2024 | 53 523 | 1 387 | 2,59 | 911 | 1,7 |  |
+| Česko – 2025 | 55 375 | 1 454 | 2,63 | 1 017 | 1,84 |  |
+| Česko – 2026 | 57 730 | – | – | 1 059 | 1,83 | neúplný rok – jen srovnatelné období |
+| Královéhradecký kraj – 2023 | 1 641 | 31 | 1,89 | – | – | část skryta (práh, dopočet) |
+| Královéhradecký kraj – 2024 | 1 680 | 29 | 1,73 | – | – | část skryta (práh, dopočet) |
+| Královéhradecký kraj – 2025 | 1 731 | 52 | 3 | 34 | 1,96 |  |
+| Královéhradecký kraj – 2026 | 1 770 | – | – | 33 | 1,86 | neúplný rok – jen srovnatelné období |
+| Karlovarský kraj – 2023 | 945 | 22 | 2,33 | – | – | část skryta (práh, dopočet) |
+| Karlovarský kraj – 2024 | 959 | 21 | 2,19 | – | – | část skryta (práh, dopočet) |
+| Karlovarský kraj – 2025 | 978 | 20 | 2,04 | – | – | část skryta (práh, dopočet) |
+| Karlovarský kraj – 2026 | 1 010 | – | – | 28 | 2,77 | neúplný rok – jen srovnatelné období |
+
+> Pomlčka = skryto: počet pod prahem nebo by z něj šlo dopočítat skrytý počet (zániky ve zbytku roku, vzniky mezi dvěma stavy).
+> Míra zániku PO = zaniklé PO v roce / stav PO k 1. 1. téhož roku × 100. Stav je rekonstruován ze snímku RES: existující PO se vznikem před 1. 1. + PO zaniklé 1. 1. nebo později.
+> Rok 2026 je neúplný (snímek k 15. 9. 2026); pro srovnání se proto počítá i srovnatelné období 1. 1.–15. 9. každého roku.
+> Omezení: jen právnické osoby – zaniklé FO mají v otevřených datech jen IČO a datum zániku. Okno 4 let (2023–2026): RES uchovává zaniklé subjekty jen 4 roky po zániku. Obor a sídlo jsou podle snímku (u zaniklých poslední známé), jejich změny v čase se nepromítají.
 
 ## T11_dynamika_csu: Vznik a zánik ekonomických subjektů v území – všechny obory (ČSÚ, RES05)
 
@@ -179,3 +276,39 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 | 2023 – podniky PO | 39 445 | 7,36 | 4,55 | 353 778 | 7,02 | 5,08 | předběžné hodnoty |
 
 > Jiná jednotka: aktivní PODNIK ze statistiky demografie podniků, ne registrovaný ekonomický subjekt z RES; čísla nejsou srovnatelná s ostatními tabulkami. Jen za ČR.
+
+## T19_zjisteni: Zjištění detektoru (seřazeno podle síly)
+
+| Položka | Zjištění | Typ zjištění | Síla | Hodnota | Srovnání | Relativní rozdíl (%) | Poznámka |
+|---|---|---|---|---|---|---|---|
+| Míra zániku PO v oboru se mezi lety 2023 a 2025 změnila v Libereckém kraji z 2,08 % na 5,86 % (index 2,82), v Česku z 2,57 % na 2,63 % (index 1,02); index je relativně o 176,5 % vyšší než v Česku. | Z01 | změna trendu | 1,76 | 2,82 | 1,02 | 176,5 |  |
+| Míra zániku PO v oboru za rok 2025 je v Libereckém kraji 5,86 %, průměr let 2023–2024 je 2,5 % (relativně o 134,4 % vyšší). | Z02 | změna trendu | 1,34 | 5,86 | 2,5 | 134,4 |  |
+| Míra zániku PO v oboru za rok 2025 je v Libereckém kraji 5,86 %, v Česku 2,63 % (relativně o 122,8 % vyšší). | Z03 | změna trendu | 1,23 | 5,86 | 2,63 | 122,8 |  |
+| Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, v Česku 1,83 % (relativně o 89,6 % vyšší). | Z04 | změna trendu | 0,9 | 3,47 | 1,83 | 89,6 |  |
+| Kraj je mezi 14 kraji 13. podle počtu registrovaných subjektů oboru a 2. podle hustoty na 1 000 obyvatel. | Z05 | divergence pořadí | 0,85 | 13 | 2 | – |  |
+| Nejvyšší hustotu oboru mezi okresy kraje má okres Jablonec nad Nisou (36,1 na 1 000 obyvatel), nejnižší okres Česká Lípa (25,67); hustota v okrese Jablonec nad Nisou je relativně o 40,6 % vyšší než v okrese Česká Lípa. | Z06 | rozdíly uvnitř území | 0,41 | 36,1 | 25,67 | 40,6 |  |
+| Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,7 %, v Česku 17,5 % (relativně o 33,1 % nižší). | Z07 | odchylka od ČR | 0,33 | 11,7 | 17,5 | 33,1 |  |
+| Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,1 %, v Česku 16,6 % (relativně o 33,1 % nižší). | Z08 | odchylka od ČR | 0,33 | 11,1 | 16,6 | 33,1 |  |
+| Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 19,4 %, v Česku 15,5 % (relativně o 25,2 % vyšší). | Z09 | odchylka od ČR | 0,25 | 19,4 | 15,5 | 25,2 |  |
+| Na 1 000 obyvatel připadá v okrese Česká Lípa 25,67 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 22,2 % nižší). | Z10 | rozdíly uvnitř území | 0,22 | 25,67 | 32,99 | 22,2 |  |
+| Lokalizační koeficient oboru je v Libereckém kraji 1,19 proti 1 za ČR (relativně o 19 % vyšší). | Z11 | odchylka od ČR | 0,19 | 1,19 | 1 | 19 |  |
+| Věk subjektu – „méně než 3 roky“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,4 %, v Česku 14 % (relativně o 18,6 % nižší). | Z12 | odchylka od ČR | 0,19 | 11,4 | 14 | 18,6 |  |
+| Na 1 000 obyvatel připadá v okrese Česká Lípa 25,67 registrovaných subjektů oboru, v Česku 31,14 (relativně o 17,6 % nižší). | Z13 | rozdíly uvnitř území | 0,18 | 25,67 | 31,14 | 17,6 |  |
+| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší). | Z14 | rozdíly uvnitř území | 0,16 | 36,1 | 31,14 | 15,9 |  |
+| Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší). | Z15 | rozdíly uvnitř území | 0,16 | 36,08 | 31,14 | 15,9 |  |
+| Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,8 %, v Česku 38,8 % (relativně o 15,5 % vyšší). | Z16 | odchylka od ČR | 0,15 | 44,8 | 38,8 | 15,5 |  |
+| Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,9 %, v Česku 50,7 % (relativně o 11,4 % nižší). | Z17 | odchylka od ČR | 0,11 | 44,9 | 50,7 | 11,4 |  |
+| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší). | Z18 | rozdíly uvnitř území | 0,09 | 36,1 | 32,99 | 9,4 |  |
+| Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší). | Z19 | rozdíly uvnitř území | 0,09 | 36,08 | 32,99 | 9,4 |  |
+| Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 85,9 %, v Česku 79 % (relativně o 8,7 % vyšší). | Z20 | odchylka od ČR | 0,09 | 85,9 | 79 | 8,7 |  |
+| Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, průměr let 2024–2025 je 3,2 % (relativně o 8,4 % vyšší). | Z21 | změna trendu | 0,08 | 3,47 | 3,2 | 8,4 |  |
+| Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší). | Z22 | odchylka od ČR | 0,08 | 22,1 | 23,9 | 7,5 |  |
+| Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,3 %, v Česku 82,5 % (relativně o 7 % vyšší). | Z23 | odchylka od ČR | 0,07 | 88,3 | 82,5 | 7 |  |
+| Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,8 %, ve všech oborech 59,1 % (ČSÚ; relativně o 6,3 % vyšší). | Z24 | aktivita oboru vůči kraji | 0,06 | 62,8 | 59,1 | 6,3 |  |
+| Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,3 %, v Česku 9,9 % (relativně o 6,1 % nižší). | Z25 | odchylka od ČR | 0,06 | 9,3 | 9,9 | 6,1 |  |
+| Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,14 (relativně o 5,9 % vyšší). | Z26 | odchylka od ČR | 0,06 | 32,99 | 31,14 | 5,9 |  |
+| Na 1 000 obyvatel připadá v okrese Semily 31,61 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,2 % nižší). | Z27 | rozdíly uvnitř území | 0,04 | 31,61 | 32,99 | 4,2 |  |
+| Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,6 %, v Česku 44 % (relativně o 3,6 % vyšší). | Z28 | odchylka od ČR | 0,04 | 45,6 | 44 | 3,6 |  |
+| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší). | Z29 | odchylka od ČR | 0,03 | 9,5 | 9,2 | 3,3 |  |
+
+> Síla = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Rozdíly pod 3 % relativně se nehlásí. Položky struktury s podílem pod 5 % v území i v ČR se nehlásí. Popisy jsou věcné, bez interpretace.

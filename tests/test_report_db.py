@@ -14,7 +14,7 @@ from openpyxl import load_workbook
 
 import yaml
 
-from firemni_databaze.report import KATALOG, MalyRozsah, Zadani, spocitej, uloz
+from firemni_databaze.report import FO_FORMY, KATALOG, MalyRozsah, Zadani, spocitej, uloz
 from firemni_databaze.report_kontrola import zkontroluj
 from firemni_databaze.report_xlsx import RADEK_ZAHLAVI
 from tests.test_res_import_db import CONN, SNIMKY
@@ -35,7 +35,7 @@ class TestReport(unittest.TestCase):
         cls.tmp = Path(tempfile.mkdtemp(prefix="report_test_"))
         cls.vystupy = {}
         for klic, zadani in {
-            "F_LBK": Zadani(["F"], "CZ051"),
+            "F_LBK": Zadani(["F"], "CZ051", srovnani=["CZ052", "CZ041"]),
             "62_JES": Zadani(["62"], "Jeseník", min_rozsah=0),
             "41_42_CR": Zadani(["41", "42"], "CZ"),
         }.items():
@@ -127,7 +127,8 @@ class TestReport(unittest.TestCase):
         a = self.kopie("62_JES")
         i = json.loads((a / "_interni" / "kontrola.json").read_text(encoding="utf-8"))
         # zveřejni všechny členy nějakého „ostatní“ kromě jednoho → ten poslední jde dopočítat
-        celek, casti = next((c, p) for c, p in i["rovnice"] if c.startswith("ostatni:") and len(p) >= 2)
+        celek, casti = next((r[0], r[1]) for r in i["rovnice"]
+                            if isinstance(r, list) and r[0].startswith("ostatni:") and len(r[1]) >= 2)
         for p in casti[:-1]:
             i["promenne"][p]["zverejneno"] = True
         (a / "_interni" / "kontrola.json").write_text(json.dumps(i), encoding="utf-8")
@@ -158,6 +159,102 @@ class TestReport(unittest.TestCase):
         self.assertGreater(r["hodnoty"]["hodnota"], 25)
         self.assertTrue(vysledek["meta"]["varovani"])
         self.assertEqual(self.vystupy["F_LBK"][0]["meta"]["varovani"], [])
+
+    # --- Blok 4: benchmarky, míra zániku PO, zjištění, čeština -----------------------------
+    def test_benchmark_cr_odpovida_databazi(self):
+        vysledek, _, _ = self.vystupy["F_LBK"]
+        with CONN.cursor() as cur:
+            cur.execute("SELECT round(100.0 * count(*) FILTER (WHERE forma = ANY(%s)) / count(*), 1) FROM res.v_subjekt "
+                        "WHERE datum_snimku = res.posledni_snimek() AND NOT je_zanikly AND nace_sekce = 'F'",
+                        (sorted(FO_FORMY),))
+            podil_fo_cr = float(cur.fetchone()[0])
+        CONN.rollback()
+        fo = next(r for r in tabulka(vysledek, "T13_bench_fo_po")["radky"] if r["promenna"] == "fopo:FO")
+        self.assertEqual(fo["hodnoty"]["cr"], podil_fo_cr)
+        self.assertEqual(fo["hodnoty"]["uzemi"], next(
+            r for r in tabulka(vysledek, "T05_fo_po")["radky"] if r["promenna"] == "fopo:FO")["hodnoty"]["podil"])
+        self.assertIn("kraj_CZ052", fo["hodnoty"])
+
+    def test_benchmark_jen_nad_prahem(self):
+        """Každý zveřejněný podíl v benchmarku stojí na zveřejněném počtu aspoň na prahu."""
+        for klic, (vysledek, interni, _) in self.vystupy.items():
+            for t in vysledek["tabulky"]:
+                if not t["kod"].startswith(("T13", "T14", "T15", "T16", "T17")) or not t["zverejneno"]:
+                    continue
+                for r in t["radky"]:
+                    for sl, h in r["hodnoty"].items():
+                        if h is None or sl == "rozdil_cr":
+                            continue
+                        p = interni["promenne"][r["zaklady"][sl]]
+                        self.assertTrue(p["zverejneno"], f"{klic}/{t['kod']}/{r['popis']}/{sl}")
+                        self.assertGreaterEqual(p["hodnota"], 10, f"{klic}/{t['kod']}/{r['popis']}/{sl}")
+
+    def test_bez_benchmarku_u_cr_a_skryteho_uzemi(self):
+        cr, _, _ = self.vystupy["41_42_CR"]
+        self.assertFalse(any(t["kod"].startswith("T13") for t in cr["tabulky"]))
+        male, _, _ = self.vystupy["MALE"]
+        for t in male["tabulky"]:
+            if t["kod"].startswith(("T13", "T14", "T15", "T16", "T17")):
+                self.assertFalse(t["zverejneno"], t["kod"])
+
+    def test_mira_zaniku_po(self):
+        vysledek, interni, _ = self.vystupy["F_LBK"]
+        t18 = tabulka(vysledek, "T18_mira_zaniku_po")
+        t10 = {r["popis"][:4]: r["hodnoty"]["pocet"] for r in tabulka(vysledek, "T10_zaniky_po")["radky"]
+               if r["typ"] == "polozka"}
+        self.assertEqual({r["uzemi"] for r in t18["radky"]}, {"CZ051", "CZ", "CZ052", "CZ041"})
+        for r in t18["radky"]:
+            h = r["hodnoty"]
+            if h["mira"] is not None:
+                self.assertEqual(h["mira"], round(100 * h["zan"] / h["stav"], 2))
+            if h["mira_obd"] is not None:
+                self.assertEqual(h["mira_obd"], round(100 * h["obd"] / h["stav"], 2))
+            if r["uzemi"] == "CZ051" and h["zan"] is not None:
+                self.assertEqual(h["zan"], t10[str(r["rok"])])
+            if r["rok"] == 2026:
+                self.assertIsNone(h["mira"])      # neúplný rok: jen srovnatelné období
+        # nezávislá rekonstrukce stavu PO v ČR k 1. 1. 2024 přímo v SQL
+        with CONN.cursor() as cur:
+            cur.execute("SELECT count(*) FROM res.subjekt s JOIN res.cis_nace n ON n.klasifikace = 80004 "
+                        "AND n.kod = s.nace WHERE s.datum_snimku = res.posledni_snimek() AND n.sekce = 'F' "
+                        "AND NOT n.je_pseudokod AND NOT (coalesce(s.forma, '') = ANY(%s)) "
+                        "AND s.ddatvzn < '2024-01-01' AND (s.ddatzan IS NULL OR s.ddatzan >= '2024-01-01') "
+                        "AND (s.ddatzan IS NULL OR s.forma IS NOT NULL)", (sorted(FO_FORMY),))
+            stav = cur.fetchone()[0]
+        CONN.rollback()
+        cr2024 = next(r for r in t18["radky"] if r["uzemi"] == "CZ" and r["rok"] == 2024)
+        self.assertEqual(cr2024["hodnoty"]["stav"], stav)
+        self.assertTrue(any("Omezení" in p and "4 roky" in p for p in t18["poznamky"]))
+
+    def test_zjisteni(self):
+        vysledek, _, adresar = self.vystupy["F_LBK"]
+        z = vysledek["zjisteni"]
+        self.assertTrue(z)
+        self.assertEqual([x["sila"] for x in z], sorted((x["sila"] for x in z), reverse=True))
+        self.assertTrue(all(x["sila"] >= 0.03 for x in z))
+        typy = {x["typ"] for x in z}
+        for typ in ("odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru", "divergence_poradi"):
+            self.assertIn(typ, typy)
+        tab = {t["kod"]: t for t in vysledek["tabulky"]}
+        for x in z:
+            for c in x["cisla"]:
+                if c["tabulka"] == "T19_zjisteni":
+                    continue
+                r = next(r for r in tab[c["tabulka"]]["radky"] if r["popis"] == c["radek"])
+                self.assertEqual(r["hodnoty"][c["sloupec"]], c["hodnota"], (x["id"], c))
+        soubor = json.loads((adresar / "zjisteni.json").read_text(encoding="utf-8"))
+        self.assertEqual(soubor["zjisteni"], z)
+
+    def test_zadny_vystup_nema_v_uzemi_nazev(self):
+        from firemni_databaze.report_cestina import tabulka as lokativy
+        nazvy = [z["nazev"] for z in lokativy().values()]
+        for klic, (_, _, adresar) in self.vystupy.items():
+            texty = [(adresar / f).read_text(encoding="utf-8") for f in ("vysledek.json", "vysledek.md", "zjisteni.json")]
+            wb = load_workbook(adresar / "priloha.xlsx")
+            texty += [c for ws in wb for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
+            for text in texty:
+                for nazev in nazvy:
+                    self.assertNotIn(f"v území {nazev}".lower(), text.lower(), klic)
 
     def test_neplatne_zadani(self):
         for zadani in (Zadani(["41", "4120"], "CZ"), Zadani(["00"], "CZ"), Zadani(["F"], "Neexistující"),

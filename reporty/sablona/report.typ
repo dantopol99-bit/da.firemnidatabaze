@@ -91,7 +91,9 @@
   #popisek(g.zdroj)
 ]
 
-#let nazvy_druhu = ("vidět": "Co je vidět", "proč": "Proč to tak může být", "plyne": "Co z toho plyne")
+// Rozhodnutí 12: „co je vidět“ a zjištění píše stroj, „proč“ a „co z toho plyne“ analytik.
+#let nazvy_druhu = ("vidět": "Co je vidět", "zjištění": "Zjištění detektoru",
+  "proč": "Proč to tak může být (analytik)", "plyne": "Co z toho plyne (analytik)")
 
 #let vyklad(bloky) = {
   let predchozi = none
@@ -100,7 +102,9 @@
       block(above: 0.9em, below: 0.3em, text(size: 9pt, weight: "semibold", fill: modra, nazvy_druhu.at(b.druh)))
       predchozi = b.druh
     }
-    if b.hypoteza {
+    if b.druh == "zjištění" {
+      block(above: 0.35em, below: 0.35em, grid(columns: (0.9em, 1fr), text(fill: modra)[■], b.text))
+    } else if b.hypoteza {
       par[#text(style: "italic", weight: "medium")[Hypotéza:] #emph(b.text)]
     } else {
       par(b.text)
@@ -139,7 +143,8 @@
     v(1em)
     block(width: 100%, inset: 10pt, radius: 3pt, fill: podklad)[
       #text(weight: "bold", fill: varovna)[KONCEPT – výklad k revizi.]
-      Analytický výklad je návrh; čísla a tabulky pocházejí přímo z výpočetní vrstvy.
+      Výklad analytika („proč“ a „co z toho plyne“) není schválen; čísla, tabulky, popis „co je vidět“
+      a zjištění pocházejí přímo z výpočetní vrstvy.
     ]
   }
   #v(1fr)

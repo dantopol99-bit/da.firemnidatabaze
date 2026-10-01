@@ -16,6 +16,8 @@
 #      index    – poměrový ukazatel (LQ, hustota); jen u zveřejněných počtů
 #      poradi   – pořadí; jen u zveřejněných počtů
 #      prumer   – průměr/medián; jen pokud je zveřejněn počet populace
+#      zjisteni – číslo detektoru zjištění (síla, srovnávaná hodnota, relativní rozdíl); odvozené jen ze
+#                 zveřejněných čísel tabulek
 #      kontext  – převzatý publikovaný údaj ČSÚ, který není počtem subjektů (obyvatelé, podíl se zjištěnou aktivitou)
 #                 (vznik/zánik ČSÚ jsou počty subjektů, proto typ pocet a platí na ně práh)
 # stav: naplněno | částečně | nelze naplnit (s důvodem)
@@ -316,7 +318,7 @@ ukazatele:
     zdroj: ČSÚ, RES – otevřená data
     uroven: [CR, kraj, okres]
     chybejici_hodnoty: Zaniklé FO mají v otevřených datech jen IČO a datum zániku (GDPR) – do oboru ani území je přiřadit nelze. Zaniklé více než 4 roky v RES nejsou; proto jen od roku 2023. Poslední rok je neúplný.
-    vyklad: Jen PO; nelze z toho počítat míru zániku oboru.
+    vyklad: Jen PO. Míru zániku (normalizovanou stavem PO) uvádí MIRA_ZANIKU_PO.
     stav: částečně
 
   - kod: DYN_VZNIK_CSU
@@ -395,3 +397,126 @@ ukazatele:
     chybejici_hodnoty: Zánik se zjišťuje se zpožděním; poslední rok bez zániků se nezobrazuje.
     vyklad: jako DEMOGR_MIRA_VZNIKU
     stav: částečně
+
+  # --- Blok 4: benchmarky struktury, míra zániku PO, detektor zjištění -------------------
+
+  - kod: BENCH_PODIL
+    nazev: Podíl položky struktury – zkoumané území, ČR a srovnávací kraje (%)
+    typ: podil
+    definice: Podíl položky (typ osoby, právní forma, velikostní pásmo, věkové pásmo, „Neuvedeno“) na registrovaných subjektech téhož oboru v daném území.
+    vzorec: "100 × počet(položka, obor, území) / počet(obor, území); u velikosti jmenovatel FO, resp. PO"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Práh a slučování platí pro každé území zvlášť; položky sloučené ve zkoumaném území jsou předem sloučené i v ostatních sloupcích; položka pod prahem v benchmarkovém území je sloučena do „ostatní“ (pomlčka).
+    vyklad: Srovnává strukturu oboru, ne velikost území. Rozdíl menší než 3 % relativně se popisuje jako „srovnatelné“.
+    stav: naplněno
+
+  - kod: BENCH_ROZDIL_PB
+    nazev: Rozdíl podílu zkoumaného území proti ČR (procentní body)
+    typ: podil
+    definice: Podíl položky ve zkoumaném území minus týž podíl v ČR.
+    vzorec: "BENCH_PODIL(území) − BENCH_PODIL(ČR), z hodnot zaokrouhlených na 0,1"
+    zdroj: odvozeno z RES
+    uroven: [kraj, okres]
+    chybejici_hodnoty: Jen jsou-li zveřejněné oba podíly.
+    vyklad: Procentní body, ne procenta; relativní rozdíl uvádí detektor zjištění.
+    stav: naplněno
+
+  - kod: ZANIK_PO_STAV
+    nazev: Stav právnických osob v oboru a území k 1. 1. (rekonstruovaný z RES)
+    typ: pocet
+    definice: PO s převažující činností v oboru a sídlem v území, které k 1. 1. roku existovaly.
+    vzorec: "count(PO bez zániku, ddatvzn < 1. 1. Y) + count(PO zaniklé, ddatvzn < 1. 1. Y, ddatzan >= 1. 1. Y)"
+    zdroj: ČSÚ, RES – otevřená data (jeden snímek)
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Zaniklé subjekty jsou v RES jen 4 roky po zániku, proto stav lze rekonstruovat jen od 2023. Obor a sídlo podle snímku. Nezveřejní se pod prahem ani tehdy, když by z po sobě jdoucích stavů šel dopočítat počet vzniků pod prahem.
+    vyklad: Jmenovatel míry zániku PO.
+    stav: naplněno
+
+  - kod: ZANIK_PO_OBD
+    nazev: Zaniklé právnické osoby ve srovnatelném období roku (1. 1.–den snímku)
+    typ: pocet
+    definice: PO v oboru a území s datem zániku od 1. 1. do dne a měsíce snímku téhož roku.
+    vzorec: "count(PO) where 1. 1. Y <= ddatzan <= (Y, měsíc a den snímku)"
+    zdroj: ČSÚ, RES – otevřená data
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Nezveřejní se pod prahem ani tehdy, když by šel dopočítat zbytek roku pod prahem.
+    vyklad: Umožňuje srovnat neúplný poslední rok s předchozími.
+    stav: naplněno
+
+  - kod: MIRA_ZANIKU_PO
+    nazev: Míra zániku právnických osob v oboru za rok (%)
+    typ: podil
+    definice: Zaniklé PO v roce / stav PO k 1. 1. téhož roku × 100.
+    vzorec: "100 × ZANIK_PO_RES(Y) / ZANIK_PO_STAV(Y)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Jen úplné roky; jen jsou-li oba počty zveřejněné.
+    vyklad: Jen PO, okno 4 let. Normalizuje zániky velikostí populace, takže je srovnatelná mezi územími.
+    stav: částečně
+
+  - kod: MIRA_ZANIKU_PO_OBD
+    nazev: Míra zániku právnických osob ve srovnatelném období (%)
+    typ: podil
+    definice: Zaniklé PO od 1. 1. do dne a měsíce snímku / stav PO k 1. 1. × 100.
+    vzorec: "100 × ZANIK_PO_OBD(Y) / ZANIK_PO_STAV(Y)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Jen jsou-li oba počty zveřejněné.
+    vyklad: Jediná srovnatelná míra pro neúplný poslední rok.
+    stav: částečně
+
+  - kod: ZJ_TYP
+    nazev: Typ zjištění
+    typ: zjisteni
+    definice: Odchylka od ČR, změna trendu, rozdíly uvnitř území, aktivita oboru vůči kraji, divergence pořadí.
+    vzorec: report_zjisteni
+    zdroj: odvozeno z tabulek reportu
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: –
+    vyklad: Popis bez interpretace; „proč“ píše analytik.
+    stav: naplněno
+
+  - kod: ZJ_SILA
+    nazev: Síla zjištění
+    typ: zjisteni
+    definice: Absolutní relativní rozdíl |a / b − 1| (u divergence pořadí |p1 − p2| / (počet území − 1)).
+    vzorec: report_zjisteni
+    zdroj: odvozeno ze zveřejněných čísel tabulek
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Zjištění pod 0,03 (3 %) se nehlásí.
+    vyklad: Bezrozměrné číslo, zjištění se podle něj řadí.
+    stav: naplněno
+
+  - kod: ZJ_HODNOTA
+    nazev: Hodnota zkoumaného území ve zjištění
+    typ: zjisteni
+    definice: Číslo z tabulky reportu, k níž zjištění odkazuje (nebo průměr čísel z ní).
+    vzorec: report_zjisteni
+    zdroj: tabulky reportu
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: –
+    vyklad: –
+    stav: naplněno
+
+  - kod: ZJ_SROVNANI
+    nazev: Srovnávací hodnota ve zjištění
+    typ: zjisteni
+    definice: Číslo, s nímž se hodnota srovnává (ČR, kraj, předchozí roky – průměr, druhé pořadí).
+    vzorec: report_zjisteni
+    zdroj: tabulky reportu
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: –
+    vyklad: –
+    stav: naplněno
+
+  - kod: ZJ_ROZDIL_PCT
+    nazev: Relativní rozdíl (%)
+    typ: zjisteni
+    definice: Absolutní hodnota 100 × (hodnota / srovnání − 1), zaokrouhleno na 0,1; směr (vyšší / nižší) je ve větě zjištění.
+    vzorec: report_zjisteni
+    zdroj: odvozeno
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: U divergence pořadí se neuvádí.
+    vyklad: Pod 3 % se rozdíl nehlásí a v textu se popisuje jako „srovnatelné“.
+    stav: naplněno

@@ -42,7 +42,7 @@ def _texty(obj):
         yield obj
     elif isinstance(obj, dict):
         for k, v in obj.items():
-            if k not in ("kod", "ukazatel", "ukazatele", "promenna", "zaklad", "url"):
+            if k not in ("kod", "ukazatel", "ukazatele", "promenna", "zaklad", "zaklady", "url"):
                 yield from _texty(v)
     elif isinstance(obj, list):
         for v in obj:
@@ -89,8 +89,9 @@ def zkontroluj(adresar: Path, katalog_cesta: Path = KATALOG) -> list[str]:
             xr = RADEK_ZAHLAVI + 1 + i
             if ws.cell(xr, 1).value != radek["popis"]:
                 chyby.append(f"{kod}: řádek {i} popis v XLSX {ws.cell(xr, 1).value!r} ≠ {radek['popis']!r}")
-            zaklad = radek.get("zaklad") or radek.get("promenna")
             for j, sl in enumerate(t["sloupce"]):
+                # základ (počet), z něhož je číslo odvozené; tabulky s více územími ho mají po sloupcích
+                zaklad = radek.get("zaklady", {}).get(sl["kod"]) or radek.get("zaklad") or radek.get("promenna")
                 hodnota = radek["hodnoty"].get(sl["kod"])
                 if hodnota is None:
                     continue
@@ -112,17 +113,20 @@ def zkontroluj(adresar: Path, katalog_cesta: Path = KATALOG) -> list[str]:
                 if typ in ODVOZENE_TYPY and zaklad and not promenne.get(zaklad, {}).get("zverejneno"):
                     chyby.append(f"{misto}: odvozený ukazatel u skrytého počtu ({zaklad})")
                 # 6. počet odpovídá interní proměnné
-                if typ == "pocet" and sl["kod"] in ("pocet", "hodnota") and radek.get("promenna"):
-                    v = promenne.get(radek["promenna"])
+                var = radek.get("zaklady", {}).get(sl["kod"]) or (
+                    radek.get("promenna") if sl["kod"] in ("pocet", "hodnota") else None)
+                if typ == "pocet" and var:
+                    v = promenne.get(var)
                     if v is None or v["hodnota"] != hodnota or not v["zverejneno"]:
-                        chyby.append(f"{misto}: neodpovídá interní proměnné {radek['promenna']}")
+                        chyby.append(f"{misto}: neodpovídá interní proměnné {var}")
 
     # 5. dopočet
     zverejnene = {k for k, v in promenne.items() if v["zverejneno"]}
-    skryte = {k for k, v in promenne.items() if not v["zverejneno"]}
-    for v in dopocitatelne([tuple(r) for r in interni["rovnice"]], zverejnene, skryte):
+    skryte = {k for k, v in promenne.items() if not v["zverejneno"] and v.get("chranit", True)}
+    rovnice = [r if isinstance(r, dict) else tuple(r) for r in interni["rovnice"]]
+    for v in dopocitatelne(rovnice, zverejnene, skryte):
         chyby.append(f"skryté číslo {v} jde dopočítat ze zveřejněných")
-    for celek, casti in interni["rovnice"]:
+    for celek, casti in (r for r in rovnice if isinstance(r, tuple)):
         if celek.startswith("ostatni:"):
             if len(casti) < 2:
                 chyby.append(f"{celek}: „ostatní“ má jen {len(casti)} položku")
@@ -188,7 +192,8 @@ def _cisla_zdroje(hodnoty) -> set[str]:
         if isinstance(h, bool) or h is None:
             continue
         if isinstance(h, (int, float)):
-            vysledek.add(_norm(str(h)))
+            # znaménko se v textu sazby nečte (−5,8 i 5,8 je „5.8“), proto i absolutní hodnota
+            vysledek |= {_norm(str(h)), _norm(str(abs(h)))}
         elif isinstance(h, str):
             vysledek |= {_norm(c) for c in _CISLO_SAZBA.findall(h)}
             vysledek |= {_norm(c) for c in _CISLO_TEXT.findall(h)}

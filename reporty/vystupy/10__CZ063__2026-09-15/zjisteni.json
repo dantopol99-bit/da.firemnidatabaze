@@ -1,0 +1,843 @@
+{
+ "id_reportu": "10__CZ063__2026-09-15",
+ "obor": "10 Výroba potravinářských výrobků",
+ "uzemi": {
+  "typ": "KRAJ",
+  "kod": "CZ063",
+  "nazev": "Kraj Vysočina",
+  "kraj": "CZ063"
+ },
+ "zadani": {
+  "obor": [
+   "10"
+  ],
+  "uzemi": "CZ063",
+  "datum_snimku": "2026-09-15",
+  "srovnani": [
+   "CZ031",
+   "CZ053"
+  ],
+  "prah": 10
+ },
+ "pravidla": {
+  "prah_relativniho_rozdilu": 0.03,
+  "min_podil_struktury_pct": 5.0,
+  "sila": "|hodnota / srovnání − 1|; divergence pořadí |p1 − p2| / (počet území − 1)"
+ },
+ "citace": "Zdroj: Český statistický úřad, Registr ekonomických subjektů (RES) – otevřená data, stav k 15. 9. 2026; licence CC BY 4.0 (https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu); vlastní výpočet.",
+ "oznaceni": "Odvozené údaje, nejde o oficiální statistiku ČSÚ.",
+ "zjisteni": [
+  {
+   "typ": "divergence_poradi",
+   "typ_nazev": "divergence pořadí",
+   "podtyp": "okres mezi okresy kraje",
+   "sila": 1.0,
+   "hodnota": 5,
+   "srovnani": 1,
+   "rozdil_pct": null,
+   "smer": null,
+   "cisla": [
+    {
+     "popis": "Pořadí podle počtu – Pelhřimov",
+     "hodnota": 5,
+     "tabulka": "T04_okresy",
+     "radek": "Pelhřimov",
+     "sloupec": "poradi_pocet"
+    },
+    {
+     "popis": "Pořadí podle hustoty – Pelhřimov",
+     "hodnota": 1,
+     "tabulka": "T04_okresy",
+     "radek": "Pelhřimov",
+     "sloupec": "poradi_hustota"
+    }
+   ],
+   "popis": "Okres Pelhřimov je mezi okresy kraje 5. podle počtu registrovaných subjektů oboru a 1. podle hustoty.",
+   "poradi": 1,
+   "id": "Z01"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost PO",
+   "sila": 0.5175,
+   "hodnota": 21.7,
+   "srovnani": 14.3,
+   "rozdil_pct": 51.7,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Velikost PO – „10–49 zaměstnanců“, Kraj Vysočina (%)",
+     "hodnota": 21.7,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "10–49 zaměstnanců",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost PO – „10–49 zaměstnanců“, Česko (%)",
+     "hodnota": 14.3,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "10–49 zaměstnanců",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 21,7 %, v Česku 14,3 % (relativně o 51,7 % vyšší).",
+   "poradi": 2,
+   "id": "Z02"
+  },
+  {
+   "typ": "divergence_poradi",
+   "typ_nazev": "divergence pořadí",
+   "podtyp": "okres mezi okresy kraje",
+   "sila": 0.5,
+   "hodnota": 3,
+   "srovnani": 5,
+   "rozdil_pct": null,
+   "smer": null,
+   "cisla": [
+    {
+     "popis": "Pořadí podle počtu – Jihlava",
+     "hodnota": 3,
+     "tabulka": "T04_okresy",
+     "radek": "Jihlava",
+     "sloupec": "poradi_pocet"
+    },
+    {
+     "popis": "Pořadí podle hustoty – Jihlava",
+     "hodnota": 5,
+     "tabulka": "T04_okresy",
+     "radek": "Jihlava",
+     "sloupec": "poradi_hustota"
+    }
+   ],
+   "popis": "Okres Jihlava je mezi okresy kraje 3. podle počtu registrovaných subjektů oboru a 5. podle hustoty.",
+   "poradi": 3,
+   "id": "Z03"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost FO",
+   "sila": 0.4505,
+   "hodnota": 13.2,
+   "srovnani": 9.1,
+   "rozdil_pct": 45.1,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Velikost FO – „1–9 zaměstnanců“, Kraj Vysočina (%)",
+     "hodnota": 13.2,
+     "tabulka": "T15_bench_velikost_fo",
+     "radek": "1–9 zaměstnanců",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost FO – „1–9 zaměstnanců“, Česko (%)",
+     "hodnota": 9.1,
+     "tabulka": "T15_bench_velikost_fo",
+     "radek": "1–9 zaměstnanců",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost FO – „1–9 zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 13,2 %, v Česku 9,1 % (relativně o 45,1 % vyšší).",
+   "poradi": 4,
+   "id": "Z04"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.3923,
+   "hodnota": 18.1,
+   "srovnani": 13.0,
+   "rozdil_pct": 39.2,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „31 a více let“, Kraj Vysočina (%)",
+     "hodnota": 18.1,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "31 a více let",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „31 a více let“, Česko (%)",
+     "hodnota": 13.0,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "31 a více let",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,1 %, v Česku 13 % (relativně o 39,2 % vyšší).",
+   "poradi": 5,
+   "id": "Z05"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "rozpětí hustoty mezi okresy",
+   "sila": 0.3467,
+   "hodnota": 2.02,
+   "srovnani": 1.5,
+   "rozdil_pct": 34.7,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Pelhřimov (nejvyšší)",
+     "hodnota": 2.02,
+     "tabulka": "T04_okresy",
+     "radek": "Pelhřimov",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Jihlava (nejnižší)",
+     "hodnota": 1.5,
+     "tabulka": "T04_okresy",
+     "radek": "Jihlava",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava.",
+   "poradi": 6,
+   "id": "Z06"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti ČR",
+   "sila": 0.3392,
+   "hodnota": 1.5,
+   "srovnani": 2.27,
+   "rozdil_pct": 33.9,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Jihlava",
+     "hodnota": 1.5,
+     "tabulka": "T04_okresy",
+     "radek": "Jihlava",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 2.27,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Česku 2,27 (relativně o 33,9 % nižší).",
+   "poradi": 7,
+   "id": "Z07"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Právní forma",
+   "sila": 0.2874,
+   "hodnota": 18.6,
+   "srovnani": 26.1,
+   "rozdil_pct": 28.7,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Právní forma – „112 Společnost s ručením omezeným“, Kraj Vysočina (%)",
+     "hodnota": 18.6,
+     "tabulka": "T14_bench_pravni_forma",
+     "radek": "112 Společnost s ručením omezeným",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Právní forma – „112 Společnost s ručením omezeným“, Česko (%)",
+     "hodnota": 26.1,
+     "tabulka": "T14_bench_pravni_forma",
+     "radek": "112 Společnost s ručením omezeným",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,6 %, v Česku 26,1 % (relativně o 28,7 % nižší).",
+   "poradi": 8,
+   "id": "Z08"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost PO",
+   "sila": 0.2731,
+   "hodnota": 37.0,
+   "srovnani": 50.9,
+   "rozdil_pct": 27.3,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Velikost PO – „Neuvedeno“, Kraj Vysočina (%)",
+     "hodnota": 37.0,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "Neuvedeno",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost PO – „Neuvedeno“, Česko (%)",
+     "hodnota": 50.9,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "Neuvedeno",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Kraji Vysočina 37 %, v Česku 50,9 % (relativně o 27,3 % nižší).",
+   "poradi": 9,
+   "id": "Z09"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti ČR",
+   "sila": 0.2687,
+   "hodnota": 1.66,
+   "srovnani": 2.27,
+   "rozdil_pct": 26.9,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Havlíčkův Brod",
+     "hodnota": 1.66,
+     "tabulka": "T04_okresy",
+     "radek": "Havlíčkův Brod",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 2.27,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Havlíčkův Brod 1,66 registrovaných subjektů oboru, v Česku 2,27 (relativně o 26,9 % nižší).",
+   "poradi": 10,
+   "id": "Z10"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "hustota",
+   "sila": 0.2511,
+   "hodnota": 1.7,
+   "srovnani": 2.27,
+   "rozdil_pct": 25.1,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Kraj Vysočina (zkoumané území)",
+     "hodnota": 1.7,
+     "tabulka": "T02_srovnani",
+     "radek": "Kraj Vysočina (zkoumané území)",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 2.27,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v Kraji Vysočina 1,7 registrovaných subjektů oboru, v Česku 2,27 (relativně o 25,1 % nižší).",
+   "poradi": 11,
+   "id": "Z11"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti ČR",
+   "sila": 0.2423,
+   "hodnota": 1.72,
+   "srovnani": 2.27,
+   "rozdil_pct": 24.2,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Třebíč",
+     "hodnota": 1.72,
+     "tabulka": "T04_okresy",
+     "radek": "Třebíč",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 2.27,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Třebíč 1,72 registrovaných subjektů oboru, v Česku 2,27 (relativně o 24,2 % nižší).",
+   "poradi": 12,
+   "id": "Z12"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti ČR",
+   "sila": 0.2379,
+   "hodnota": 1.73,
+   "srovnani": 2.27,
+   "rozdil_pct": 23.8,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Žďár nad Sázavou",
+     "hodnota": 1.73,
+     "tabulka": "T04_okresy",
+     "radek": "Žďár nad Sázavou",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 2.27,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Žďár nad Sázavou 1,73 registrovaných subjektů oboru, v Česku 2,27 (relativně o 23,8 % nižší).",
+   "poradi": 13,
+   "id": "Z13"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Typ osoby",
+   "sila": 0.2238,
+   "hodnota": 21.5,
+   "srovnani": 27.7,
+   "rozdil_pct": 22.4,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Typ osoby – „právnické osoby a ostatní (PO)“, Kraj Vysočina (%)",
+     "hodnota": 21.5,
+     "tabulka": "T13_bench_fo_po",
+     "radek": "právnické osoby a ostatní (PO)",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Typ osoby – „právnické osoby a ostatní (PO)“, Česko (%)",
+     "hodnota": 27.7,
+     "tabulka": "T13_bench_fo_po",
+     "radek": "právnické osoby a ostatní (PO)",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 21,5 %, v Česku 27,7 % (relativně o 22,4 % nižší).",
+   "poradi": 14,
+   "id": "Z14"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.2188,
+   "hodnota": 15.0,
+   "srovnani": 19.2,
+   "rozdil_pct": 21.9,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „6–10 let“, Kraj Vysočina (%)",
+     "hodnota": 15.0,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "6–10 let",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „6–10 let“, Česko (%)",
+     "hodnota": 19.2,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "6–10 let",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „6–10 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15 %, v Česku 19,2 % (relativně o 21,9 % nižší).",
+   "poradi": 15,
+   "id": "Z15"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti kraji",
+   "sila": 0.1882,
+   "hodnota": 2.02,
+   "srovnani": 1.7,
+   "rozdil_pct": 18.8,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Pelhřimov",
+     "hodnota": 2.02,
+     "tabulka": "T04_okresy",
+     "radek": "Pelhřimov",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Kraj Vysočina",
+     "hodnota": 1.7,
+     "tabulka": "T02_srovnani",
+     "radek": "Kraj Vysočina (zkoumané území)",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 18,8 % vyšší).",
+   "poradi": 16,
+   "id": "Z16"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.1791,
+   "hodnota": 15.8,
+   "srovnani": 13.4,
+   "rozdil_pct": 17.9,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „21–30 let“, Kraj Vysočina (%)",
+     "hodnota": 15.8,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "21–30 let",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „21–30 let“, Česko (%)",
+     "hodnota": 13.4,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "21–30 let",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „21–30 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15,8 %, v Česku 13,4 % (relativně o 17,9 % vyšší).",
+   "poradi": 17,
+   "id": "Z17"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.1481,
+   "hodnota": 11.5,
+   "srovnani": 13.5,
+   "rozdil_pct": 14.8,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „3–5 let“, Kraj Vysočina (%)",
+     "hodnota": 11.5,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "3–5 let",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „3–5 let“, Česko (%)",
+     "hodnota": 13.5,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "3–5 let",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 11,5 %, v Česku 13,5 % (relativně o 14,8 % nižší).",
+   "poradi": 18,
+   "id": "Z18"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost FO",
+   "sila": 0.1399,
+   "hodnota": 41.8,
+   "srovnani": 48.6,
+   "rozdil_pct": 14.0,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Velikost FO – „Neuvedeno“, Kraj Vysočina (%)",
+     "hodnota": 41.8,
+     "tabulka": "T15_bench_velikost_fo",
+     "radek": "Neuvedeno",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost FO – „Neuvedeno“, Česko (%)",
+     "hodnota": 48.6,
+     "tabulka": "T15_bench_velikost_fo",
+     "radek": "Neuvedeno",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Kraji Vysočina 41,8 %, v Česku 48,6 % (relativně o 14 % nižší).",
+   "poradi": 19,
+   "id": "Z19"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti kraji",
+   "sila": 0.1176,
+   "hodnota": 1.5,
+   "srovnani": 1.7,
+   "rozdil_pct": 11.8,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Jihlava",
+     "hodnota": 1.5,
+     "tabulka": "T04_okresy",
+     "radek": "Jihlava",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Kraj Vysočina",
+     "hodnota": 1.7,
+     "tabulka": "T02_srovnani",
+     "radek": "Kraj Vysočina (zkoumané území)",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 11,8 % nižší).",
+   "poradi": 20,
+   "id": "Z20"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti ČR",
+   "sila": 0.1101,
+   "hodnota": 2.02,
+   "srovnani": 2.27,
+   "rozdil_pct": 11.0,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Pelhřimov",
+     "hodnota": 2.02,
+     "tabulka": "T04_okresy",
+     "radek": "Pelhřimov",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 2.27,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Česku 2,27 (relativně o 11 % nižší).",
+   "poradi": 21,
+   "id": "Z21"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Právní forma",
+   "sila": 0.0991,
+   "hodnota": 76.5,
+   "srovnani": 69.6,
+   "rozdil_pct": 9.9,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“, Kraj Vysočina (%)",
+     "hodnota": 76.5,
+     "tabulka": "T14_bench_pravni_forma",
+     "radek": "101 Fyzická osoba podnikající dle živnostenského zákona",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“, Česko (%)",
+     "hodnota": 69.6,
+     "tabulka": "T14_bench_pravni_forma",
+     "radek": "101 Fyzická osoba podnikající dle živnostenského zákona",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 76,5 %, v Česku 69,6 % (relativně o 9,9 % vyšší).",
+   "poradi": 22,
+   "id": "Z22"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Typ osoby",
+   "sila": 0.0858,
+   "hodnota": 78.5,
+   "srovnani": 72.3,
+   "rozdil_pct": 8.6,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Typ osoby – „fyzické osoby (FO)“, Kraj Vysočina (%)",
+     "hodnota": 78.5,
+     "tabulka": "T13_bench_fo_po",
+     "radek": "fyzické osoby (FO)",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Typ osoby – „fyzické osoby (FO)“, Česko (%)",
+     "hodnota": 72.3,
+     "tabulka": "T13_bench_fo_po",
+     "radek": "fyzické osoby (FO)",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 78,5 %, v Česku 72,3 % (relativně o 8,6 % vyšší).",
+   "poradi": 23,
+   "id": "Z23"
+  },
+  {
+   "typ": "divergence_poradi",
+   "typ_nazev": "divergence pořadí",
+   "podtyp": "kraj mezi 14 kraji",
+   "sila": 0.0769,
+   "hodnota": 12,
+   "srovnani": 13,
+   "rozdil_pct": null,
+   "smer": null,
+   "cisla": [
+    {
+     "popis": "Pořadí kraje mezi 14 kraji podle počtu",
+     "hodnota": 12,
+     "tabulka": "T01_zakladni",
+     "radek": "Pořadí kraje mezi 14 kraji podle počtu",
+     "sloupec": "hodnota"
+    },
+    {
+     "popis": "Pořadí kraje mezi 14 kraji podle hustoty",
+     "hodnota": 13,
+     "tabulka": "T01_zakladni",
+     "radek": "Pořadí kraje mezi 14 kraji podle hustoty",
+     "sloupec": "hodnota"
+    }
+   ],
+   "popis": "Kraj je mezi 14 kraji 12. podle počtu registrovaných subjektů oboru a 13. podle hustoty na 1 000 obyvatel.",
+   "poradi": 24,
+   "id": "Z24"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost PO",
+   "sila": 0.0669,
+   "hodnota": 26.5,
+   "srovnani": 28.4,
+   "rozdil_pct": 6.7,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Velikost PO – „1–9 zaměstnanců“, Kraj Vysočina (%)",
+     "hodnota": 26.5,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "1–9 zaměstnanců",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost PO – „1–9 zaměstnanců“, Česko (%)",
+     "hodnota": 28.4,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "1–9 zaměstnanců",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 26,5 %, v Česku 28,4 % (relativně o 6,7 % nižší).",
+   "poradi": 25,
+   "id": "Z25"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "LQ",
+   "sila": 0.06,
+   "hodnota": 0.94,
+   "srovnani": 1.0,
+   "rozdil_pct": 6.0,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Lokalizační koeficient – Kraj Vysočina (zkoumané území)",
+     "hodnota": 0.94,
+     "tabulka": "T02_srovnani",
+     "radek": "Kraj Vysočina (zkoumané území)",
+     "sloupec": "lq"
+    },
+    {
+     "popis": "Lokalizační koeficient – Česko",
+     "hodnota": 1.0,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "lq"
+    }
+   ],
+   "popis": "Lokalizační koeficient oboru je v Kraji Vysočina 0,94 proti 1 za ČR (relativně o 6 % nižší).",
+   "poradi": 26,
+   "id": "Z26"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.0462,
+   "hodnota": 24.8,
+   "srovnani": 26.0,
+   "rozdil_pct": 4.6,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „11–20 let“, Kraj Vysočina (%)",
+     "hodnota": 24.8,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "11–20 let",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „11–20 let“, Česko (%)",
+     "hodnota": 26.0,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "11–20 let",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 24,8 %, v Česku 26 % (relativně o 4,6 % nižší).",
+   "poradi": 27,
+   "id": "Z27"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost FO",
+   "sila": 0.0341,
+   "hodnota": 42.4,
+   "srovnani": 41.0,
+   "rozdil_pct": 3.4,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Velikost FO – „bez zaměstnanců“, Kraj Vysočina (%)",
+     "hodnota": 42.4,
+     "tabulka": "T15_bench_velikost_fo",
+     "radek": "bez zaměstnanců",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost FO – „bez zaměstnanců“, Česko (%)",
+     "hodnota": 41.0,
+     "tabulka": "T15_bench_velikost_fo",
+     "radek": "bez zaměstnanců",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost FO – „bez zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 42,4 %, v Česku 41 % (relativně o 3,4 % vyšší).",
+   "poradi": 28,
+   "id": "Z28"
+  }
+ ]
+}
