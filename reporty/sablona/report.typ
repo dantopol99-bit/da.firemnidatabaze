@@ -175,8 +175,19 @@
 // Kapitoly: postavení území, struktura, dynamika
 // ---------------------------------------------------------------------------
 
+#let nedostupne_box(n) = block(width: 100%, inset: 10pt, radius: 3pt, stroke: 0.8pt + jemna, fill: podklad)[
+  #text(weight: "bold", fill: sedy)[Stav: zatím nedostupné]
+  #v(0.3em)
+  #grid(columns: (auto, 1fr), column-gutter: 1em, row-gutter: 0.6em,
+    text(fill: sedy)[Důvod], n.duvod,
+    text(fill: sedy)[Plánovaný zdroj], n.zdroj,
+    text(fill: sedy)[Plánovaný obsah], n.obsah,
+  )
+]
+
 #for k in d.kapitoly [
   = #k.nadpis
+  #if k.nedostupne != none { nedostupne_box(k.nedostupne) }
   #vyklad(k.vyklad)
   #for o in k.obsah {
     if o.typ == "tabulka" { tabulka(o) } else { graf(o) }

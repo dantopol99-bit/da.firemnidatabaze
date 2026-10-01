@@ -13,10 +13,19 @@ Data: výhradně `vysledek.json` z výpočetní vrstvy (Blok 2). Šablona nic ne
 | 2 | **Shrnutí klíčových zjištění** (1 strana) | dlaždice (strojové): počet, lokalizační koeficient, hustota na 1 000 obyvatel (+ ČR), pořadí (rozhodnutí 11); body shrnutí **píše analytik** (oddíl `## Shrnutí` v souboru výkladu); varování (strojové) | T01–T03, výklad analytika |
 | 3 | **Postavení území** | výklad; tab. základní ukazatele; tab. srovnání s ČR a zadanými kraji; graf kraje podle hustoty; graf kraje podle LQ; tab. pořadí 14 krajů; tab. okresy kraje (u kraje a okresu) | T01–T04 |
 | 4 | **Struktura** | výklad; graf a tab. FO/PO + srovnání s ČR a kraji; tab. právní formy + srovnání; graf a tab. velikostní profil FO a PO zvlášť, vždy s „Neuvedeno“ (rozhodnutí 2, 11), + srovnání; graf a tab. věková struktura existujících subjektů + srovnání | T05–T09, T13–T17, T01 (věk) |
-| 5 | **Dynamika území a kontext ČR** | výklad; graf a tab. vznik a zánik v území, všechny obory (RES05), rok 2023 označen jako mimořádný; tab. zaniklé PO v oboru od 2023 (RES); graf a tab. míra zániku PO (území, ČR, srovnávací kraje; za rok i za srovnatelné období); graf a tab. demografie podniků ČR (RESDP00) s poznámkou o jiné jednotce (rozhodnutí 10) | T10, T18, T11, T12 |
-| 6 | **Metodika, omezení a zdroje** | populace a klasifikace; pravidla zveřejnění (práh, minimální rozsah, spolehlivost zařazení); varování; omezení; použité ukazatele z katalogu; zdroje, **licence CC BY 4.0**, **„Odvozené údaje, nejde o oficiální statistiku ČSÚ.“** | `meta` |
-| 7 | **Příloha: zjištění detektoru** | všechna zjištění seřazená podle síly (id, typ, síla, věta, odkazy na tabulky) | `zjisteni` |
-| 8 | **Příloha: odchylky od osnovy** | nezveřejněné tabulky s důvodem; jinak „Žádné“ | `tabulky[].zverejneno`, `duvod` |
+| 5 | **Ekonomický profil a koncentrace** – *zatím nedostupné* | tržby a aktiva PO v oboru, koncentrace (podíl největších subjektů), srovnání s ČR a kraji. Důvod: účetní výkazy zatím nejsou načtené. Plánovaný zdroj: **účetní výkazy ze Sbírky listin** | – |
+| 6 | **Zaměstnanost a mzdy** – *zatím nedostupné* | počet zaměstnanců a průměrná mzda v oboru a území, srovnání s ČR a kraji. Důvod: statistika za obor × kraj zatím není mezi zdroji (RES má jen kategorie počtu zaměstnanců). Plánovaný zdroj: **ČSÚ** | – |
+| 7 | **Dynamika území a kontext ČR** | výklad; graf a tab. vznik a zánik v území, všechny obory (RES05), rok 2023 označen jako mimořádný; tab. zaniklé PO v oboru od 2023 (RES); graf a tab. míra zániku PO (území, ČR, srovnávací kraje; za rok i za srovnatelné období); graf a tab. demografie podniků ČR (RESDP00) s poznámkou o jiné jednotce (rozhodnutí 10) | T10, T18, T11, T12 |
+| 8 | **Rizikový profil (insolvence)** – *zatím nedostupné* | podíl zaniklých PO s insolvenčním řízením po letech zániku, míra zahájených řízení PO a podnikajících FO (jen agregovaně), výsledky řízení; srovnání s ČR a kraji. Důvod: webové služby ISIR nejsou z cloudového prostředí dostupné, data přibudou po jednorázovém běhu z české IP nebo ze serveru. Plánovaný zdroj: **insolvenční rejstřík (ISIR)** | – |
+| 9 | **Veřejné zakázky a dotace** – *zatím nedostupné* | podíl subjektů oboru s veřejnou zakázkou nebo dotací a jejich objem; srovnání s ČR a kraji. Důvod: data zatím nejsou načtená ani spárovaná se subjekty RES. Plánovaný zdroj: **Platforma veřejné kontroly** | – |
+| 10 | **Metodika, omezení a zdroje** | populace a klasifikace; pravidla zveřejnění (práh, minimální rozsah, spolehlivost zařazení); varování; omezení; použité ukazatele z katalogu; zdroje, **licence CC BY 4.0**, **„Odvozené údaje, nejde o oficiální statistiku ČSÚ.“** | `meta` |
+| 11 | **Příloha: zjištění detektoru** | všechna zjištění seřazená podle síly (id, typ, síla, věta, odkazy na tabulky) | `zjisteni` |
+| 12 | **Příloha: odchylky od osnovy** | nezveřejněné tabulky a kapitoly „zatím nedostupné“ s důvodem | `tabulky[].zverejneno`, `duvod` |
+
+**Kapitoly „zatím nedostupné“** (5, 6, 8, 9) jsou v osnově na místě, kde budou v hotovém reportu, a vysází
+se vždy: nadpis, rámeček „Stav: zatím nedostupné“ s důvodem, plánovaným zdrojem a plánovaným obsahem.
+Nemají výklad ani oddíly v souboru analytika; oddíly přibudou spolu s daty. Jsou i v příloze odchylek.
+Definice: `report_pdf.NEDOSTUPNE_KAPITOLY`, pořadí: `report_pdf.PORADI_KAPITOL`.
 
 ## Pravidla sazby
 

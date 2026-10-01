@@ -211,6 +211,22 @@ class TestSazba(unittest.TestCase):
             (adresar / f"{self.vystup.name}.md").write_text(text, encoding="utf-8")
         return adresar
 
+    def test_pevne_kapitoly_v_poradi_osnovy(self):
+        from pypdf import PdfReader
+        from firemni_databaze.report_pdf import NEDOSTUPNE_KAPITOLY, vysazej
+        pdf = vysazej(self.vystup, self.tmp / "osnova")
+        poradi = ["Shrnutí klíčových zjištění", "Postavení území", "Struktura", "Ekonomický profil a koncentrace",
+                  "Zaměstnanost a mzdy", "Dynamika území a kontext ČR", "Rizikový profil (insolvence)",
+                  "Veřejné zakázky a dotace", "Metodika, omezení a zdroje", "Příloha: zjištění detektoru",
+                  "Příloha: odchylky od osnovy"]
+        # nadpis kapitoly je první řádek strany pod záhlavím (každá kapitola začíná na nové straně)
+        nadpisy = [s.extract_text().splitlines()[1] for s in PdfReader(pdf).pages[1:]]
+        self.assertEqual([n for n in nadpisy if n in poradi], poradi)
+        text = " ".join(text_pdf(pdf).split())
+        self.assertEqual(text.count("Stav: zatím nedostupné"), len(NEDOSTUPNE_KAPITOLY))
+        for n in NEDOSTUPNE_KAPITOLY.values():
+            self.assertIn(" ".join(n["zdroj"].split()), text)
+
     def test_schvaleny_vyklad_bez_konceptu(self):
         from firemni_databaze.report_pdf import vysazej
         pdf = vysazej(self.vystup, self.tmp / "schvaleno", koncept=False, adresar_vykladu=self.vyklady(VYKLAD_HOTOVY))

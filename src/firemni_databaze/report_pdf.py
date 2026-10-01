@@ -39,6 +39,45 @@ FONTY = KOREN / "reporty" / "sablona" / "fonty"
 UKAZKY = KOREN / "reporty" / "ukazky"
 
 
+# Pevná osnova kapitol (docs/report_osnova.md) v pořadí hotového reportu. Kapitoly bez dat mají stav
+# „zatím nedostupné“ s důvodem a plánovaným zdrojem; vysází se vždy, aby byla vidět celková podoba reportu.
+PORADI_KAPITOL = ["postaveni", "struktura", "ekonomicky_profil", "zamestnanost", "dynamika", "rizikovy_profil",
+                  "zakazky"]
+NEDOSTUPNE_KAPITOLY = {
+    "ekonomicky_profil": {
+        "nadpis": "Ekonomický profil a koncentrace",
+        "duvod": "Účetní výkazy právnických osob (rozvaha, výkaz zisku a ztráty) zatím nejsou načtené; tržby, "
+                 "aktiva ani koncentraci oboru bez nich spočítat nelze.",
+        "zdroj": "Účetní výkazy ze Sbírky listin obchodního rejstříku.",
+        "obsah": "Tržby a aktiva právnických osob v oboru, koncentrace (podíl největších subjektů), srovnání s ČR "
+                 "a se srovnávacími kraji.",
+    },
+    "zamestnanost": {
+        "nadpis": "Zaměstnanost a mzdy",
+        "duvod": "Statistika zaměstnanosti a mezd za obor a kraj zatím není mezi zdroji reportu; registr RES "
+                 "uvádí jen kategorie počtu zaměstnanců (kapitola Struktura).",
+        "zdroj": "ČSÚ – statistika zaměstnanosti a mezd.",
+        "obsah": "Počet zaměstnanců a průměrná mzda v oboru a území, srovnání s ČR a se srovnávacími kraji.",
+    },
+    "rizikovy_profil": {
+        "nadpis": "Rizikový profil (insolvence)",
+        "duvod": "Webové služby insolvenčního rejstříku nejsou z cloudového prostředí dostupné; data přibudou "
+                 "po jednorázovém běhu z české IP nebo ze serveru.",
+        "zdroj": "Insolvenční rejstřík (ISIR) – veřejné webové služby.",
+        "obsah": "Podíl zaniklých PO v oboru s insolvenčním řízením po letech zániku, míra zahájených insolvenčních "
+                 "řízení PO a podnikajících FO (jen agregovaně), rozložení výsledků řízení; srovnání s ČR a se "
+                 "srovnávacími kraji.",
+    },
+    "zakazky": {
+        "nadpis": "Veřejné zakázky a dotace",
+        "duvod": "Data o veřejných zakázkách a dotacích zatím nejsou načtená ani spárovaná se subjekty RES.",
+        "zdroj": "Platforma veřejné kontroly.",
+        "obsah": "Podíl subjektů oboru s veřejnou zakázkou nebo dotací a jejich objem, srovnání s ČR a se "
+                 "srovnávacími kraji.",
+    },
+}
+
+
 class ChybaSazby(RuntimeError):
     pass
 
@@ -235,11 +274,19 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
          [f"T{i:02d}" for i in range(1, 20)]
          + ["g_dyn", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
     for k in kapitoly:
+        k["nedostupne"] = None
         k["vyklad"] = {"postaveni": vy.postaveni, "struktura": vy.struktura, "dynamika": vy.dynamika}[k["klic"]](v, L)
         if vyklad_analytika is None:
             k["vyklad"].append(vy._blok("proč", "Výklad analytika zatím chybí."))
         else:
             k["vyklad"] += vyklad_analytika.get(k["klic"], [])
+
+    # --- pevné kapitoly bez dat, seřazení podle osnovy ----------------------------------
+    for klic, n in NEDOSTUPNE_KAPITOLY.items():
+        kapitoly.append({"nadpis": n["nadpis"], "klic": klic, "obsah": [], "vyklad": [],
+                         "nedostupne": {"duvod": n["duvod"], "zdroj": n["zdroj"], "obsah": n["obsah"]}})
+        odchylky.append(f"Kapitola {n['nadpis']}: zatím nedostupné – {n['duvod']}")
+    kapitoly.sort(key=lambda k: PORADI_KAPITOL.index(k["klic"]))
 
     # --- shrnutí (rozhodnutí 11: počet, LQ, hustota, pořadí) ------------------------
     cr = next((r for r in v.radky("T02_srovnani") if r["promenna"] == "obor@CZ"), None)
