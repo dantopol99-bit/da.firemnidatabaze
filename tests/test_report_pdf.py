@@ -169,15 +169,15 @@ class TestBezDatabaze(unittest.TestCase):
                              encoding="utf-8")
             self.assertEqual(report_vyklad.nacti_vyklad_analytika(cesta)[0], "zastupny")
 
-    def test_pilotni_vyklad_ceka_jen_na_zamestnanost(self):
-        """Text analytika je hotový ve všech oddílech kromě nové kapitoly Zaměstnanost a mzdy (zástupný text)."""
+    def test_pilotni_vyklad_je_hotovy(self):
+        """Pilot má text analytika ve všech oddílech a žádný zástupný text (lze ho vysázet jako schválený)."""
         soubor = KOREN / "reporty" / "vyklad" / "F__CZ051__2026-09-15.md"
         stav, bloky = report_vyklad.nacti_vyklad_analytika(soubor)
-        self.assertEqual(stav, "zastupny")
+        self.assertEqual(stav, "hotovy")
         self.assertEqual(set(bloky), {"shrnuti", "postaveni", "struktura", "zamestnanost", "dynamika"})
         for oddil, b in bloky.items():
-            zastupny = any(report_vyklad.ZASTUPNY_TEXT in x["text"] for x in b)
-            self.assertEqual(zastupny, oddil == "zamestnanost", oddil)
+            self.assertTrue(b, oddil)
+            self.assertFalse(any(report_vyklad.ZASTUPNY_TEXT in x["text"] for x in b), oddil)
 
 
 @unittest.skipIf(TYPST is None, "typst není v PATH")
