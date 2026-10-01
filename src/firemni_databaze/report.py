@@ -179,7 +179,7 @@ def nacti_data(cur, obor: list[dict], datum: date) -> dict:
         f"WHERE s.datum_snimku = %(d)s AND s.ddatzan IS NULL AND {podminka}", parametry)
     subjekty = cur.fetchall()
     cur.execute(
-        "SELECT s.okreslau, extract(year FROM s.ddatzan)::int FROM res.subjekt s "
+        "SELECT s.okreslau, s.ddatvzn, s.ddatzan FROM res.subjekt s "
         "JOIN res.cis_nace n ON n.klasifikace = 80004 AND n.kod = s.nace "
         f"WHERE s.datum_snimku = %(d)s AND s.ddatzan >= make_date({ZANIKY_OD_ROKU}, 1, 1) "
         f"AND s.forma IS NOT NULL AND NOT (s.forma = ANY(%(fo)s)) AND {podminka}",
@@ -273,14 +273,26 @@ class Sestava:
     def __init__(self, prah: int):
         self.prah = prah
         self.tabulky: list[dict] = []
-        self.promenne: dict[str, dict] = {}   # kód → {hodnota, zverejneno}
-        self.rovnice: list[tuple[str, list[str]]] = []
+        self.promenne: dict[str, dict] = {}   # kód → {hodnota, zverejneno[, chranit]}
+        self.rovnice: list = []               # (celek, [části]) nebo {"koef": {proměnná: k}}
 
-    def promenna(self, kod: str, hodnota: int, zverejneno: bool) -> None:
+    def promenna(self, kod: str, hodnota: int, zverejneno: bool, chranit: bool | None = None) -> None:
+        """chranit=False: nezveřejněná proměnná, kterou není třeba chránit, protože je na prahu nebo nad
+        ním a skrytá je jen kvůli srovnatelnosti nebo jako mezivýsledek (např. vzniky PO odvozené ze
+        stavů, položka předem sloučená v benchmarku). Pro kontrolu dopočtu zůstává neznámou."""
         stara = self.promenne.get(kod)
         if stara and stara["hodnota"] != hodnota:
             raise AssertionError(f"proměnná {kod} má dvě hodnoty: {stara['hodnota']} a {hodnota}")
+        if chranit is None:
+            chranit = stara.get("chranit", True) if stara else True
         self.promenne[kod] = {"hodnota": hodnota, "zverejneno": zverejneno or bool(stara and stara["zverejneno"])}
+        if not chranit:
+            if hodnota < self.prah:
+                raise AssertionError(f"pomocná proměnná {kod} je pod prahem – musí se chránit")
+            self.promenne[kod]["chranit"] = False
+
+    def rovnice_obecna(self, koef: dict[str, int]) -> None:
+        self.rovnice.append({"koef": dict(koef)})
 
     def zverejnena(self, kod: str) -> bool:
         return self.promenne.get(kod, {}).get("zverejneno", False)
@@ -303,7 +315,7 @@ class Sestava:
 
     def kontrola_dopoctu(self) -> list[str]:
         zverejnene = {k for k, v in self.promenne.items() if v["zverejneno"]}
-        skryte = {k for k, v in self.promenne.items() if not v["zverejneno"]}
+        skryte = {k for k, v in self.promenne.items() if not v["zverejneno"] and v.get("chranit", True)}
         return dopocitatelne(self.rovnice, zverejnene, skryte)
 
 
@@ -612,9 +624,9 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
 
     # T10 zániky PO z RES od 2023
     zaniky = {}
-    for okres, rok in d["zaniky_po"]:
+    for okres, _, zanik in d["zaniky_po"]:
         if v_uzemi(okres, uz):
-            zaniky[rok] = zaniky.get(rok, 0) + 1
+            zaniky[zanik.year] = zaniky.get(zanik.year, 0) + 1
     bunky = [Bunka(f"zanik_po:{r}", str(r) + (" (do data snímku)" if r == datum.year else ""), zaniky.get(r, 0))
              for r in range(ZANIKY_OD_ROKU, datum.year + 1)]
     p = potlac(bunky, prah)
@@ -626,6 +638,289 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
     t10["sloupce"] = [{"kod": "pocet", "nazev": "Počet zaniklých PO", "ukazatel": "ZANIK_PO_RES"}]
     for r in t10["radky"]:
         r["hodnoty"].pop("podil", None)
+
+    # --- Benchmarky struktury: týž obor v ČR a ve srovnávacích krajích (Blok 4 A) -------
+    # Každé benchmarkové území má vlastní proměnné (předpona „cr:“ / „kraj:<kód>:“) a vlastní
+    # potlačení. Položky jsou ty, které jsou zveřejněné ve zkoumaném území; co je tam sloučeno
+    # do „ostatní“, je v benchmarku sloučeno předem taky, aby sloupce byly srovnatelné.
+    okresy_uz_kraje = [k for k in okresy if okresy[k]["kraj_kod"] == uz.kraj_kod] if uz.kraj_kod else []
+    bench: list[tuple[str, Uzemi]] = []
+    if uz.typ != "CR":
+        bench.append(("cr:", Uzemi("CR", "CZ", "Česko", None)))
+    for k in srovnani:
+        if k.kod == uz.kod or (uz.typ == "OKRES" and k.kod == uz.kraj_kod and len(okresy_uz_kraje) == 1):
+            continue    # kraj s jediným okresem = zkoumané území, srovnání by obešlo potlačení
+        bench.append((f"kraj:{k.kod}:", k))
+    tab_uz = {t["kod"]: t for t in tabulky_uzemi}
+
+    def sloupec(pref: str) -> str:
+        return pref.rstrip(":").replace(":", "_")
+
+    def bench_cleneni(pref: str, celek: str, zv_celek: bool, hodnoty: dict[str, int], kody_uz: list[str],
+                      ostatni_kod: str):
+        """Potlačení jednoho členění benchmarkového území. Vrátí ({kód: počet} zveřejněných, počet
+        v „ostatní“, zda „ostatní“ obsahuje i položku zveřejněnou ve zkoumaném území), nebo None."""
+        zbytek = sorted(k for k, n in hodnoty.items() if n and k not in kody_uz)
+        for k, n in hodnoty.items():
+            if n:   # položka sloučená jen kvůli srovnatelnosti a na prahu není citlivá (chránit netřeba)
+                s.promenna(pref + k, n, False, chranit=False if k in zbytek and n >= prah else None)
+        bunky = [Bunka(pref + k, k, hodnoty.get(k, 0)) for k in kody_uz]
+        predem = pref + ostatni_kod + ":predem"
+        if zbytek:
+            n_predem = sum(hodnoty[k] for k in zbytek)
+            s.promenna(predem, n_predem, False, chranit=False if n_predem >= prah else None)
+            s.rovnice_souctu(predem, [pref + k for k in zbytek])
+            bunky.append(Bunka(predem, "ostatní", sum(hodnoty[k] for k in zbytek)))
+        p = potlac(bunky, prah)
+        for b in [b for b in p.zverejnene if b.kod == predem]:     # předem sloučené zůstává v „ostatní“
+            p.zverejnene.remove(b)
+            p.ostatni.append(b)
+        if not zv_celek:
+            p.cele_skryte = True
+        s.zaznamenej_potlaceni(p, celek, pref + ostatni_kod)
+        if p.cele_skryte:
+            return None
+        return ({b.kod[len(pref):]: b.hodnota for b in p.zverejnene}, p.ostatni_hodnota,
+                any(b.kod != predem for b in p.ostatni))
+
+    def struktura_uzemi(u: Uzemi) -> dict:
+        st = {"n": 0, "fopo:FO": 0, "fopo:PO": 0, "formy": {}, "vel": {}, "vek": {}}
+        for okres, f, kp, v in d["subjekty"]:
+            if not v_uzemi(okres, u):
+                continue
+            g = "FO" if f in FO_FORMY else "PO"
+            st["n"] += 1
+            st[f"fopo:{g}"] += 1
+            st["formy"][f"forma:{f}"] = st["formy"].get(f"forma:{f}", 0) + 1
+            vel = next(kod for kod, _, kody in PASMA_VELIKOSTI if kp in kody)
+            st["vel"][f"vel_{g}:{vel}"] = st["vel"].get(f"vel_{g}:{vel}", 0) + 1
+            vek_r = (datum - v).days / 365.25
+            pas = next(k for od, do, k, _ in PASMA_VEKU if vek_r >= od and (do is None or vek_r < do))
+            st["vek"][f"vek:{pas}"] = st["vek"].get(f"vek:{pas}", 0) + 1
+        return st
+
+    struktury = {pref: struktura_uzemi(u) for pref, u in bench}
+    for pref, u in bench:
+        assert struktury[pref]["n"] == pocet_uzemi(u)
+
+    def bench_tabulka(kod: str, nazev: str, t_uz: dict, skupiny: list[dict], poznamky: list[str]) -> dict:
+        """Podíly zkoumaného území (z tabulky t_uz) vedle týchž podílů v benchmarkových územích.
+        skupiny: [{g, celek: pref → proměnná, zv: pref → bool, hodnoty: pref → {kód: počet},
+        clen: kód → bool, ostatni_kod, jmenovatel: pref → počet}] – skupiny slučování (FO / PO)."""
+        sloupce = [{"kod": "uzemi", "nazev": f"{uz.nazev} (%)", "ukazatel": "BENCH_PODIL"}]
+        sloupce += [{"kod": sloupec(pref), "nazev": f"{u.nazev} (%)", "ukazatel": "BENCH_PODIL"} for pref, u in bench]
+        ma_cr = any(pref == "cr:" for pref, _ in bench)
+        if ma_cr:
+            sloupce.append({"kod": "rozdil_cr", "nazev": "Rozdíl proti ČR (p. b.)", "ukazatel": "BENCH_ROZDIL_PB"})
+        if not t_uz["zverejneno"]:
+            return tabulka_nezverejnena(kod, nazev, f"tabulka zkoumaného území se nezveřejňuje ({t_uz['duvod']})",
+                                        sloupce)
+        polozky_uz = [r["promenna"] for r in t_uz["radky"] if r["typ"] == "polozka"]
+        vysl = {}
+        for sk in skupiny:
+            for pref, _ in bench:
+                hodn = {k: n for k, n in sk["hodnoty"](pref).items() if sk["clen"](k)}
+                vysl[(sk["ostatni_kod"], pref)] = bench_cleneni(
+                    pref, sk["celek"](pref), sk["zv"](pref), hodn, [k for k in polozky_uz if sk["clen"](k)],
+                    sk["ostatni_kod"])
+        radky_uz = list(t_uz["radky"])
+        for sk in skupiny:   # benchmark má „ostatní“, zkoumané území ne (tam jsou ty položky nulové)
+            if (not any(r["promenna"] == sk["ostatni_kod"] for r in radky_uz)
+                    and any(vysl[(sk["ostatni_kod"], pref)] and vysl[(sk["ostatni_kod"], pref)][1] for pref, _ in bench)):
+                kde = next(i for i, r in enumerate(radky_uz) if r["typ"] == "celkem" or
+                           (r["typ"] == "mezisoucet" and r["promenna"] == f"fopo:{sk['g']}"))
+                radky_uz.insert(kde, {"popis": "ostatní (sloučené malé položky)", "typ": "ostatni",
+                                      "promenna": sk["ostatni_kod"], "hodnoty": {"podil": None},
+                                      "poznamka": "ve zkoumaném území žádné"})
+        radky, rozsirene = [], set()
+        for r in radky_uz:
+            var = r["promenna"]
+            if r["typ"] == "polozka":
+                sk = next(sk for sk in skupiny if sk["clen"](var))
+            elif r["typ"] == "ostatni":
+                sk = next(sk for sk in skupiny if var == sk["ostatni_kod"])
+            elif r["typ"] == "mezisoucet":
+                sk = next(sk for sk in skupiny if var == f"fopo:{sk['g']}")
+            else:
+                sk = None
+            hodnoty = {"uzemi": r["hodnoty"]["podil"]}
+            zaklady = {"uzemi": var} if hodnoty["uzemi"] is not None else {}
+            for pref, u in bench:
+                st, n, zakl = struktury[pref], None, None
+                if r["typ"] == "celkem":
+                    if s.zverejnena(u.promenna):
+                        n, zakl = st["n"], u.promenna
+                elif r["typ"] == "mezisoucet":
+                    if s.zverejnena(pref + var):
+                        n, zakl = st[var], pref + var
+                else:
+                    v = vysl[(sk["ostatni_kod"], pref)]
+                    if v and r["typ"] == "polozka":
+                        if var in v[0]:
+                            n, zakl = v[0][var], pref + var
+                        else:
+                            rozsirene.add(u.nazev)
+                    elif v and r["typ"] == "ostatni" and v[1]:
+                        n, zakl = v[1], pref + sk["ostatni_kod"]
+                        if v[2]:
+                            rozsirene.add(u.nazev)
+                jmen = st["n"] if sk is None else sk["jmenovatel"](pref)
+                hodnoty[sloupec(pref)] = _pct(n, jmen) if n is not None else None
+                if zakl:
+                    zaklady[sloupec(pref)] = zakl
+            if ma_cr and hodnoty["uzemi"] is not None and hodnoty["cr"] is not None:
+                hodnoty["rozdil_cr"] = round(hodnoty["uzemi"] - hodnoty["cr"], 1)
+                zaklady["rozdil_cr"] = var
+            radky.append({"popis": r["popis"], "typ": r["typ"], "promenna": var, "zaklady": zaklady, "hodnoty": hodnoty,
+                          "poznamka": r.get("poznamka") if r["typ"] == "ostatni" and hodnoty["uzemi"] is None else None})
+        pozn = list(poznamky)
+        if rozsirene:
+            pozn.append(f"{', '.join(sorted(rozsirene))}: některá položka zveřejněná ve zkoumaném území je zde pod "
+                        f"prahem a je sloučena do „ostatní“ (v tomto sloupci pomlčka).")
+        return {"kod": kod, "nazev": nazev, "sloupce": sloupce, "radky": radky, "zverejneno": True, "duvod": None,
+                "poznamky": pozn}
+
+    tabulky_bench = []
+    spolecna = ("Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, "
+                "je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.")
+    if bench:
+        def je_fo(k: str) -> bool:
+            return k.split(":", 1)[1] in FO_FORMY
+        vse = lambda k: True                                                     # noqa: E731
+        celek_u = dict((pref, u.promenna) for pref, u in bench)
+        zv_celek = {pref: s.zverejnena(u.promenna) for pref, u in bench}
+        tabulky_bench.append(bench_tabulka(
+            "T13_bench_fo_po", "Typ osoby – srovnání s ČR a se srovnávacími kraji (podíl, %)", tab_uz["T05_fo_po"],
+            [{"g": None, "celek": celek_u.get, "zv": zv_celek.get, "clen": lambda k: k.startswith("fopo:"),
+              "hodnoty": lambda p: {k: struktury[p][k] for k in ("fopo:FO", "fopo:PO")},
+              "ostatni_kod": "ostatni:T05_fo_po", "jmenovatel": lambda p: struktury[p]["n"]}], [spolecna]))
+        fopo_zv = {pref: s.zverejnena(pref + "fopo:FO") and s.zverejnena(pref + "fopo:PO") for pref, _ in bench}
+        t06 = tab_uz["T06_pravni_forma"]
+        if any(r["typ"] == "mezisoucet" for r in t06["radky"]):
+            sk_formy = [{"g": g, "celek": (lambda p, g=g: p + f"fopo:{g}"), "zv": fopo_zv.get,
+                         "clen": (lambda k, g=g: k.startswith("forma:") and je_fo(k) == (g == "FO")),
+                         "hodnoty": lambda p: struktury[p]["formy"], "ostatni_kod": f"ostatni:T06_pravni_forma:{g}",
+                         "jmenovatel": lambda p: struktury[p]["n"]} for g in ("FO", "PO")]
+        else:
+            sk_formy = [{"g": None, "celek": celek_u.get, "zv": zv_celek.get, "clen": lambda k: k.startswith("forma:"),
+                         "hodnoty": lambda p: struktury[p]["formy"], "ostatni_kod": "ostatni:T06_pravni_forma",
+                         "jmenovatel": lambda p: struktury[p]["n"]}]
+        tabulky_bench.append(bench_tabulka(
+            "T14_bench_pravni_forma", "Právní forma – srovnání s ČR a se srovnávacími kraji (podíl z celku, %)",
+            t06, sk_formy, [spolecna]))
+        for g, kod_uz, kod_b in (("FO", "T07_velikost_fo", "T15_bench_velikost_fo"),
+                                 ("PO", "T08_velikost_po", "T16_bench_velikost_po")):
+            tabulky_bench.append(bench_tabulka(
+                kod_b, f"Velikostní profil {g} – srovnání s ČR a se srovnávacími kraji (podíl z {g}, %)",
+                tab_uz[kod_uz],
+                [{"g": g, "celek": (lambda p, g=g: p + f"fopo:{g}"), "zv": fopo_zv.get,
+                  "clen": (lambda k, g=g: k.startswith(f"vel_{g}:")), "hodnoty": lambda p: struktury[p]["vel"],
+                  "ostatni_kod": f"ostatni:{kod_uz}", "jmenovatel": (lambda p, g=g: struktury[p][f"fopo:{g}"])}],
+                [spolecna, "„Neuvedeno“ (KATPO 000) je samostatný řádek, nesčítá se s „bez zaměstnanců“."]))
+        tabulky_bench.append(bench_tabulka(
+            "T17_bench_vekova_struktura",
+            "Věková struktura existujících subjektů – srovnání s ČR a se srovnávacími kraji (podíl, %)",
+            tab_uz["T09_vekova_struktura"],
+            [{"g": None, "celek": celek_u.get, "zv": zv_celek.get, "clen": lambda k: k.startswith("vek:"),
+              "hodnoty": lambda p: struktury[p]["vek"], "ostatni_kod": "ostatni:T09_vekova_struktura",
+              "jmenovatel": lambda p: struktury[p]["n"]}], [spolecna]))
+
+    # --- T18 míra zániku PO v oboru (Blok 4 B) ---------------------------------------------
+    # stav k 1. 1. Y = existující PO se vznikem před 1. 1. Y + PO zaniklé 1. 1. Y nebo později;
+    # míra = zaniklé PO v roce / stav k 1. 1.; srovnatelné období 1. 1.–den snímku i pro dřívější roky.
+    roky_z = list(range(ZANIKY_OD_ROKU, datum.year + 1))
+    posledni = datum.year
+    mira_uzemi = [("", uz)] + bench
+
+    def dynamika_po(u: Uzemi) -> dict:
+        exist = [v for okres, f, _, v in d["subjekty"] if f not in FO_FORMY and v_uzemi(okres, u)]
+        zan = [(v, z) for okres, v, z in d["zaniky_po"] if v_uzemi(okres, u)]
+        out = {}
+        for y in roky_z:
+            od, do_obd = date(y, 1, 1), date(y, datum.month, datum.day)
+            out[y] = {
+                "stav": sum(1 for v in exist if v < od) + sum(1 for v, z in zan if (v is None or v < od) and z >= od),
+                "zan": sum(1 for _, z in zan if z.year == y),
+                "obd": sum(1 for _, z in zan if od <= z <= do_obd),
+                "vznik": sum(1 for v in exist if v.year == y) + sum(1 for v, _ in zan if v and v.year == y),
+            }
+        out["nyni"] = len(exist)
+        for y in roky_z:     # kontrola rekonstrukce: stav(Y+1) = stav(Y) − zániky(Y) + vzniky(Y)
+            dalsi = out[y + 1]["stav"] if y < posledni else out["nyni"]
+            assert dalsi == out[y]["stav"] - out[y]["zan"] + out[y]["vznik"], (u.kod, y)
+        return out
+
+    t18_radky = []
+    for pref, u in mira_uzemi:
+        dp = dynamika_po(u)
+        po_var = pref + "fopo:PO"
+        for y in roky_z:
+            x = dp[y]
+            v_stav, v_zan, v_obd = f"{pref}stav_po:{y}", f"{pref}zanik_po:{y}", f"{pref}zanik_po_obd:{y}"
+            v_vzn, v_mimo = f"{pref}vznik_po:{y}", f"{pref}zanik_po_mimo:{y}"
+            # zániky za rok (u zkoumaného území převzaté z T10 včetně jejího slučování)
+            zv_zan = s.zverejnena(v_zan) if pref == "" else x["zan"] >= prah
+            s.promenna(v_zan, x["zan"], zv_zan)
+            if y < posledni:
+                mimo = x["zan"] - x["obd"]
+                zv_obd = x["obd"] >= prah and (not zv_zan or mimo >= prah)
+                s.promenna(v_obd, x["obd"], zv_obd)
+                s.promenna(v_mimo, mimo, False, chranit=mimo < prah)
+                s.rovnice_obecna({v_zan: 1, v_obd: -1, v_mimo: -1})
+            else:
+                v_obd, zv_obd = v_zan, zv_zan
+            s.promenna(v_vzn, x["vznik"], False, chranit=x["vznik"] < prah)
+            dalsi = f"{pref}stav_po:{y + 1}" if y < posledni else po_var
+            s.rovnice_obecna({dalsi: 1, v_stav: -1, v_zan: 1, v_vzn: -1})
+        # stavy: zveřejnit, je-li stav na prahu a nedá se z nich dopočítat malý počet vzniků
+        for y in reversed(roky_z):
+            x = dp[y]
+            zv = x["stav"] >= prah
+            dalsi_zv = s.zverejnena(f"{pref}stav_po:{y + 1}") if y < posledni else s.zverejnena(po_var)
+            if zv and dalsi_zv and s.zverejnena(f"{pref}zanik_po:{y}") and x["vznik"] < prah:
+                zv = False
+            s.promenna(f"{pref}stav_po:{y}", x["stav"], zv)
+        for y in roky_z:
+            x = dp[y]
+            v_stav, v_zan = f"{pref}stav_po:{y}", f"{pref}zanik_po:{y}"
+            v_obd = f"{pref}zanik_po_obd:{y}" if y < posledni else v_zan
+            zv_stav, zv_zan, zv_obd = s.zverejnena(v_stav), s.zverejnena(v_zan), s.zverejnena(v_obd)
+            uplny = y < posledni
+            hodnoty = {
+                "stav": x["stav"] if zv_stav else None,
+                "zan": x["zan"] if zv_zan and uplny else None,
+                "mira": round(100 * x["zan"] / x["stav"], 2) if zv_stav and zv_zan and uplny else None,
+                "obd": x["obd"] if zv_obd else None,
+                "mira_obd": round(100 * x["obd"] / x["stav"], 2) if zv_stav and zv_obd else None,
+            }
+            poz = []
+            if not uplny:
+                poz.append("neúplný rok – jen srovnatelné období")
+            if not zv_stav or (uplny and not zv_zan) or not zv_obd:
+                poz.append("část skryta (práh, dopočet)")
+            t18_radky.append({
+                "popis": f"{u.nazev} – {y}", "typ": "polozka", "promenna": v_stav, "uzemi": u.kod, "rok": y,
+                "zaklady": {"stav": v_stav, "zan": v_zan, "mira": v_zan, "obd": v_obd, "mira_obd": v_obd},
+                "hodnoty": hodnoty, "poznamka": "; ".join(poz) or None})
+    obdobi_txt = f"1. 1.–{datum.day}. {datum.month}."
+    t18 = {"kod": "T18_mira_zaniku_po", "nazev": f"Míra zániku právnických osob v oboru (RES, {ZANIKY_OD_ROKU}–{posledni})",
+           "sloupce": [{"kod": "stav", "nazev": "Stav PO k 1. 1.", "ukazatel": "ZANIK_PO_STAV"},
+                       {"kod": "zan", "nazev": "Zaniklé PO za rok", "ukazatel": "ZANIK_PO_RES"},
+                       {"kod": "mira", "nazev": "Míra zániku za rok (%)", "ukazatel": "MIRA_ZANIKU_PO"},
+                       {"kod": "obd", "nazev": f"Zaniklé PO {obdobi_txt}", "ukazatel": "ZANIK_PO_OBD"},
+                       {"kod": "mira_obd", "nazev": f"Míra zániku {obdobi_txt} (%)", "ukazatel": "MIRA_ZANIKU_PO_OBD"}],
+           "radky": t18_radky, "zverejneno": True, "duvod": None, "obdobi": obdobi_txt,
+           "poznamky": [
+               "Pomlčka = skryto: počet pod prahem nebo by z něj šlo dopočítat skrytý počet (zániky ve zbytku "
+               "roku, vzniky mezi dvěma stavy).",
+               "Míra zániku PO = zaniklé PO v roce / stav PO k 1. 1. téhož roku × 100. Stav je rekonstruován "
+               "ze snímku RES: existující PO se vznikem před 1. 1. + PO zaniklé 1. 1. nebo později.",
+               f"Rok {posledni} je neúplný (snímek k {datum.day}. {datum.month}. {datum.year}); pro srovnání se "
+               f"proto počítá i srovnatelné období {obdobi_txt} každého roku.",
+               "Omezení: jen právnické osoby – zaniklé FO mají v otevřených datech jen IČO a datum zániku. "
+               f"Okno {len(roky_z)} let ({ZANIKY_OD_ROKU}–{posledni}): RES uchovává zaniklé subjekty jen 4 roky po "
+               "zániku. Obor a sídlo jsou podle snímku (u zaniklých poslední známé), jejich změny v čase se "
+               "nepromítají."]}
 
     # T11 dynamika území podle ČSÚ (RES05) – všechny obory
     t11_radky = []
@@ -832,7 +1127,8 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
                         + ("" if kod_oboru else " Obor nemá v RESDP00 samostatné odvětví; uvádí se jen celek.")
                         + (" Odvětví RESDP00 je širší nebo užší než sekce oboru." if kod_oboru and kod_oboru not in "BCDEFGHIJLMNPQR" else "")]}
 
-    tabulky = [t01_tab, t02, t03] + ([t04] if t04 else []) + tabulky_uzemi + [t10, t11, t12]
+    tabulky = ([t01_tab, t02, t03] + ([t04] if t04 else []) + tabulky_uzemi + tabulky_bench
+               + [t10, t18, t11, t12])
     for t in tabulky:
         for r in t["radky"]:
             for sl in t["sloupce"]:
@@ -865,10 +1161,14 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
         "licence": {"nazev": "CC BY 4.0", "url": LICENCE_URL},
         "vygenerovano": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
+    # detektor zjištění (Blok 4 C) pracuje jen se zveřejněnými čísly tabulek
+    from firemni_databaze.report_zjisteni import detekuj, tabulka_zjisteni
+    zjisteni = detekuj({"meta": meta, "tabulky": tabulky})
+    tabulky.append(tabulka_zjisteni(zjisteni))
     pouzite = {r.get("ukazatele", {}).get(sl["kod"]) or sl["ukazatel"] for t in tabulky for r in t["radky"] for sl in t["sloupce"]}
     meta["ukazatele"] = [{k: u.get(k) for k in ("kod", "nazev", "typ", "definice", "chybejici_hodnoty", "vyklad")}
                          for kod, u in katalog.items() if kod in pouzite]
-    vysledek = {"meta": meta, "tabulky": tabulky}
+    vysledek = {"meta": meta, "tabulky": tabulky, "zjisteni": zjisteni}
     interni = {"promenne": s.promenne, "rovnice": s.rovnice, "prah": prah}
     return vysledek, interni
 
@@ -916,6 +1216,16 @@ def slug(vysledek: dict) -> str:
     return f"{'-'.join(z['obor'])}__{z['uzemi']}__{z['datum_snimku']}"
 
 
+def soubor_zjisteni(vysledek: dict) -> dict:
+    """Obsah zjisteni.json: zadání, pravidla detektoru a zjištění seřazená podle síly."""
+    from firemni_databaze.report_zjisteni import MIN_PODIL_STRUKTURY, PRAH_ZJISTENI
+    m = vysledek["meta"]
+    return {"id_reportu": slug(vysledek), "obor": m["obor_popis"], "uzemi": m["uzemi"], "zadani": m["zadani"],
+            "pravidla": {"prah_relativniho_rozdilu": PRAH_ZJISTENI, "min_podil_struktury_pct": MIN_PODIL_STRUKTURY,
+                         "sila": "|hodnota / srovnání − 1|; divergence pořadí |p1 − p2| / (počet území − 1)"},
+            "citace": m["citace"], "oznaceni": m["oznaceni"], "zjisteni": vysledek["zjisteni"]}
+
+
 def uloz(vysledek: dict, interni: dict, adresar: Path) -> Path:
     from firemni_databaze.report_xlsx import zapis_xlsx
 
@@ -923,6 +1233,8 @@ def uloz(vysledek: dict, interni: dict, adresar: Path) -> Path:
     (cil / "_interni").mkdir(parents=True, exist_ok=True)
     (cil / "vysledek.json").write_text(json.dumps(vysledek, ensure_ascii=False, indent=1), encoding="utf-8")
     (cil / "vysledek.md").write_text(markdown(vysledek), encoding="utf-8")
+    (cil / "zjisteni.json").write_text(json.dumps(soubor_zjisteni(vysledek), ensure_ascii=False, indent=1),
+                                       encoding="utf-8")
     (cil / "_interni" / "kontrola.json").write_text(json.dumps(interni, ensure_ascii=False, indent=1), encoding="utf-8")
     zapis_xlsx(vysledek, cil / "priloha.xlsx", KATALOG)
     return cil
@@ -952,6 +1264,12 @@ def main() -> int:
     cil = uloz(vysledek, interni, args.vystup)
     print(markdown(vysledek))
     print(f"\nUloženo do {cil}")
+    from firemni_databaze.report_vyklad import sablona_vykladu, soubor_vykladu
+    vyklad = soubor_vykladu(slug(vysledek))
+    if not vyklad.exists():     # rozhodnutí 12: výklad analytika začíná zástupným textem
+        vyklad.parent.mkdir(parents=True, exist_ok=True)
+        vyklad.write_text(sablona_vykladu(vysledek, slug(vysledek)), encoding="utf-8")
+        print(f"Založen soubor výkladu analytika se zástupným textem: {vyklad}")
     if args.pdf:
         from firemni_databaze.report_pdf import ChybaSazby, vysazej
         try:

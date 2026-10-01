@@ -29,6 +29,26 @@ sekundárním slučování přeskočí, pokud je z čeho vybírat; (b) právní 
 | 10 | **Dynamika**: v0 používá RES05 (dynamika území) a RESDP jako kontext za ČR s poznámkou o jiné jednotce (podnik). Dynamika obor × území je mimo v0 (vznikne z archivu snímků RES). | T11 (RES05), nová T12 (RESDP00, `res.csu_demografie`); míry ČSÚ zaokrouhlené na 2 desetinná místa ve výpočetní vrstvě |
 | 11 | **Hlavní sdělení** nesou počet, lokalizační koeficient, hustota a pořadí. Velikostní profil jde až do strukturní kapitoly, vždy s podílem „Neuvedeno“. | shrnutí a dlaždice v PDF; velikost jen v kapitole Struktura |
 
+## Schválené rozhodnutí – Blok 4 (1. 10. 2026)
+
+| # | rozhodnutí | jak je v kódu |
+|---|---|---|
+| 12 | **Výklad má dvě vrstvy.** Stroj píše „co je vidět“ a detektor zjištění. „Proč“ a „co z toho plyne“ píše analytik do `reporty/vyklad/<id_reportu>.md`. Sazba text vloží a kontrola čísel na něj platí stejně. Dokud soubor chybí nebo obsahuje zástupný text, nejde použít `--vyklad-schvalen`. | `report_vyklad` (strojová vrstva + `nacti_vyklad_analytika`), `report_zjisteni`, `report_pdf.vysazej` (blokace schválení, kontrola čísel a zakázaných slov i v textu analytika); `report` při prvním výpočtu založí soubor se zástupným textem |
+
+Pravidla Bloku 4 zadaná spolu s rozhodnutím 12:
+
+- **Benchmarky struktury** (T13–T17): u FO/PO, právních forem, velikosti FO a PO (včetně
+  „Neuvedeno“) a věkových pásem se vedle zkoumaného území uvádí týž obor za ČR a za zadané
+  srovnávací kraje. Práh a slučování platí pro každé území zvlášť (viz níže).
+- **Míra zániku PO** (T18) = zaniklé PO v roce / stav PO k 1. 1. téhož roku × 100, pro území, ČR
+  a srovnávací kraje; za neúplný poslední rok i za srovnatelné období 1. 1.–den snímku všech let.
+- **Detektor zjištění** (T19, `zjisteni.json`): typ, číselná síla, čísla s odkazem na tabulku,
+  jedna věta bez interpretace; řazení podle síly. Rozdíl pod 3 % relativně se nehlásí a v textu se
+  popisuje jako „srovnatelné“.
+- **Čeština**: názvy území v 6. pádě z ručně psané tabulky `reporty/cestina/lokativ.yaml`
+  (14 krajů, 77 okresů, ČR); text nikdy nepoužije „v území <název>“.
+- **Shrnutí** (strana 2) tvoří 5 nejsilnějších zjištění, dlaždice zůstávají.
+
 **Upřesnění k rozhodnutí 1:** kontrola zakázaných slov povoluje jen sousloví **„aktivní podnik(y)“**.
 Je to oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10), ne označení
 registrovaných subjektů.
@@ -62,12 +82,70 @@ python -m firemni_databaze.report_kontrola reporty/vystupy/*
 |---|---|
 | `vysledek.json` | `meta` (zadání, obor, území, populace, citace, označení, další zdroje, licence) a `tabulky` (sloupce s kódem ukazatele z katalogu, řádky se zveřejnitelnými čísly; skrytá čísla ve výstupu **nejsou**) |
 | `vysledek.md` | tytéž tabulky pro čtení |
+| `zjisteni.json` | zjištění detektoru seřazená podle síly, s pravidly detektoru, citací a označením |
 | `priloha.xlsx` | „Přehled“, každá tabulka na vlastním listu, „Metodika“ (celý katalog + příznak použití), „Zdroj a licence“ |
 | `_interni/kontrola.json` | všechny proměnné včetně skrytých a lineární vztahy mezi tabulkami; **nezveřejňuje se** (je v `.gitignore`) |
 
 Tabulky: T01 základní ukazatele, T02 srovnání s ČR a zadanými kraji, T03 pořadí 14 krajů, T04 okresy
 kraje, T05 FO/PO, T06 právní forma, T07/T08 velikostní profil FO/PO, T09 věková struktura,
-T10 zaniklé PO z RES od 2023, T11 vznik a zánik v území podle ČSÚ (RES05).
+T10 zaniklé PO z RES od 2023, T11 vznik a zánik v území podle ČSÚ (RES05), T12 demografie podniků ČR
+(RESDP00), T13–T17 benchmarky struktury (ČR a srovnávací kraje), T18 míra zániku PO, T19 zjištění.
+
+## Benchmarky struktury (T13–T17)
+
+- Sloupce: zkoumané území (podíly převzaté z T05–T09), ČR (chybí, je-li území ČR), zadané
+  srovnávací kraje a rozdíl proti ČR v procentních bodech (z hodnot zaokrouhlených na 0,1).
+- Řádky určuje zkoumané území: položky, které jsou v něm sloučené do „ostatní“, se v ostatních
+  sloupcích **předem** sloučí taky (jinak by sloupce nebyly srovnatelné). Má-li benchmark navíc
+  položky, které v území vůbec nejsou, jdou rovněž do „ostatní“ (řádek s poznámkou „ve zkoumaném
+  území žádné“).
+- Každé benchmarkové území prochází **vlastním** potlačením: položka pod prahem v benchmarku se
+  sloučí do jeho „ostatní“ (v jeho sloupci pomlčka), je-li „ostatní“ pod prahem, přidá se další
+  nejmenší. Formy se slučují v rámci FO a PO; velikost FO a PO se zveřejní jen při zveřejněném
+  rozdělení FO/PO v daném území.
+- Proměnné benchmarků mají předponu (`cr:`, `kraj:<kód>:`) a vlastní rovnice, takže je pokrývá
+  kontrola dopočtu. Kraj s jediným okresem se jako benchmark okresu nepoužije (byl by totožný se
+  zkoumaným územím a obešel by jeho potlačení).
+- Položka, která je skrytá **jen kvůli srovnatelnosti** (předem sloučená) a je na prahu nebo nad
+  ním, se nechrání (`chranit: false` v interní kontrole): pro dopočet je dál neznámá, ale její
+  případné dopočítání nic neprozradí.
+
+## Míra zániku PO (T18)
+
+- **Stav PO k 1. 1. Y** = existující PO se vznikem před 1. 1. Y + PO zaniklé 1. 1. Y nebo později
+  (rekonstrukce z jednoho snímku RES). Výpočet ověřuje identitu stav(Y+1) = stav(Y) − zániky(Y) + vzniky(Y)
+  a pro poslední rok stav − zániky + vzniky = dnešní počet PO.
+- **Míra za rok** = zaniklé PO v roce / stav k 1. 1. × 100 (jen úplné roky); **míra za srovnatelné
+  období** = zaniklé PO 1. 1.–den snímku / stav k 1. 1. × 100 (všechny roky, tedy i neúplný poslední).
+- **Ochrana**: počty pod prahem se nezveřejní. Navíc se nezveřejní zániky za srovnatelné období, pokud
+  by šlo odečtem od celoročních zániků dopočítat zániky ve zbytku roku pod prahem, a stav, pokud by
+  z dvou po sobě jdoucích stavů a zániků šel dopočítat počet vzniků pod prahem. Tyto vztahy jsou
+  v interní kontrole jako obecné lineární rovnice (`{"koef": …}`).
+- **Omezení** (poznámka v T18): jen PO (zaniklé FO mají v otevřených datech jen IČO a datum zániku);
+  okno 4 let 2023–2026, protože RES uchovává zaniklé subjekty jen 4 roky po zániku (nejstarší zánik ve
+  snímku k 15. 9. 2026 je 1. 10. 2022, rok 2023 je tedy úplný); obor a sídlo podle snímku, jejich
+  změny v čase se nepromítají.
+
+## Detektor zjištění (T19, `zjisteni.json`)
+
+Pracuje jen se zveřejněnými čísly tabulek. Typy:
+
+| typ | co srovnává | tabulky |
+|---|---|---|
+| `odchylka_od_cr` | LQ proti 1, hustota proti ČR, každá položka struktury proti ČR | T02, T13–T17 |
+| `zmena_trendu` | míra zániku PO posledního roku proti průměru předchozích let (za rok i za srovnatelné období), proti ČR, a vývoj (index poslední/první rok) proti ČR | T18 |
+| `rozdily_uvnitr_uzemi` | hustota okresů proti kraji a proti ČR, rozpětí mezi okresy | T04, T02 |
+| `aktivita_oboru` | podíl se zjištěnou aktivitou v sekci proti všem oborům kraje (ČSÚ) | T01 |
+| `divergence_poradi` | pořadí podle počtu proti pořadí podle hustoty (kraj mezi 14 kraji, okresy v kraji) | T01, T04 |
+
+- **Síla** = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Obě míry
+  jsou bezrozměrné a 0 znamená shodu, takže jdou řadit společně.
+- **Nehlásí se**: rozdíl pod 3 % relativně (v textu „srovnatelné“); položky struktury s podílem pod 5 %
+  v území i v ČR (relativní rozdíl malých podílů je nestabilní); posun pořadí okresů o jedno místo.
+- Každé zjištění nese čísla s odkazem na tabulku, řádek a sloupec. Vypočtená čísla (průměr let,
+  index, relativní rozdíl) jsou v tabulce T19, takže jsou v JSON i XLSX a projdou kontrolou PDF.
+- **Shrnutí** v PDF: 5 nejsilnějších zjištění, nejvýš 2 téhož typu (jinak by u pilotu čtyři z pěti
+  bodů popisovaly tentýž jev – míru zániku PO).
 
 ## Ochrana malých buněk – přesný postup
 
@@ -107,8 +185,9 @@ T10 zaniklé PO z RES od 2023, T11 vznik a zánik v území podle ČSÚ (RES05).
 2. Každé číslo má ukazatel z katalogu.
 3. Žádný zveřejněný počet (typ `pocet`) není pod prahem.
 4. Odvozené ukazatele (podíl, index, pořadí, průměr) jsou jen u zveřejněných počtů.
-5. Žádné skryté číslo nejde dopočítat. Každé „ostatní“ má aspoň 2 položky a je nad prahem.
-6. Čísla odpovídají interním proměnným.
+5. Žádné skryté číslo nejde dopočítat (i přes obecné rovnice míry zániku PO). Každé „ostatní“ má aspoň
+   2 položky a je nad prahem.
+6. Čísla odpovídají interním proměnným (u tabulek s více územími podle `zaklady` po sloupcích).
 7. Citace (ČSÚ, RES, datum snímku, CC BY 4.0) a označení jsou v JSON i na každém listu.
 8. Žádné „firm…“ ani „aktivn…“ v textech JSON ani XLSX.
 
@@ -132,6 +211,7 @@ v ČR **200 977 FO** (obvykle 15–45 tis. za čtvrtletí).
 |---|---|
 | `DYN_OBOR_CSU` vznik a zánik v oboru × území | ČSÚ tabulku nepublikuje (viz výše) |
 | `ZANIK_PO_RES` jen částečně | zaniklé FO mají v otevřených datech jen IČO a datum zániku (GDPR), nejde je přiřadit oboru ani území; zaniklé starší 4 let v RES nejsou |
+| `MIRA_ZANIKU_PO`, `MIRA_ZANIKU_PO_OBD` jen částečně | jen PO a jen okno 2023–2026; u menších území je část let skrytá pravidlem prahu a dopočtu |
 | `DYN_VZNIK_CSU`, `DYN_ZANIK_CSU` jen částečně | jen celé území, ne obor; poslední rok neúplný |
 | `AKTIVNI_PODIL_SEKCE_KRAJ` jen částečně | jen je-li obor přesně jedna sekce publikovaná samostatně (ne B, C, D, E ani oddíl) |
 | `AKTIVNI_PODIL_KRAJ` za okres | ČSÚ podíl aktivity za okres podle převažující činnosti nepublikuje, uvádí se krajský |

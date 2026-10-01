@@ -1,4 +1,4 @@
-"""Sazba Oborově-regionálního reportu do PDF (Typst) z výstupu JSON Bloku 2.
+"""Sazba Oborově-regionálního reportu do PDF (Typst) z výstupu JSON výpočetní vrstvy.
 
 Spuštění:
     python -m firemni_databaze.report_pdf reporty/vystupy/F__CZ051__2026-09-15
@@ -7,13 +7,16 @@ Spuštění:
 Postup (každý krok, který selže, sazbu zastaví):
   1. kontrola výstupu Bloku 2 (report_kontrola.zkontroluj),
   2. data pro šablonu: všechna čísla se jen převezmou z vysledek.json a naformátují
-     (šablona reporty/sablona/report.typ nic nepočítá), výklad z report_vyklad,
+     (šablona reporty/sablona/report.typ nic nepočítá); výklad má dvě vrstvy (rozhodnutí 12):
+     „co je vidět“ a zjištění detektoru píše stroj (report_vyklad), „proč“ a „co z toho
+     plyne“ analytik do reporty/vyklad/<id_reportu>.md,
   3. grafy výhradně z knihovny report_grafy,
   4. kontrola čísel ve výkladu ještě před sazbou,
   5. typst compile (fonty jen z reporty/sablona/fonty),
   6. kontrola konzistence PDF: každé číslo v textu PDF (včetně výkladu) musí být
      v JSON i XLSX; při nesouladu se PDF smaže a skončí se chybou.
 Dokud výklad neschválí člověk (--vyklad-schvalen), nese zápatí „KONCEPT – výklad k revizi“.
+--vyklad-schvalen selže, dokud soubor analytika chybí nebo obsahuje zástupný text.
 """
 
 import argparse
@@ -26,7 +29,8 @@ from pathlib import Path
 
 from firemni_databaze import report_grafy as g
 from firemni_databaze import report_vyklad as vy
-from firemni_databaze.report_kontrola import cisla_v_textu, povolena_cisla, zkontroluj, zkontroluj_pdf
+from firemni_databaze.report_cestina import lokativ
+from firemni_databaze.report_kontrola import ZAKAZANA_SLOVA, cisla_v_textu, povolena_cisla, zkontroluj, zkontroluj_pdf
 from firemni_databaze.report_vyklad import Vstup, cz
 
 KOREN = Path(__file__).resolve().parents[2]
@@ -91,7 +95,7 @@ class Sestava:
         return p
 
 
-def sestav_data(vysledek: dict, adresar: Path, koncept: bool) -> dict:
+def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: dict | None = None) -> dict:
     v = Vstup(vysledek)
     meta = v.meta
     datum = _datum_cz(meta["zadani"]["datum_snimku"])
@@ -141,10 +145,15 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool) -> dict:
         obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.skladba(casti, adresar / "g_fopo.svg")),
                       "nazev": "Registrované subjekty oboru podle typu osoby", "zdroj": zdroj_res, "maly": True})
         obsah.append(tabulka(v.tab["T05_fo_po"], s.pismeno_tab("T05"), zdroj_res))
+    if v.t("T13_bench_fo_po"):
+        obsah.append(tabulka(v.tab["T13_bench_fo_po"], s.pismeno_tab("T13"), zdroj_res))
     if v.t("T06_pravni_forma"):
         obsah.append(tabulka(v.tab["T06_pravni_forma"], s.pismeno_tab("T06"), zdroj_res))
-    for kod, klic, nazev in (("T07_velikost_fo", "g_vel_fo", "Velikostní profil fyzických osob (podíl, %)"),
-                             ("T08_velikost_po", "g_vel_po", "Velikostní profil právnických osob (podíl, %)")):
+    if v.t("T14_bench_pravni_forma"):
+        obsah.append(tabulka(v.tab["T14_bench_pravni_forma"], s.pismeno_tab("T14"), zdroj_res))
+    for kod, klic, nazev, kod_b in (
+            ("T07_velikost_fo", "g_vel_fo", "Velikostní profil fyzických osob (podíl, %)", "T15_bench_velikost_fo"),
+            ("T08_velikost_po", "g_vel_po", "Velikostní profil právnických osob (podíl, %)", "T16_bench_velikost_po")):
         if v.t(kod):
             kat = [{"popis": r["popis"], "podil": r["hodnoty"]["podil"],
                     "zvlastni": r["popis"] == "Neuvedeno" or r["typ"] == "ostatni"}
@@ -153,6 +162,8 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool) -> dict:
             obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.rozlozeni(kat, adresar / f"{klic}.svg")),
                           "nazev": nazev + " – „Neuvedeno“ a „ostatní“ šrafovaně", "zdroj": zdroj_res})
             obsah.append(tabulka(v.tab[kod], s.pismeno_tab(kod[:3]), zdroj_res))
+        if v.t(kod_b):
+            obsah.append(tabulka(v.tab[kod_b], s.pismeno_tab(kod_b[:3]), zdroj_res))
     if v.t("T09_vekova_struktura"):
         kat = [{"popis": r["popis"], "podil": r["hodnoty"]["podil"], "zvlastni": r["typ"] == "ostatni"}
                for r in v.radky("T09_vekova_struktura", None) if r["typ"] in ("polozka", "ostatni")]
@@ -160,6 +171,8 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool) -> dict:
         obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.rozlozeni(kat, adresar / "g_vek.svg")),
                       "nazev": "Věková struktura existujících subjektů (podíl, %)", "zdroj": zdroj_res})
         obsah.append(tabulka(v.tab["T09_vekova_struktura"], s.pismeno_tab("T09"), zdroj_res))
+    if v.t("T17_bench_vekova_struktura"):
+        obsah.append(tabulka(v.tab["T17_bench_vekova_struktura"], s.pismeno_tab("T17"), zdroj_res))
     kapitoly.append({"nadpis": "Struktura", "klic": "struktura", "obsah": obsah})
 
     # --- Dynamika území a kontext ČR -------------------------------------------------
@@ -175,11 +188,29 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool) -> dict:
             roky[rok]["mimoradny_zanik"] = roky[rok].get("mimoradny_zanik") or "mimořádný" in poz
         p = s.pismeno_graf("g_dyn")
         obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.vznik_zanik(list(roky.values()), adresar / "g_dyn.svg")),
-                      "nazev": f"Vzniklé a zaniklé ekonomické subjekty v území {uzemi_nazev} – všechny obory",
+                      "nazev": f"Vzniklé a zaniklé ekonomické subjekty {v.v_uzemi} – všechny obory",
                       "zdroj": "Zdroj: ČSÚ, DataStat, RES05; " + f"RES stav k {datum}."})
         obsah.append(tabulka(v.tab["T11_dynamika_csu"], s.pismeno_tab("T11"), "Zdroj: ČSÚ, DataStat, RES05."))
     if v.t("T10_zaniky_po"):
         obsah.append(tabulka(v.tab["T10_zaniky_po"], s.pismeno_tab("T10"), zdroj_res))
+    t18 = v.radky("T18_mira_zaniku_po")
+    if t18:
+        uzemi_t18 = list(dict.fromkeys(r["uzemi"] for r in t18))
+        roky = sorted({r["rok"] for r in t18})
+        def rada(kod_u, sl, roky_):
+            radky_u = {r["rok"]: r for r in t18 if r["uzemi"] == kod_u}
+            popis = radky_u[roky[0]]["popis"].rsplit(" – ", 1)[0]
+            role = "uzemi" if kod_u == v.uzemi["kod"] else "cr" if kod_u == "CZ" else "srovnani"
+            return {"popis": popis, "role": role, "body": [(y, radky_u[y]["hodnoty"][sl]) for y in roky_]}
+        panely = [{"nazev": "Za celý rok", "rady": [rada(k, "mira", roky[:-1]) for k in uzemi_t18]},
+                  {"nazev": f"Za období {v.tab['T18_mira_zaniku_po']['obdobi']}",
+                   "rady": [rada(k, "mira_obd", roky) for k in uzemi_t18]}]
+        p = s.pismeno_graf("g_zanik")
+        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.miry_v_case(panely, adresar / "g_zanik.svg",
+                                                                             "Míra zániku PO (%)")),
+                      "nazev": "Míra zániku právnických osob v oboru – zkoumané území, ČR a srovnávací kraje",
+                      "zdroj": zdroj_res + " Chybějící bod = pod prahem."})
+        obsah.append(tabulka(v.tab["T18_mira_zaniku_po"], s.pismeno_tab("T18"), zdroj_res))
     t12 = v.radky("T12_demografie_cr")
     if t12:
         panely = []
@@ -201,10 +232,14 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool) -> dict:
 
     # --- výklad (po přidělení písmen) --------------------------------------------------
     L = {k: s.L.get(k, "příloha") for k in
-         ("T01", "T02", "T03", "T05", "T06", "T10", "T11", "T12", "g_dyn", "g_hustota", "g_lq", "g_miry",
-          "g_vek", "g_vel_fo", "g_vel_po")}
+         [f"T{i:02d}" for i in range(1, 20)]
+         + ["g_dyn", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
     for k in kapitoly:
         k["vyklad"] = {"postaveni": vy.postaveni, "struktura": vy.struktura, "dynamika": vy.dynamika}[k["klic"]](v, L)
+        if vyklad_analytika is None:
+            k["vyklad"].append(vy._blok("proč", "Výklad analytika zatím chybí."))
+        else:
+            k["vyklad"] += vyklad_analytika.get(k["klic"], [])
 
     # --- shrnutí (rozhodnutí 11: počet, LQ, hustota, pořadí) ------------------------
     cr = next((r for r in v.radky("T02_srovnani") if r["promenna"] == "obor@CZ"), None)
@@ -237,6 +272,13 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool) -> dict:
             + (f" Pro toto zadání: {cz(spolehlivost)} % ({L['T01']})." if spolehlivost is not None else ""),
             "Hlavní sdělení nesou počet, lokalizační koeficient, hustota a pořadí; velikostní profil je jen ve "
             "strukturní kapitole, vždy s podílem „Neuvedeno“.",
+            "Výklad má dvě vrstvy: „co je vidět“ a zjištění detektoru píše stroj (jen věcný popis zveřejněných čísel), "
+            "„proč to tak může být“ a „co z toho plyne“ píše analytik. Na oba texty platí kontrola čísel.",
+            "Zjištění: síla je relativní rozdíl |hodnota / srovnání − 1| (u pořadí rozdíl pořadí dělený počtem území "
+            "bez jednoho); zjištění se řadí podle síly. Rozdíl pod 3 % relativně se nehlásí a popisuje se jako "
+            "„srovnatelné“. Shrnutí tvoří nejsilnější zjištění, nejvýš dvě téhož typu.",
+            "Srovnání struktury s ČR a srovnávacími kraji: týž obor, položky podle zkoumaného území; práh a "
+            "slučování platí pro každé území zvlášť.",
         ],
         "varovani": meta["varovani"],
         "omezeni": [
@@ -248,8 +290,11 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool) -> dict:
             "Kategorie počtu zaměstnanců „Neuvedeno“ se neslučuje s „bez zaměstnanců“; u právnických osob znamená "
             "hlavně nehlášené zaměstnance.",
             "Zaniklé fyzické osoby mají v otevřených datech jen IČO a datum zániku, proto zánik v oboru lze sledovat "
-            "jen u právnických osob; dynamiku oboru v území ČSÚ nepublikuje.",
+            "jen u právnických osob; dynamiku oboru za kraj ani okres ČSÚ nepublikuje.",
             "Demografie podniků ČSÚ používá jinou jednotku (aktivní podnik) a je jen za ČR – slouží jen jako kontext.",
+            "Míra zániku PO: jen právnické osoby a jen okno let, které RES ještě uchovává (zaniklé subjekty jsou "
+            "v RES 4 roky po zániku); stav k 1. 1. je rekonstruován z jednoho snímku, obor a sídlo jsou podle "
+            "snímku. Neúplný poslední rok se srovnává za stejné období roku.",
         ],
         "ukazatele": [{"kod": u["kod"], "nazev": u["nazev"], "definice": u["definice"]} for u in meta["ukazatele"]],
         "zdroje": [meta["citace"]] + meta["dalsi_zdroje"],
@@ -290,17 +335,28 @@ def texty_dat(data: dict):
 # Sazba
 # ---------------------------------------------------------------------------
 
-def vysazej(adresar_vysledku: Path, cil: Path, koncept: bool = True) -> Path:
+def vysazej(adresar_vysledku: Path, cil: Path, koncept: bool = True, adresar_vykladu: Path = vy.VYKLAD) -> Path:
+    """koncept=False (výklad schválen) vyžaduje hotový soubor analytika bez zástupného textu."""
     chyby = zkontroluj(adresar_vysledku)
     if chyby:
-        raise ChybaSazby("výstup Bloku 2 neprošel kontrolou: " + "; ".join(chyby[:5]))
+        raise ChybaSazby("výstup výpočetní vrstvy neprošel kontrolou: " + "; ".join(chyby[:5]))
     vysledek = json.loads((adresar_vysledku / "vysledek.json").read_text(encoding="utf-8"))
+    from firemni_databaze.report import slug
+    soubor = vy.soubor_vykladu(slug(vysledek), adresar_vykladu)
+    stav, vyklad_analytika = vy.nacti_vyklad_analytika(soubor)
+    if not koncept and stav != "hotovy":
+        raise ChybaSazby(f"výklad nelze označit jako schválený: soubor analytika {soubor} "
+                         + ("chybí" if stav == "chybi" else f"obsahuje „{vy.ZASTUPNY_TEXT}“ nebo prázdnou kapitolu"))
+    for bloky in vyklad_analytika.values():
+        for b in bloky:
+            if ZAKAZANA_SLOVA.search(b["text"]):
+                raise ChybaSazby(f"zakázané slovo ve výkladu analytika (rozhodnutí 1): {b['text'][:80]!r}")
     povolena = povolena_cisla(adresar_vysledku)
     cil.mkdir(parents=True, exist_ok=True)
     pdf = cil / "report.pdf"
     with tempfile.TemporaryDirectory(prefix="sazba_") as tmp:
         tmp = Path(tmp)
-        data = sestav_data(vysledek, tmp, koncept)
+        data = sestav_data(vysledek, tmp, koncept, vyklad_analytika if stav != "chybi" else None)
         # kontrola čísel v textech ještě před sazbou (rychlé selhání)
         spatne = sorted({c for t in texty_dat(data) for c in cisla_v_textu(t)} - povolena)
         if spatne:
@@ -315,8 +371,9 @@ def vysazej(adresar_vysledku: Path, cil: Path, koncept: bool = True) -> Path:
     if chyby:
         pdf.unlink(missing_ok=True)
         raise ChybaSazby("nesoulad čísel v PDF – sazba zastavena: " + "; ".join(chyby[:10]))
-    if (cil / "priloha.xlsx").resolve() != (adresar_vysledku / "priloha.xlsx").resolve():
-        shutil.copy(adresar_vysledku / "priloha.xlsx", cil / "priloha.xlsx")
+    for soubor in ("priloha.xlsx", "zjisteni.json"):
+        if (adresar_vysledku / soubor).exists() and (cil / soubor).resolve() != (adresar_vysledku / soubor).resolve():
+            shutil.copy(adresar_vysledku / soubor, cil / soubor)
     return pdf
 
 
@@ -325,11 +382,13 @@ def main() -> int:
     parser.add_argument("adresar", type=Path, help="adresář s výstupem Bloku 2 (vysledek.json, priloha.xlsx)")
     parser.add_argument("--vystup", type=Path, help="kam uložit PDF a XLSX (výchozí: vedle vysledek.json); "
                                                   "ukázky do reporty/ukazky")
-    parser.add_argument("--vyklad-schvalen", action="store_true", help="odstraní z zápatí stav KONCEPT")
+    parser.add_argument("--vyklad-schvalen", action="store_true",
+                        help="odstraní ze zápatí stav KONCEPT; selže, dokud soubor analytika chybí nebo má zástupný text")
+    parser.add_argument("--vyklad", type=Path, default=vy.VYKLAD, help="adresář výkladů analytika (reporty/vyklad)")
     args = parser.parse_args()
     try:
         cil = args.vystup / args.adresar.name if args.vystup else args.adresar
-        pdf = vysazej(args.adresar, cil, koncept=not args.vyklad_schvalen)
+        pdf = vysazej(args.adresar, cil, koncept=not args.vyklad_schvalen, adresar_vykladu=args.vyklad)
     except ChybaSazby as exc:
         print(f"SAZBA ZASTAVENA: {exc}")
         return 1

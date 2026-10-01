@@ -83,20 +83,26 @@ def _redukuj(radek: dict[str, Fraction], baze: list[tuple[str, dict[str, Fractio
     return radek
 
 
-def dopocitatelne(rovnice: list[tuple[str, list[str]]], zverejnene: set[str], skryte: set[str]) -> list[str]:
+def dopocitatelne(rovnice: list, zverejnene: set[str], skryte: set[str]) -> list[str]:
     """Vrátí skryté proměnné, které jdou ze zveřejněných čísel dopočítat.
 
     rovnice: (celek, [části]) znamená celek = součet částí (např. součet
-    tabulky, podskupina FO/PO, sloučené „ostatní“). Proměnná je dopočitatelná,
+    tabulky, podskupina FO/PO, sloučené „ostatní“); {"koef": {proměnná: k}}
+    znamená obecný vztah Σ k·proměnná = 0 (např. stav PO k 1. 1. dalšího roku
+    = stav − zániky + vzniky). Proměnná je dopočitatelná,
     právě když její jednotkový vektor leží v řádkovém prostoru soustavy
     rovnic doplněné o zveřejněné proměnné (Gaussova eliminace nad zlomky).
     Meze plynoucí z nezápornosti (intervaly) se neposuzují.
     """
     radky: list[dict[str, Fraction]] = []
-    for celek, casti in rovnice:
-        r: dict[str, Fraction] = {celek: Fraction(1)}
-        for c in casti:
-            r[c] = r.get(c, Fraction(0)) - 1
+    for rov in rovnice:
+        if isinstance(rov, dict):
+            r: dict[str, Fraction] = {k: Fraction(v) for k, v in rov["koef"].items()}
+        else:
+            celek, casti = rov
+            r = {celek: Fraction(1)}
+            for c in casti:
+                r[c] = r.get(c, Fraction(0)) - 1
         radky.append({k: v for k, v in r.items() if v != 0})
     radky += [{v: Fraction(1)} for v in zverejnene]
 

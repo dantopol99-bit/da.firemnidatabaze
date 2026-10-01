@@ -1,0 +1,122 @@
+# Tvary územních názvů v 6. pádě (lokativ) s předložkou – ručně psaná, verzovaná tabulka.
+#
+# NEGENERUJE SE: každý tvar je napsaný ručně a změna jde přes revizi v gitu.
+# Použití: výklad, zjištění a popisky reportu („v Libereckém kraji“,
+# „v okrese Jablonec nad Nisou“). Chybí-li území v tabulce, výpočet skončí
+# chybou – nikdy se nepoužije náhradní „v území <název>“.
+#
+# kod: kód území (CZ, CZ-NUTS 3 kraje, kód okresu z číselníku ČSÚ 109)
+# nazev: název v 1. pádě (kontrola proti číselníku)
+# v: tvar v 6. pádě s předložkou
+
+cr:
+  - {kod: CZ, nazev: Česko, v: v Česku}
+
+kraje:
+  - {kod: CZ010, nazev: Hlavní město Praha, v: v hlavním městě Praze}
+  - {kod: CZ020, nazev: Středočeský kraj, v: ve Středočeském kraji}
+  - {kod: CZ031, nazev: Jihočeský kraj, v: v Jihočeském kraji}
+  - {kod: CZ032, nazev: Plzeňský kraj, v: v Plzeňském kraji}
+  - {kod: CZ041, nazev: Karlovarský kraj, v: v Karlovarském kraji}
+  - {kod: CZ042, nazev: Ústecký kraj, v: v Ústeckém kraji}
+  - {kod: CZ051, nazev: Liberecký kraj, v: v Libereckém kraji}
+  - {kod: CZ052, nazev: Královéhradecký kraj, v: v Královéhradeckém kraji}
+  - {kod: CZ053, nazev: Pardubický kraj, v: v Pardubickém kraji}
+  - {kod: CZ063, nazev: Kraj Vysočina, v: v Kraji Vysočina}
+  - {kod: CZ064, nazev: Jihomoravský kraj, v: v Jihomoravském kraji}
+  - {kod: CZ071, nazev: Olomoucký kraj, v: v Olomouckém kraji}
+  - {kod: CZ072, nazev: Zlínský kraj, v: ve Zlínském kraji}
+  - {kod: CZ080, nazev: Moravskoslezský kraj, v: v Moravskoslezském kraji}
+
+okresy:
+  # Hlavní město Praha (okres = kraj)
+  - {kod: CZ0100, nazev: Praha, v: v Praze}
+  # Středočeský kraj
+  - {kod: CZ0201, nazev: Benešov, v: v okrese Benešov}
+  - {kod: CZ0202, nazev: Beroun, v: v okrese Beroun}
+  - {kod: CZ0203, nazev: Kladno, v: v okrese Kladno}
+  - {kod: CZ0204, nazev: Kolín, v: v okrese Kolín}
+  - {kod: CZ0205, nazev: Kutná Hora, v: v okrese Kutná Hora}
+  - {kod: CZ0206, nazev: Mělník, v: v okrese Mělník}
+  - {kod: CZ0207, nazev: Mladá Boleslav, v: v okrese Mladá Boleslav}
+  - {kod: CZ0208, nazev: Nymburk, v: v okrese Nymburk}
+  - {kod: CZ0209, nazev: Praha-východ, v: v okrese Praha-východ}
+  - {kod: CZ020A, nazev: Praha-západ, v: v okrese Praha-západ}
+  - {kod: CZ020B, nazev: Příbram, v: v okrese Příbram}
+  - {kod: CZ020C, nazev: Rakovník, v: v okrese Rakovník}
+  # Jihočeský kraj
+  - {kod: CZ0311, nazev: České Budějovice, v: v okrese České Budějovice}
+  - {kod: CZ0312, nazev: Český Krumlov, v: v okrese Český Krumlov}
+  - {kod: CZ0313, nazev: Jindřichův Hradec, v: v okrese Jindřichův Hradec}
+  - {kod: CZ0314, nazev: Písek, v: v okrese Písek}
+  - {kod: CZ0315, nazev: Prachatice, v: v okrese Prachatice}
+  - {kod: CZ0316, nazev: Strakonice, v: v okrese Strakonice}
+  - {kod: CZ0317, nazev: Tábor, v: v okrese Tábor}
+  # Plzeňský kraj
+  - {kod: CZ0321, nazev: Domažlice, v: v okrese Domažlice}
+  - {kod: CZ0322, nazev: Klatovy, v: v okrese Klatovy}
+  - {kod: CZ0323, nazev: Plzeň-město, v: v okrese Plzeň-město}
+  - {kod: CZ0324, nazev: Plzeň-jih, v: v okrese Plzeň-jih}
+  - {kod: CZ0325, nazev: Plzeň-sever, v: v okrese Plzeň-sever}
+  - {kod: CZ0326, nazev: Rokycany, v: v okrese Rokycany}
+  - {kod: CZ0327, nazev: Tachov, v: v okrese Tachov}
+  # Karlovarský kraj
+  - {kod: CZ0411, nazev: Cheb, v: v okrese Cheb}
+  - {kod: CZ0412, nazev: Karlovy Vary, v: v okrese Karlovy Vary}
+  - {kod: CZ0413, nazev: Sokolov, v: v okrese Sokolov}
+  # Ústecký kraj
+  - {kod: CZ0421, nazev: Děčín, v: v okrese Děčín}
+  - {kod: CZ0422, nazev: Chomutov, v: v okrese Chomutov}
+  - {kod: CZ0423, nazev: Litoměřice, v: v okrese Litoměřice}
+  - {kod: CZ0424, nazev: Louny, v: v okrese Louny}
+  - {kod: CZ0425, nazev: Most, v: v okrese Most}
+  - {kod: CZ0426, nazev: Teplice, v: v okrese Teplice}
+  - {kod: CZ0427, nazev: Ústí nad Labem, v: v okrese Ústí nad Labem}
+  # Liberecký kraj
+  - {kod: CZ0511, nazev: Česká Lípa, v: v okrese Česká Lípa}
+  - {kod: CZ0512, nazev: Jablonec nad Nisou, v: v okrese Jablonec nad Nisou}
+  - {kod: CZ0513, nazev: Liberec, v: v okrese Liberec}
+  - {kod: CZ0514, nazev: Semily, v: v okrese Semily}
+  # Královéhradecký kraj
+  - {kod: CZ0521, nazev: Hradec Králové, v: v okrese Hradec Králové}
+  - {kod: CZ0522, nazev: Jičín, v: v okrese Jičín}
+  - {kod: CZ0523, nazev: Náchod, v: v okrese Náchod}
+  - {kod: CZ0524, nazev: Rychnov nad Kněžnou, v: v okrese Rychnov nad Kněžnou}
+  - {kod: CZ0525, nazev: Trutnov, v: v okrese Trutnov}
+  # Pardubický kraj
+  - {kod: CZ0531, nazev: Chrudim, v: v okrese Chrudim}
+  - {kod: CZ0532, nazev: Pardubice, v: v okrese Pardubice}
+  - {kod: CZ0533, nazev: Svitavy, v: v okrese Svitavy}
+  - {kod: CZ0534, nazev: Ústí nad Orlicí, v: v okrese Ústí nad Orlicí}
+  # Kraj Vysočina
+  - {kod: CZ0631, nazev: Havlíčkův Brod, v: v okrese Havlíčkův Brod}
+  - {kod: CZ0632, nazev: Jihlava, v: v okrese Jihlava}
+  - {kod: CZ0633, nazev: Pelhřimov, v: v okrese Pelhřimov}
+  - {kod: CZ0634, nazev: Třebíč, v: v okrese Třebíč}
+  - {kod: CZ0635, nazev: Žďár nad Sázavou, v: v okrese Žďár nad Sázavou}
+  # Jihomoravský kraj
+  - {kod: CZ0641, nazev: Blansko, v: v okrese Blansko}
+  - {kod: CZ0642, nazev: Brno-město, v: v okrese Brno-město}
+  - {kod: CZ0643, nazev: Brno-venkov, v: v okrese Brno-venkov}
+  - {kod: CZ0644, nazev: Břeclav, v: v okrese Břeclav}
+  - {kod: CZ0645, nazev: Hodonín, v: v okrese Hodonín}
+  - {kod: CZ0646, nazev: Vyškov, v: v okrese Vyškov}
+  - {kod: CZ0647, nazev: Znojmo, v: v okrese Znojmo}
+  # Olomoucký kraj
+  - {kod: CZ0711, nazev: Jeseník, v: v okrese Jeseník}
+  - {kod: CZ0712, nazev: Olomouc, v: v okrese Olomouc}
+  - {kod: CZ0713, nazev: Prostějov, v: v okrese Prostějov}
+  - {kod: CZ0714, nazev: Přerov, v: v okrese Přerov}
+  - {kod: CZ0715, nazev: Šumperk, v: v okrese Šumperk}
+  # Zlínský kraj
+  - {kod: CZ0721, nazev: Kroměříž, v: v okrese Kroměříž}
+  - {kod: CZ0722, nazev: Uherské Hradiště, v: v okrese Uherské Hradiště}
+  - {kod: CZ0723, nazev: Vsetín, v: v okrese Vsetín}
+  - {kod: CZ0724, nazev: Zlín, v: v okrese Zlín}
+  # Moravskoslezský kraj
+  - {kod: CZ0801, nazev: Bruntál, v: v okrese Bruntál}
+  - {kod: CZ0802, nazev: Frýdek-Místek, v: v okrese Frýdek-Místek}
+  - {kod: CZ0803, nazev: Karviná, v: v okrese Karviná}
+  - {kod: CZ0804, nazev: Nový Jičín, v: v okrese Nový Jičín}
+  - {kod: CZ0805, nazev: Opava, v: v okrese Opava}
+  - {kod: CZ0806, nazev: Ostrava-město, v: v okrese Ostrava-město}

@@ -134,9 +134,101 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 
 > Věk = datum snímku − datum vzniku. Jde o strukturu dnes existujících subjektů, ne o počet vzniků v jednotlivých letech (zaniklé subjekty nejsou zahrnuty).
 
+## T13_bench_fo_po: Typ osoby – srovnání s ČR a se srovnávacími kraji (podíl, %)
+
+| Položka | Kraj Vysočina (%) | Česko (%) | Jihočeský kraj (%) | Pardubický kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| fyzické osoby (FO) | 78,5 | 72,3 | 79,2 | 77,8 | 6,2 |  |
+| právnické osoby a ostatní (PO) | 21,5 | 27,7 | 20,8 | 22,2 | -6,2 |  |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+
+## T14_bench_pravni_forma: Právní forma – srovnání s ČR a se srovnávacími kraji (podíl z celku, %)
+
+| Položka | Kraj Vysočina (%) | Česko (%) | Jihočeský kraj (%) | Pardubický kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| 101 Fyzická osoba podnikající dle živnostenského zákona | 76,5 | 69,6 | 77,2 | 76,4 | 6,9 |  |
+| ostatní formy FO | 1,9 | 2,7 | 1,9 | 1,4 | -0,8 |  |
+| **FO celkem** | 78,5 | 72,3 | 79,2 | 77,8 | 6,2 |  |
+| 112 Společnost s ručením omezeným | 18,6 | 26,1 | 19,2 | 20,2 | -7,5 |  |
+| ostatní formy PO | 3 | 1,5 | 1,6 | 2 | 1,5 |  |
+| **PO celkem** | 21,5 | 27,7 | 20,8 | 22,2 | -6,2 |  |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+
+## T15_bench_velikost_fo: Velikostní profil FO – srovnání s ČR a se srovnávacími kraji (podíl z FO, %)
+
+| Položka | Kraj Vysočina (%) | Česko (%) | Jihočeský kraj (%) | Pardubický kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| bez zaměstnanců | 42,4 | 41 | 42,5 | 42,1 | 1,4 |  |
+| 1–9 zaměstnanců | 13,2 | 9,1 | 9,7 | 10,7 | 4,1 |  |
+| 10–49 zaměstnanců | 2,6 | – | 1 | – | – |  |
+| Neuvedeno | 41,8 | 48,6 | 46,8 | 45,7 | -6,8 |  |
+| ostatní (sloučené malé položky) | – | 1,3 | – | 1,4 | – | ve zkoumaném území žádné |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+> „Neuvedeno“ (KATPO 000) je samostatný řádek, nesčítá se s „bez zaměstnanců“.
+> Pardubický kraj, Česko: některá položka zveřejněná ve zkoumaném území je zde pod prahem a je sloučena do „ostatní“ (v tomto sloupci pomlčka).
+
+## T16_bench_velikost_po: Velikostní profil PO – srovnání s ČR a se srovnávacími kraji (podíl z PO, %)
+
+| Položka | Kraj Vysočina (%) | Česko (%) | Jihočeský kraj (%) | Pardubický kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| 1–9 zaměstnanců | 26,5 | 28,4 | 33,7 | 24,2 | -1,9 |  |
+| 10–49 zaměstnanců | 21,7 | 14,3 | 21,3 | 19,3 | 7,4 |  |
+| Neuvedeno | 37 | 50,9 | 38,3 | 43,5 | -13,9 |  |
+| ostatní (sloučené malé položky) | 14,8 | 6,4 | 6,7 | 13 | 8,4 |  |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+> „Neuvedeno“ (KATPO 000) je samostatný řádek, nesčítá se s „bez zaměstnanců“.
+
+## T17_bench_vekova_struktura: Věková struktura existujících subjektů – srovnání s ČR a se srovnávacími kraji (podíl, %)
+
+| Položka | Kraj Vysočina (%) | Česko (%) | Jihočeský kraj (%) | Pardubický kraj (%) | Rozdíl proti ČR (p. b.) | Poznámka |
+|---|---|---|---|---|---|---|
+| méně než 3 roky | 14,7 | 14,8 | 16 | 12,8 | -0,1 |  |
+| 3–5 let | 11,5 | 13,5 | 14,3 | 14,3 | -2 |  |
+| 6–10 let | 15 | 19,2 | 16,6 | 19,8 | -4,2 |  |
+| 11–20 let | 24,8 | 26 | 23,4 | 25,5 | -1,2 |  |
+| 21–30 let | 15,8 | 13,4 | 14,7 | 13,3 | 2,4 |  |
+| 31 a více let | 18,1 | 13 | 15 | 14,2 | 5,1 |  |
+| **celkem** | 100 | 100 | 100 | 100 | 0 |  |
+
+> Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
+
 ## T10_zaniky_po: Zaniklé právnické osoby v oboru a území podle roku zániku (RES, od 2023)
 
 _Nezveřejněno: celé členění pod prahem._
+
+## T18_mira_zaniku_po: Míra zániku právnických osob v oboru (RES, 2023–2026)
+
+| Položka | Stav PO k 1. 1. | Zaniklé PO za rok | Míra zániku za rok (%) | Zaniklé PO 1. 1.–15. 9. | Míra zániku 1. 1.–15. 9. (%) | Poznámka |
+|---|---|---|---|---|---|---|
+| Kraj Vysočina – 2023 | 171 | – | – | – | – | část skryta (práh, dopočet) |
+| Kraj Vysočina – 2024 | 178 | – | – | – | – | část skryta (práh, dopočet) |
+| Kraj Vysočina – 2025 | 180 | – | – | – | – | část skryta (práh, dopočet) |
+| Kraj Vysočina – 2026 | 184 | – | – | – | – | neúplný rok – jen srovnatelné období; část skryta (práh, dopočet) |
+| Česko – 2023 | 5 844 | 145 | 2,48 | 108 | 1,85 |  |
+| Česko – 2024 | 6 093 | 135 | 2,22 | 91 | 1,49 |  |
+| Česko – 2025 | 6 362 | 188 | 2,96 | 129 | 2,03 |  |
+| Česko – 2026 | 6 652 | – | – | 146 | 2,19 | neúplný rok – jen srovnatelné období |
+| Jihočeský kraj – 2023 | 248 | – | – | – | – | část skryta (práh, dopočet) |
+| Jihočeský kraj – 2024 | 260 | – | – | – | – | část skryta (práh, dopočet) |
+| Jihočeský kraj – 2025 | – | 11 | – | – | – | část skryta (práh, dopočet) |
+| Jihočeský kraj – 2026 | 272 | – | – | – | – | neúplný rok – jen srovnatelné období; část skryta (práh, dopočet) |
+| Pardubický kraj – 2023 | 205 | – | – | – | – | část skryta (práh, dopočet) |
+| Pardubický kraj – 2024 | 215 | – | – | – | – | část skryta (práh, dopočet) |
+| Pardubický kraj – 2025 | 221 | – | – | – | – | část skryta (práh, dopočet) |
+| Pardubický kraj – 2026 | 222 | – | – | – | – | neúplný rok – jen srovnatelné období; část skryta (práh, dopočet) |
+
+> Pomlčka = skryto: počet pod prahem nebo by z něj šlo dopočítat skrytý počet (zániky ve zbytku roku, vzniky mezi dvěma stavy).
+> Míra zániku PO = zaniklé PO v roce / stav PO k 1. 1. téhož roku × 100. Stav je rekonstruován ze snímku RES: existující PO se vznikem před 1. 1. + PO zaniklé 1. 1. nebo později.
+> Rok 2026 je neúplný (snímek k 15. 9. 2026); pro srovnání se proto počítá i srovnatelné období 1. 1.–15. 9. každého roku.
+> Omezení: jen právnické osoby – zaniklé FO mají v otevřených datech jen IČO a datum zániku. Okno 4 let (2023–2026): RES uchovává zaniklé subjekty jen 4 roky po zániku. Obor a sídlo jsou podle snímku (u zaniklých poslední známé), jejich změny v čase se nepromítají.
 
 ## T11_dynamika_csu: Vznik a zánik ekonomických subjektů v území – všechny obory (ČSÚ, RES05)
 
@@ -169,3 +261,38 @@ _Nezveřejněno: celé členění pod prahem._
 | 2023 – podniky PO | 41 190 | 5,9 | 3,83 | 353 778 | 7,02 | 5,08 | předběžné hodnoty |
 
 > Jiná jednotka: aktivní PODNIK ze statistiky demografie podniků, ne registrovaný ekonomický subjekt z RES; čísla nejsou srovnatelná s ostatními tabulkami. Jen za ČR.
+
+## T19_zjisteni: Zjištění detektoru (seřazeno podle síly)
+
+| Položka | Zjištění | Typ zjištění | Síla | Hodnota | Srovnání | Relativní rozdíl (%) | Poznámka |
+|---|---|---|---|---|---|---|---|
+| Okres Pelhřimov je mezi okresy kraje 5. podle počtu registrovaných subjektů oboru a 1. podle hustoty. | Z01 | divergence pořadí | 1 | 5 | 1 | – |  |
+| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 21,7 %, v Česku 14,3 % (relativně o 51,7 % vyšší). | Z02 | odchylka od ČR | 0,52 | 21,7 | 14,3 | 51,7 |  |
+| Okres Jihlava je mezi okresy kraje 3. podle počtu registrovaných subjektů oboru a 5. podle hustoty. | Z03 | divergence pořadí | 0,5 | 3 | 5 | – |  |
+| Velikost FO – „1–9 zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 13,2 %, v Česku 9,1 % (relativně o 45,1 % vyšší). | Z04 | odchylka od ČR | 0,45 | 13,2 | 9,1 | 45,1 |  |
+| Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,1 %, v Česku 13 % (relativně o 39,2 % vyšší). | Z05 | odchylka od ČR | 0,39 | 18,1 | 13 | 39,2 |  |
+| Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava. | Z06 | rozdíly uvnitř území | 0,35 | 2,02 | 1,5 | 34,7 |  |
+| Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Česku 2,27 (relativně o 33,9 % nižší). | Z07 | rozdíly uvnitř území | 0,34 | 1,5 | 2,27 | 33,9 |  |
+| Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,6 %, v Česku 26,1 % (relativně o 28,7 % nižší). | Z08 | odchylka od ČR | 0,29 | 18,6 | 26,1 | 28,7 |  |
+| Velikost PO – „Neuvedeno“: podíl na PO oboru je v Kraji Vysočina 37 %, v Česku 50,9 % (relativně o 27,3 % nižší). | Z09 | odchylka od ČR | 0,27 | 37 | 50,9 | 27,3 |  |
+| Na 1 000 obyvatel připadá v okrese Havlíčkův Brod 1,66 registrovaných subjektů oboru, v Česku 2,27 (relativně o 26,9 % nižší). | Z10 | rozdíly uvnitř území | 0,27 | 1,66 | 2,27 | 26,9 |  |
+| Na 1 000 obyvatel připadá v Kraji Vysočina 1,7 registrovaných subjektů oboru, v Česku 2,27 (relativně o 25,1 % nižší). | Z11 | odchylka od ČR | 0,25 | 1,7 | 2,27 | 25,1 |  |
+| Na 1 000 obyvatel připadá v okrese Třebíč 1,72 registrovaných subjektů oboru, v Česku 2,27 (relativně o 24,2 % nižší). | Z12 | rozdíly uvnitř území | 0,24 | 1,72 | 2,27 | 24,2 |  |
+| Na 1 000 obyvatel připadá v okrese Žďár nad Sázavou 1,73 registrovaných subjektů oboru, v Česku 2,27 (relativně o 23,8 % nižší). | Z13 | rozdíly uvnitř území | 0,24 | 1,73 | 2,27 | 23,8 |  |
+| Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 21,5 %, v Česku 27,7 % (relativně o 22,4 % nižší). | Z14 | odchylka od ČR | 0,22 | 21,5 | 27,7 | 22,4 |  |
+| Věk subjektu – „6–10 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15 %, v Česku 19,2 % (relativně o 21,9 % nižší). | Z15 | odchylka od ČR | 0,22 | 15 | 19,2 | 21,9 |  |
+| Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 18,8 % vyšší). | Z16 | rozdíly uvnitř území | 0,19 | 2,02 | 1,7 | 18,8 |  |
+| Věk subjektu – „21–30 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15,8 %, v Česku 13,4 % (relativně o 17,9 % vyšší). | Z17 | odchylka od ČR | 0,18 | 15,8 | 13,4 | 17,9 |  |
+| Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 11,5 %, v Česku 13,5 % (relativně o 14,8 % nižší). | Z18 | odchylka od ČR | 0,15 | 11,5 | 13,5 | 14,8 |  |
+| Velikost FO – „Neuvedeno“: podíl na FO oboru je v Kraji Vysočina 41,8 %, v Česku 48,6 % (relativně o 14 % nižší). | Z19 | odchylka od ČR | 0,14 | 41,8 | 48,6 | 14 |  |
+| Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 11,8 % nižší). | Z20 | rozdíly uvnitř území | 0,12 | 1,5 | 1,7 | 11,8 |  |
+| Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Česku 2,27 (relativně o 11 % nižší). | Z21 | rozdíly uvnitř území | 0,11 | 2,02 | 2,27 | 11 |  |
+| Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 76,5 %, v Česku 69,6 % (relativně o 9,9 % vyšší). | Z22 | odchylka od ČR | 0,1 | 76,5 | 69,6 | 9,9 |  |
+| Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 78,5 %, v Česku 72,3 % (relativně o 8,6 % vyšší). | Z23 | odchylka od ČR | 0,09 | 78,5 | 72,3 | 8,6 |  |
+| Kraj je mezi 14 kraji 12. podle počtu registrovaných subjektů oboru a 13. podle hustoty na 1 000 obyvatel. | Z24 | divergence pořadí | 0,08 | 12 | 13 | – |  |
+| Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 26,5 %, v Česku 28,4 % (relativně o 6,7 % nižší). | Z25 | odchylka od ČR | 0,07 | 26,5 | 28,4 | 6,7 |  |
+| Lokalizační koeficient oboru je v Kraji Vysočina 0,94 proti 1 za ČR (relativně o 6 % nižší). | Z26 | odchylka od ČR | 0,06 | 0,94 | 1 | 6 |  |
+| Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 24,8 %, v Česku 26 % (relativně o 4,6 % nižší). | Z27 | odchylka od ČR | 0,05 | 24,8 | 26 | 4,6 |  |
+| Velikost FO – „bez zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 42,4 %, v Česku 41 % (relativně o 3,4 % vyšší). | Z28 | odchylka od ČR | 0,03 | 42,4 | 41 | 3,4 |  |
+
+> Síla = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Rozdíly pod 3 % relativně se nehlásí. Položky struktury s podílem pod 5 % v území i v ČR se nehlásí. Popisy jsou věcné, bez interpretace.

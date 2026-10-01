@@ -1,0 +1,928 @@
+{
+ "id_reportu": "F__CZ051__2026-09-15",
+ "obor": "F Stavebnictví",
+ "uzemi": {
+  "typ": "KRAJ",
+  "kod": "CZ051",
+  "nazev": "Liberecký kraj",
+  "kraj": "CZ051"
+ },
+ "zadani": {
+  "obor": [
+   "F"
+  ],
+  "uzemi": "CZ051",
+  "datum_snimku": "2026-09-15",
+  "srovnani": [
+   "CZ052",
+   "CZ041"
+  ],
+  "prah": 10
+ },
+ "pravidla": {
+  "prah_relativniho_rozdilu": 0.03,
+  "min_podil_struktury_pct": 5.0,
+  "sila": "|hodnota / srovnání − 1|; divergence pořadí |p1 − p2| / (počet území − 1)"
+ },
+ "citace": "Zdroj: Český statistický úřad, Registr ekonomických subjektů (RES) – otevřená data, stav k 15. 9. 2026; licence CC BY 4.0 (https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu); vlastní výpočet.",
+ "oznaceni": "Odvozené údaje, nejde o oficiální statistiku ČSÚ.",
+ "zjisteni": [
+  {
+   "typ": "zmena_trendu",
+   "typ_nazev": "změna trendu",
+   "podtyp": "míra zániku PO za rok: vývoj proti ČR",
+   "sila": 1.7647,
+   "hodnota": 2.82,
+   "srovnani": 1.02,
+   "rozdil_pct": 176.5,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Míra zániku PO 2023 – Liberecký kraj (%)",
+     "hodnota": 2.08,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2023",
+     "sloupec": "mira"
+    },
+    {
+     "popis": "Míra zániku PO 2025 – Liberecký kraj (%)",
+     "hodnota": 5.86,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2025",
+     "sloupec": "mira"
+    },
+    {
+     "popis": "Míra zániku PO 2023 – Česko (%)",
+     "hodnota": 2.57,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Česko – 2023",
+     "sloupec": "mira"
+    },
+    {
+     "popis": "Míra zániku PO 2025 – Česko (%)",
+     "hodnota": 2.63,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Česko – 2025",
+     "sloupec": "mira"
+    },
+    {
+     "popis": "Index 2025/2023 – Liberecký kraj",
+     "hodnota": 2.82,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "hodnota"
+    },
+    {
+     "popis": "Index 2025/2023 – Česko",
+     "hodnota": 1.02,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "srovnani"
+    }
+   ],
+   "popis": "Míra zániku PO v oboru se mezi lety 2023 a 2025 změnila v Libereckém kraji z 2,08 % na 5,86 % (index 2,82), v Česku z 2,57 % na 2,63 % (index 1,02); index je relativně o 176,5 % vyšší než v Česku.",
+   "poradi": 1,
+   "id": "Z01"
+  },
+  {
+   "typ": "zmena_trendu",
+   "typ_nazev": "změna trendu",
+   "podtyp": "míra zániku PO za rok: poslední rok proti předchozím",
+   "sila": 1.344,
+   "hodnota": 5.86,
+   "srovnani": 2.5,
+   "rozdil_pct": 134.4,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Míra zániku PO za rok 2025 (%)",
+     "hodnota": 5.86,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2025",
+     "sloupec": "mira"
+    },
+    {
+     "popis": "Míra zániku PO za rok 2023 (%)",
+     "hodnota": 2.08,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2023",
+     "sloupec": "mira"
+    },
+    {
+     "popis": "Míra zániku PO za rok 2024 (%)",
+     "hodnota": 2.93,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2024",
+     "sloupec": "mira"
+    },
+    {
+     "popis": "Průměr let 2023–2024 (%)",
+     "hodnota": 2.5,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "srovnani"
+    }
+   ],
+   "popis": "Míra zániku PO v oboru za rok 2025 je v Libereckém kraji 5,86 %, průměr let 2023–2024 je 2,5 % (relativně o 134,4 % vyšší).",
+   "poradi": 2,
+   "id": "Z02"
+  },
+  {
+   "typ": "zmena_trendu",
+   "typ_nazev": "změna trendu",
+   "podtyp": "míra zániku PO za rok: proti ČR",
+   "sila": 1.2281,
+   "hodnota": 5.86,
+   "srovnani": 2.63,
+   "rozdil_pct": 122.8,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Míra zániku PO za rok 2025 – Liberecký kraj (%)",
+     "hodnota": 5.86,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2025",
+     "sloupec": "mira"
+    },
+    {
+     "popis": "Míra zániku PO za rok 2025 – Česko (%)",
+     "hodnota": 2.63,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Česko – 2025",
+     "sloupec": "mira"
+    }
+   ],
+   "popis": "Míra zániku PO v oboru za rok 2025 je v Libereckém kraji 5,86 %, v Česku 2,63 % (relativně o 122,8 % vyšší).",
+   "poradi": 3,
+   "id": "Z03"
+  },
+  {
+   "typ": "zmena_trendu",
+   "typ_nazev": "změna trendu",
+   "podtyp": "míra zániku PO za období 1. 1.–15. 9.: proti ČR",
+   "sila": 0.8962,
+   "hodnota": 3.47,
+   "srovnani": 1.83,
+   "rozdil_pct": 89.6,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Míra zániku PO za období 1. 1.–15. 9. 2026 – Liberecký kraj (%)",
+     "hodnota": 3.47,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2026",
+     "sloupec": "mira_obd"
+    },
+    {
+     "popis": "Míra zániku PO za období 1. 1.–15. 9. 2026 – Česko (%)",
+     "hodnota": 1.83,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Česko – 2026",
+     "sloupec": "mira_obd"
+    }
+   ],
+   "popis": "Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, v Česku 1,83 % (relativně o 89,6 % vyšší).",
+   "poradi": 4,
+   "id": "Z04"
+  },
+  {
+   "typ": "divergence_poradi",
+   "typ_nazev": "divergence pořadí",
+   "podtyp": "kraj mezi 14 kraji",
+   "sila": 0.8462,
+   "hodnota": 13,
+   "srovnani": 2,
+   "rozdil_pct": null,
+   "smer": null,
+   "cisla": [
+    {
+     "popis": "Pořadí kraje mezi 14 kraji podle počtu",
+     "hodnota": 13,
+     "tabulka": "T01_zakladni",
+     "radek": "Pořadí kraje mezi 14 kraji podle počtu",
+     "sloupec": "hodnota"
+    },
+    {
+     "popis": "Pořadí kraje mezi 14 kraji podle hustoty",
+     "hodnota": 2,
+     "tabulka": "T01_zakladni",
+     "radek": "Pořadí kraje mezi 14 kraji podle hustoty",
+     "sloupec": "hodnota"
+    }
+   ],
+   "popis": "Kraj je mezi 14 kraji 13. podle počtu registrovaných subjektů oboru a 2. podle hustoty na 1 000 obyvatel.",
+   "poradi": 5,
+   "id": "Z05"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "rozpětí hustoty mezi okresy",
+   "sila": 0.4063,
+   "hodnota": 36.1,
+   "srovnani": 25.67,
+   "rozdil_pct": 40.6,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Jablonec nad Nisou (nejvyšší)",
+     "hodnota": 36.1,
+     "tabulka": "T04_okresy",
+     "radek": "Jablonec nad Nisou",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česká Lípa (nejnižší)",
+     "hodnota": 25.67,
+     "tabulka": "T04_okresy",
+     "radek": "Česká Lípa",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Nejvyšší hustotu oboru mezi okresy kraje má okres Jablonec nad Nisou (36,1 na 1 000 obyvatel), nejnižší okres Česká Lípa (25,67); hustota v okrese Jablonec nad Nisou je relativně o 40,6 % vyšší než v okrese Česká Lípa.",
+   "poradi": 6,
+   "id": "Z06"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Typ osoby",
+   "sila": 0.3314,
+   "hodnota": 11.7,
+   "srovnani": 17.5,
+   "rozdil_pct": 33.1,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Typ osoby – „právnické osoby a ostatní (PO)“, Liberecký kraj (%)",
+     "hodnota": 11.7,
+     "tabulka": "T13_bench_fo_po",
+     "radek": "právnické osoby a ostatní (PO)",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Typ osoby – „právnické osoby a ostatní (PO)“, Česko (%)",
+     "hodnota": 17.5,
+     "tabulka": "T13_bench_fo_po",
+     "radek": "právnické osoby a ostatní (PO)",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,7 %, v Česku 17,5 % (relativně o 33,1 % nižší).",
+   "poradi": 7,
+   "id": "Z07"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Právní forma",
+   "sila": 0.3313,
+   "hodnota": 11.1,
+   "srovnani": 16.6,
+   "rozdil_pct": 33.1,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Právní forma – „112 Společnost s ručením omezeným“, Liberecký kraj (%)",
+     "hodnota": 11.1,
+     "tabulka": "T14_bench_pravni_forma",
+     "radek": "112 Společnost s ručením omezeným",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Právní forma – „112 Společnost s ručením omezeným“, Česko (%)",
+     "hodnota": 16.6,
+     "tabulka": "T14_bench_pravni_forma",
+     "radek": "112 Společnost s ručením omezeným",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,1 %, v Česku 16,6 % (relativně o 33,1 % nižší).",
+   "poradi": 8,
+   "id": "Z08"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.2516,
+   "hodnota": 19.4,
+   "srovnani": 15.5,
+   "rozdil_pct": 25.2,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „31 a více let“, Liberecký kraj (%)",
+     "hodnota": 19.4,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "31 a více let",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „31 a více let“, Česko (%)",
+     "hodnota": 15.5,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "31 a více let",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 19,4 %, v Česku 15,5 % (relativně o 25,2 % vyšší).",
+   "poradi": 9,
+   "id": "Z09"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti kraji",
+   "sila": 0.2219,
+   "hodnota": 25.67,
+   "srovnani": 32.99,
+   "rozdil_pct": 22.2,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Česká Lípa",
+     "hodnota": 25.67,
+     "tabulka": "T04_okresy",
+     "radek": "Česká Lípa",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Liberecký kraj",
+     "hodnota": 32.99,
+     "tabulka": "T02_srovnani",
+     "radek": "Liberecký kraj (zkoumané území)",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Česká Lípa 25,67 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 22,2 % nižší).",
+   "poradi": 10,
+   "id": "Z10"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "LQ",
+   "sila": 0.19,
+   "hodnota": 1.19,
+   "srovnani": 1.0,
+   "rozdil_pct": 19.0,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Lokalizační koeficient – Liberecký kraj (zkoumané území)",
+     "hodnota": 1.19,
+     "tabulka": "T02_srovnani",
+     "radek": "Liberecký kraj (zkoumané území)",
+     "sloupec": "lq"
+    },
+    {
+     "popis": "Lokalizační koeficient – Česko",
+     "hodnota": 1.0,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "lq"
+    }
+   ],
+   "popis": "Lokalizační koeficient oboru je v Libereckém kraji 1,19 proti 1 za ČR (relativně o 19 % vyšší).",
+   "poradi": 11,
+   "id": "Z11"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.1857,
+   "hodnota": 11.4,
+   "srovnani": 14.0,
+   "rozdil_pct": 18.6,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „méně než 3 roky“, Liberecký kraj (%)",
+     "hodnota": 11.4,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "méně než 3 roky",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „méně než 3 roky“, Česko (%)",
+     "hodnota": 14.0,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "méně než 3 roky",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „méně než 3 roky“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,4 %, v Česku 14 % (relativně o 18,6 % nižší).",
+   "poradi": 12,
+   "id": "Z12"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti ČR",
+   "sila": 0.1757,
+   "hodnota": 25.67,
+   "srovnani": 31.14,
+   "rozdil_pct": 17.6,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Česká Lípa",
+     "hodnota": 25.67,
+     "tabulka": "T04_okresy",
+     "radek": "Česká Lípa",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 31.14,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Česká Lípa 25,67 registrovaných subjektů oboru, v Česku 31,14 (relativně o 17,6 % nižší).",
+   "poradi": 13,
+   "id": "Z13"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti ČR",
+   "sila": 0.1593,
+   "hodnota": 36.1,
+   "srovnani": 31.14,
+   "rozdil_pct": 15.9,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Jablonec nad Nisou",
+     "hodnota": 36.1,
+     "tabulka": "T04_okresy",
+     "radek": "Jablonec nad Nisou",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 31.14,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
+   "poradi": 14,
+   "id": "Z14"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti ČR",
+   "sila": 0.1586,
+   "hodnota": 36.08,
+   "srovnani": 31.14,
+   "rozdil_pct": 15.9,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Liberec",
+     "hodnota": 36.08,
+     "tabulka": "T04_okresy",
+     "radek": "Liberec",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 31.14,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Česku 31,14 (relativně o 15,9 % vyšší).",
+   "poradi": 15,
+   "id": "Z15"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost PO",
+   "sila": 0.1546,
+   "hodnota": 44.8,
+   "srovnani": 38.8,
+   "rozdil_pct": 15.5,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Velikost PO – „1–9 zaměstnanců“, Liberecký kraj (%)",
+     "hodnota": 44.8,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "1–9 zaměstnanců",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost PO – „1–9 zaměstnanců“, Česko (%)",
+     "hodnota": 38.8,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "1–9 zaměstnanců",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,8 %, v Česku 38,8 % (relativně o 15,5 % vyšší).",
+   "poradi": 16,
+   "id": "Z16"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost PO",
+   "sila": 0.1144,
+   "hodnota": 44.9,
+   "srovnani": 50.7,
+   "rozdil_pct": 11.4,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Velikost PO – „Neuvedeno“, Liberecký kraj (%)",
+     "hodnota": 44.9,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "Neuvedeno",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost PO – „Neuvedeno“, Česko (%)",
+     "hodnota": 50.7,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "Neuvedeno",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,9 %, v Česku 50,7 % (relativně o 11,4 % nižší).",
+   "poradi": 17,
+   "id": "Z17"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti kraji",
+   "sila": 0.0943,
+   "hodnota": 36.1,
+   "srovnani": 32.99,
+   "rozdil_pct": 9.4,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Jablonec nad Nisou",
+     "hodnota": 36.1,
+     "tabulka": "T04_okresy",
+     "radek": "Jablonec nad Nisou",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Liberecký kraj",
+     "hodnota": 32.99,
+     "tabulka": "T02_srovnani",
+     "radek": "Liberecký kraj (zkoumané území)",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,1 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší).",
+   "poradi": 18,
+   "id": "Z18"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti kraji",
+   "sila": 0.0937,
+   "hodnota": 36.08,
+   "srovnani": 32.99,
+   "rozdil_pct": 9.4,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Liberec",
+     "hodnota": 36.08,
+     "tabulka": "T04_okresy",
+     "radek": "Liberec",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Liberecký kraj",
+     "hodnota": 32.99,
+     "tabulka": "T02_srovnani",
+     "radek": "Liberecký kraj (zkoumané území)",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Liberec 36,08 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší).",
+   "poradi": 19,
+   "id": "Z19"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Právní forma",
+   "sila": 0.0873,
+   "hodnota": 85.9,
+   "srovnani": 79.0,
+   "rozdil_pct": 8.7,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“, Liberecký kraj (%)",
+     "hodnota": 85.9,
+     "tabulka": "T14_bench_pravni_forma",
+     "radek": "101 Fyzická osoba podnikající dle živnostenského zákona",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“, Česko (%)",
+     "hodnota": 79.0,
+     "tabulka": "T14_bench_pravni_forma",
+     "radek": "101 Fyzická osoba podnikající dle živnostenského zákona",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 85,9 %, v Česku 79 % (relativně o 8,7 % vyšší).",
+   "poradi": 20,
+   "id": "Z20"
+  },
+  {
+   "typ": "zmena_trendu",
+   "typ_nazev": "změna trendu",
+   "podtyp": "míra zániku PO za období 1. 1.–15. 9.: poslední rok proti předchozím",
+   "sila": 0.0844,
+   "hodnota": 3.47,
+   "srovnani": 3.2,
+   "rozdil_pct": 8.4,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Míra zániku PO za období 1. 1.–15. 9. 2026 (%)",
+     "hodnota": 3.47,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2026",
+     "sloupec": "mira_obd"
+    },
+    {
+     "popis": "Míra zániku PO za období 1. 1.–15. 9. 2024 (%)",
+     "hodnota": 1.9,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2024",
+     "sloupec": "mira_obd"
+    },
+    {
+     "popis": "Míra zániku PO za období 1. 1.–15. 9. 2025 (%)",
+     "hodnota": 4.49,
+     "tabulka": "T18_mira_zaniku_po",
+     "radek": "Liberecký kraj – 2025",
+     "sloupec": "mira_obd"
+    },
+    {
+     "popis": "Průměr let 2024–2025 (%)",
+     "hodnota": 3.2,
+     "tabulka": "T19_zjisteni",
+     "radek": "",
+     "sloupec": "srovnani"
+    }
+   ],
+   "popis": "Míra zániku PO v oboru za období 1. 1.–15. 9. 2026 je v Libereckém kraji 3,47 %, průměr let 2024–2025 je 3,2 % (relativně o 8,4 % vyšší).",
+   "poradi": 21,
+   "id": "Z21"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.0753,
+   "hodnota": 22.1,
+   "srovnani": 23.9,
+   "rozdil_pct": 7.5,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „11–20 let“, Liberecký kraj (%)",
+     "hodnota": 22.1,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "11–20 let",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „11–20 let“, Česko (%)",
+     "hodnota": 23.9,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "11–20 let",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší).",
+   "poradi": 22,
+   "id": "Z22"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Typ osoby",
+   "sila": 0.0703,
+   "hodnota": 88.3,
+   "srovnani": 82.5,
+   "rozdil_pct": 7.0,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Typ osoby – „fyzické osoby (FO)“, Liberecký kraj (%)",
+     "hodnota": 88.3,
+     "tabulka": "T13_bench_fo_po",
+     "radek": "fyzické osoby (FO)",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Typ osoby – „fyzické osoby (FO)“, Česko (%)",
+     "hodnota": 82.5,
+     "tabulka": "T13_bench_fo_po",
+     "radek": "fyzické osoby (FO)",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,3 %, v Česku 82,5 % (relativně o 7 % vyšší).",
+   "poradi": 23,
+   "id": "Z23"
+  },
+  {
+   "typ": "aktivita_oboru",
+   "typ_nazev": "aktivita oboru vůči kraji",
+   "podtyp": "podíl se zjištěnou aktivitou: sekce proti všem oborům",
+   "sila": 0.0626,
+   "hodnota": 62.8,
+   "srovnani": 59.1,
+   "rozdil_pct": 6.3,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Podíl subjektů se zjištěnou aktivitou – Liberecký kraj, sekce F (ČSÚ, 2026-Q2, %)",
+     "hodnota": 62.8,
+     "tabulka": "T01_zakladni",
+     "radek": "Podíl subjektů se zjištěnou aktivitou – Liberecký kraj, sekce F (ČSÚ, 2026-Q2, %)",
+     "sloupec": "hodnota"
+    },
+    {
+     "popis": "Podíl subjektů se zjištěnou aktivitou – Liberecký kraj, všechny obory (ČSÚ, 2026-Q2, %)",
+     "hodnota": 59.1,
+     "tabulka": "T01_zakladni",
+     "radek": "Podíl subjektů se zjištěnou aktivitou – Liberecký kraj, všechny obory (ČSÚ, 2026-Q2, %)",
+     "sloupec": "hodnota"
+    }
+   ],
+   "popis": "Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,8 %, ve všech oborech 59,1 % (ČSÚ; relativně o 6,3 % vyšší).",
+   "poradi": 24,
+   "id": "Z24"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Věk subjektu",
+   "sila": 0.0606,
+   "hodnota": 9.3,
+   "srovnani": 9.9,
+   "rozdil_pct": 6.1,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Věk subjektu – „3–5 let“, Liberecký kraj (%)",
+     "hodnota": 9.3,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "3–5 let",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Věk subjektu – „3–5 let“, Česko (%)",
+     "hodnota": 9.9,
+     "tabulka": "T17_bench_vekova_struktura",
+     "radek": "3–5 let",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,3 %, v Česku 9,9 % (relativně o 6,1 % nižší).",
+   "poradi": 25,
+   "id": "Z25"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "hustota",
+   "sila": 0.0594,
+   "hodnota": 32.99,
+   "srovnani": 31.14,
+   "rozdil_pct": 5.9,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Liberecký kraj (zkoumané území)",
+     "hodnota": 32.99,
+     "tabulka": "T02_srovnani",
+     "radek": "Liberecký kraj (zkoumané území)",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Česko",
+     "hodnota": 31.14,
+     "tabulka": "T02_srovnani",
+     "radek": "Česko",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,14 (relativně o 5,9 % vyšší).",
+   "poradi": 26,
+   "id": "Z26"
+  },
+  {
+   "typ": "rozdily_uvnitr_uzemi",
+   "typ_nazev": "rozdíly uvnitř území",
+   "podtyp": "hustota okresu proti kraji",
+   "sila": 0.0418,
+   "hodnota": 31.61,
+   "srovnani": 32.99,
+   "rozdil_pct": 4.2,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Na 1 000 obyvatel – Semily",
+     "hodnota": 31.61,
+     "tabulka": "T04_okresy",
+     "radek": "Semily",
+     "sloupec": "hustota"
+    },
+    {
+     "popis": "Na 1 000 obyvatel – Liberecký kraj",
+     "hodnota": 32.99,
+     "tabulka": "T02_srovnani",
+     "radek": "Liberecký kraj (zkoumané území)",
+     "sloupec": "hustota"
+    }
+   ],
+   "popis": "Na 1 000 obyvatel připadá v okrese Semily 31,61 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,2 % nižší).",
+   "poradi": 27,
+   "id": "Z27"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost FO",
+   "sila": 0.0364,
+   "hodnota": 45.6,
+   "srovnani": 44.0,
+   "rozdil_pct": 3.6,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Velikost FO – „Neuvedeno“, Liberecký kraj (%)",
+     "hodnota": 45.6,
+     "tabulka": "T15_bench_velikost_fo",
+     "radek": "Neuvedeno",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost FO – „Neuvedeno“, Česko (%)",
+     "hodnota": 44.0,
+     "tabulka": "T15_bench_velikost_fo",
+     "radek": "Neuvedeno",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,6 %, v Česku 44 % (relativně o 3,6 % vyšší).",
+   "poradi": 28,
+   "id": "Z28"
+  },
+  {
+   "typ": "odchylka_od_cr",
+   "typ_nazev": "odchylka od ČR",
+   "podtyp": "struktura: Velikost PO",
+   "sila": 0.0326,
+   "hodnota": 9.5,
+   "srovnani": 9.2,
+   "rozdil_pct": 3.3,
+   "smer": "vyšší",
+   "cisla": [
+    {
+     "popis": "Velikost PO – „10–49 zaměstnanců“, Liberecký kraj (%)",
+     "hodnota": 9.5,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "10–49 zaměstnanců",
+     "sloupec": "uzemi"
+    },
+    {
+     "popis": "Velikost PO – „10–49 zaměstnanců“, Česko (%)",
+     "hodnota": 9.2,
+     "tabulka": "T16_bench_velikost_po",
+     "radek": "10–49 zaměstnanců",
+     "sloupec": "cr"
+    }
+   ],
+   "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší).",
+   "poradi": 29,
+   "id": "Z29"
+  }
+ ]
+}
