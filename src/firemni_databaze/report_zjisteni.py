@@ -6,7 +6,7 @@ z toho plyne“ píše analytik (reporty/vyklad/<id_reportu>.md), ne stroj.
 
 Každé zjištění má:
   typ          odchylka_od_cr | zmena_trendu | rozdily_uvnitr_uzemi | aktivita_oboru | divergence_poradi |
-               mzdy_zamestnanost
+               mzdy_zamestnanost | ekonomika
   sila         číselná a porovnatelná: |hodnota / srovnání − 1| (relativní rozdíl);
                u divergence pořadí |p1 − p2| / (počet území − 1); obojí bezrozměrné, 0 = žádný rozdíl
   hodnota, srovnani, rozdil_pct (absolutně, %), smer (vyšší / nižší)
@@ -24,7 +24,7 @@ from firemni_databaze.report_vyklad import cz
 PRAH_ZJISTENI = 0.03        # 3 % relativně
 MIN_PODIL_STRUKTURY = 5.0   # %
 PORADI_TYPU = ["odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru", "divergence_poradi",
-               "mzdy_zamestnanost"]
+               "mzdy_zamestnanost", "ekonomika"]
 NAZVY_TYPU = {
     "odchylka_od_cr": "odchylka od ČR",
     "zmena_trendu": "změna trendu",
@@ -32,6 +32,7 @@ NAZVY_TYPU = {
     "aktivita_oboru": "aktivita oboru vůči kraji",
     "divergence_poradi": "divergence pořadí",
     "mzdy_zamestnanost": "mzdy a zaměstnanost",
+    "ekonomika": "ekonomika",
 }
 STRUKTURA = {   # benchmarková tabulka → (název členění, jmenovatel podílu)
     "T13_bench_fo_po": ("Typ osoby", "registrovaných subjektech oboru"),
@@ -313,6 +314,66 @@ def _mzdy(self) -> None:
 _Detektor.mzdy = _mzdy
 
 
+def _ekonomika(self) -> None:
+    """Typ ekonomika: T22 (Eurostat, kraj × A*10) – produktivita, podíl na HPH území, sebezaměstnaní
+    a objemový vývoj kraje proti ČR; T23 – podíl náhrad zaměstnancům na HPH regionu soudržnosti proti ČR."""
+    t22 = self.tab.get("T22_ekonomika")
+    if not t22 or self.uz["typ"] == "CR":
+        return
+    kraj = self.uz["kraj"]
+    v_kraji = lokativ(kraj) + (" (nejbližší publikovaná úroveň)" if self.uz["typ"] == "OKRES" else "")
+    sk = t22.get("skupina_nazev", "")
+    uz = [r for r in t22["radky"] if r["uzemi"] == kraj]
+    cr = {r["rok"]: r for r in t22["radky"] if r["uzemi"] == "CZ"}
+    if not uz or uz[-1]["rok"] not in cr:
+        return
+    posl, prvni = uz[-1], uz[0]
+    c, c0 = cr[posl["rok"]], cr.get(prvni["rok"])
+    rok, rok0 = posl["rok"], prvni["rok"]
+
+    def cislo(t, r, sl, popis):
+        return _cislo(popis, r["hodnoty"][sl], t, r["popis"], sl)
+
+    for sl, podtyp, veta in (
+            ("produktivita", "produktivita (HPH na zaměstnaného) proti ČR",
+             lambda a, b, d: f"Hrubá přidaná hodnota na zaměstnaného ve skupině {sk} byla v roce {rok} {v_kraji} "
+                             f"{cz(a)} tis. Kč, {self.v_cr} {cz(b)} tis. Kč ({d})."),
+            ("hph_podil_uzemi", "podíl skupiny na HPH území proti ČR",
+             lambda a, b, d: f"Skupina {sk} tvořila v roce {rok} {v_kraji} {cz(a)} % hrubé přidané hodnoty, "
+                             f"{self.v_cr} {cz(b)} % ({d})."),
+            ("podil_self", "podíl sebezaměstnaných proti ČR",
+             lambda a, b, d: f"Sebezaměstnaní tvořili v roce {rok} ve skupině {sk} {v_kraji} {cz(a)} % zaměstnaných, "
+                             f"{self.v_cr} {cz(b)} % ({d}).")):
+        a, b = posl["hodnoty"][sl], c["hodnoty"][sl]
+        self.pridej("ekonomika", podtyp, a, b,
+                    [cislo("T22_ekonomika", posl, sl, f"{sl} {rok} – kraj"), cislo("T22_ekonomika", c, sl, f"{sl} {rok} – Česko")],
+                    lambda d, a=a, b=b, veta=veta: veta(a, b, d))
+    if c0 and rok0 != rok:
+        a, b = posl["hodnoty"]["objem_index"], c["hodnoty"]["objem_index"]
+        self.pridej("ekonomika", "objemový vývoj HPH proti ČR", a, b,
+                    [cislo("T22_ekonomika", posl, "objem_index", f"Objem HPH {rok} ({rok0} = 100) – kraj"),
+                     cislo("T22_ekonomika", c, "objem_index", f"Objem HPH {rok} ({rok0} = 100) – Česko")],
+                    lambda d: f"Objem hrubé přidané hodnoty skupiny {sk} se mezi lety {rok0} a {rok} změnil {v_kraji} "
+                              f"na {cz(a)} % (rok {rok0} = 100), {self.v_cr} na {cz(b)} % ({d}).")
+    t23 = self.tab.get("T23_nahrady")
+    if t23:
+        reg = [r for r in t23["radky"] if r["uzemi"] == kraj[:4] and r["rok"] == rok]
+        c23 = next((r for r in t23["radky"] if r["uzemi"] == "CZ" and r["rok"] == rok), None)
+        if reg and c23:
+            r = reg[0]
+            nazev_reg = r["popis"].split(" (")[0]
+            a, b = r["hodnoty"]["podil"], c23["hodnoty"]["podil"]
+            self.pridej("ekonomika", "podíl náhrad zaměstnancům na HPH (region soudržnosti) proti ČR", a, b,
+                        [cislo("T23_nahrady", r, "podil", f"Náhrady / HPH {rok} – region {nazev_reg} (%)"),
+                         cislo("T23_nahrady", c23, "podil", f"Náhrady / HPH {rok} – Česko (%)")],
+                        lambda d: f"Náhrady zaměstnancům tvořily v roce {rok} ve skupině {sk} v regionu soudržnosti "
+                                  f"{nazev_reg} (nejbližší publikovaná úroveň) {cz(a)} % hrubé přidané hodnoty, "
+                                  f"{self.v_cr} {cz(b)} % ({d}).")
+
+
+_Detektor.ekonomika = _ekonomika
+
+
 def detekuj(vysledek: dict) -> list[dict]:
     """Zjištění seřazená podle síly (sestupně); id Z01… podle pořadí."""
     d = _Detektor(vysledek)
@@ -322,6 +383,7 @@ def detekuj(vysledek: dict) -> list[dict]:
     d.aktivita()
     d.divergence()
     d.mzdy()
+    d.ekonomika()
     z = sorted(d.zjisteni, key=lambda x: (-x["sila"], PORADI_TYPU.index(x["typ"]), x["podtyp"]))
     for i, x in enumerate(z, start=1):
         x["poradi"] = i

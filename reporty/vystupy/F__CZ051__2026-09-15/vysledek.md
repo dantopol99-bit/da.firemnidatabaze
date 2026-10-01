@@ -207,6 +207,59 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 
 > Týž obor ve všech sloupcích. Položky jsou dané zkoumaným územím; co je v něm sloučeno do „ostatní“, je sloučeno i v ostatních sloupcích. Práh a slučování platí pro každé území zvlášť.
 
+## T22_ekonomika: Hrubá přidaná hodnota, zaměstnanost a produktivita – kraje a ČR (Eurostat, regionální účty) – Stavebnictví (F)
+
+| Položka | HPH skupiny (mil. Kč, běžné ceny) | Podíl na HPH území (%) | Podíl na HPH skupiny v ČR (%) | Objemová změna HPH (%) | Objem HPH (1. rok = 100) | Zaměstnaní (tis.) | Sebezaměst­naní (%) | HPH na zaměst­naného (tis. Kč) | Produktivita (ČR = 100) | Poznámka |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Liberecký kraj – 2020 | 9 364 | 5,57 | 3,2 | -10,9 | 100 | 12,76 | 33,6 | 734 | 97 |  |
+| Liberecký kraj – 2021 | 9 810 | 5,6 | 3,14 | -4,1 | 95,9 | 13,02 | 32,4 | 753 | 95,9 |  |
+| Liberecký kraj – 2022 | 11 251 | 5,93 | 3,21 | -3,2 | 92,9 | 13,23 | 33,8 | 850 | 97,9 |  |
+| Liberecký kraj – 2023 | 12 173 | 5,69 | 3,09 | -3,6 | 89,5 | 13,02 | 34,6 | 935 | 100,4 |  |
+| Liberecký kraj – 2024 | 12 598 | 5,45 | 3,08 | 0,4 | 89,8 | 13,05 | 33,3 | 965 | 99,2 |  |
+| Česko – 2020 | 292 311 | 5,5 | – | -7,7 | 100 | 386,4 | 33,5 | 756 | – |  |
+| Česko – 2021 | 312 154 | 5,43 | – | -2,6 | 97,4 | 397,13 | 32,6 | 786 | – |  |
+| Česko – 2022 | 350 966 | 5,47 | – | -5,4 | 92,1 | 404,22 | 33,3 | 868 | – |  |
+| Česko – 2023 | 394 052 | 5,6 | – | 0,2 | 92,3 | 423,03 | 34,2 | 931 | – |  |
+| Česko – 2024 | 409 647 | 5,57 | – | 0,9 | 93,1 | 420,98 | 33,7 | 973 | – |  |
+| Královéhradecký kraj – 2020 | 12 134 | 4,9 | 4,15 | -9,7 | 100 | 15,7 | 34,4 | 773 | 102,2 |  |
+| Královéhradecký kraj – 2021 | 12 405 | 4,75 | 3,97 | -6,5 | 93,5 | 15,79 | 34,1 | 786 | 99,9 |  |
+| Královéhradecký kraj – 2022 | 13 788 | 4,93 | 3,93 | -6 | 87,9 | 15,95 | 34,2 | 864 | 99,6 |  |
+| Královéhradecký kraj – 2023 | 15 229 | 4,86 | 3,86 | -1,5 | 86,5 | 16,96 | 33,1 | 898 | 96,4 |  |
+| Královéhradecký kraj – 2024 | 16 336 | 5,03 | 3,99 | 4 | 90 | 16,41 | 30 | 995 | 102,3 |  |
+| Karlovarský kraj – 2020 | 5 039 | 5,71 | 1,72 | -9,4 | 100 | 8,68 | 32,4 | 581 | 76,7 |  |
+| Karlovarský kraj – 2021 | 5 330 | 5,78 | 1,71 | -3,3 | 96,7 | 8,34 | 32,7 | 639 | 81,3 |  |
+| Karlovarský kraj – 2022 | 5 968 | 5,79 | 1,7 | -5,5 | 91,3 | 8,89 | 30,4 | 671 | 77,3 |  |
+| Karlovarský kraj – 2023 | 6 599 | 5,66 | 1,67 | -1,2 | 90,3 | 9,14 | 31,7 | 722 | 77,5 |  |
+| Karlovarský kraj – 2024 | 6 313 | 5,12 | 1,54 | -7,3 | 83,7 | 9 | 30,8 | 701 | 72,1 |  |
+
+> Skupina odvětví A*10 regionálních účtů: Stavebnictví (F). Odpovídá sekci oboru přesně.
+> Zaměstnaní = zaměstnanost podle národních účtů (zaměstnanci i sebezaměstnaní, včetně podnikajících fyzických osob, místo pracoviště); liší se proto od přepočtených zaměstnanců ČSÚ v kapitole Zaměstnanost a mzdy (jen zaměstnanci, přepočet na plný úvazek) i od počtu registrovaných subjektů.
+> Objemová změna = HPH v cenách předchozího roku / HPH v běžných cenách předchozího roku − 1; objem (první rok = 100) je řetězením těchto změn. Produktivita = HPH v běžných cenách / zaměstnaní.
+> Eurostat u údajů neuvádí příznak předběžnosti; poslední publikovaný rok 2024 se při revizích regionálních účtů může změnit.
+
+## T23_nahrady: Náhrady zaměstnancům a hrubá přidaná hodnota – regiony soudržnosti (Eurostat) – Stavebnictví (F)
+
+| Položka | Náhrady zaměstnancům (mil. Kč) | HPH (mil. Kč, běžné ceny) | Náhrady zaměstnancům / HPH skupiny (%) | Náhrady / HPH, všechna odvětví (%) | Poznámka |
+|---|---|---|---|---|---|
+| Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2020 | 14 238 | 35 275 | 40,4 | 49,8 |  |
+| Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2021 | 15 471 | 36 783 | 42,1 | 51,5 |  |
+| Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2022 | 16 567 | 41 505 | 39,9 | 49,6 |  |
+| Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2023 | 18 255 | 45 320 | 40,3 | 47,6 |  |
+| Severovýchod (region soudržnosti: Liberecký kraj, Královéhradecký kraj, Pardubický kraj) – 2024 | 19 919 | 47 385 | 42 | 48,3 |  |
+| Česko – 2020 | 127 981 | 292 311 | 43,8 | 49,4 |  |
+| Česko – 2021 | 137 713 | 312 154 | 44,1 | 48,9 |  |
+| Česko – 2022 | 150 038 | 350 966 | 42,8 | 47,2 |  |
+| Česko – 2023 | 164 001 | 394 052 | 41,6 | 46,7 |  |
+| Česko – 2024 | 176 048 | 409 647 | 43 | 47,7 |  |
+| Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2020 | 11 759 | 25 720 | 45,7 | 53,2 |  |
+| Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2021 | 12 292 | 25 708 | 47,8 | 52,5 |  |
+| Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2022 | 12 719 | 27 487 | 46,3 | 48,7 |  |
+| Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2023 | 13 610 | 30 790 | 44,2 | 48,9 |  |
+| Severozápad (region soudržnosti: Karlovarský kraj, Ústecký kraj) – 2024 | 14 888 | 32 359 | 46 | 51,5 |  |
+
+> Nejbližší publikovaná úroveň: region soudržnosti (NUTS 2) – náhrady zaměstnancům Eurostat za kraje nepublikuje. Region zahrnuje více krajů; srovnávací kraj ze stejného regionu má stejné hodnoty.
+> Podíl náhrad zaměstnancům na HPH ukazuje, jaká část přidané hodnoty připadá na mzdy a pojistné zaměstnanců; zbytek tvoří hlavně hrubý provozní přebytek a smíšený důchod (příjem podnikatelů).
+
 ## T20_mzdy_obor: Zaměstnanci a průměrné mzdy v oboru – kraje a ČR (ČSÚ, roční zjišťování)
 
 | Položka | Zaměstnanci v oboru (tis., přepočtené) | Podíl na zaměstnancích oboru v ČR (%) | Podíl oboru na zaměstnancích území (%) | Průměrná mzda v oboru (Kč) | Mzda proti oboru v ČR (ČR = 100) | Mzda proti všem odvětvím území (= 100) | Poznámka |
@@ -364,7 +417,8 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 | Na 1 000 obyvatel připadá v okrese Semily 31,61 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,2 % nižší). | Z29 | rozdíly uvnitř území | 0,04 | 31,61 | 32,99 | 4,2 |  |
 | V sekci F se počet zaměstnanců mezi lety 2018 a 2022 změnil v Libereckém kraji z 6 tis. na 6,4 tis. (index 1,07), v Česku z 207,9 tis. na 214,9 tis. (index 1,03); index je relativně o 3,9 % vyšší než v Česku. | Z30 | mzdy a zaměstnanost | 0,04 | 1,07 | 1,03 | 3,9 |  |
 | Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,6 %, v Česku 44 % (relativně o 3,6 % vyšší). | Z31 | odchylka od ČR | 0,04 | 45,6 | 44 | 3,6 |  |
-| Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší). | Z32 | mzdy a zaměstnanost | 0,03 | 33 623 | 34 840 | 3,5 |  |
-| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší). | Z33 | odchylka od ČR | 0,03 | 9,5 | 9,2 | 3,3 |  |
+| Objem hrubé přidané hodnoty skupiny Stavebnictví (F) se mezi lety 2020 a 2024 změnil v Libereckém kraji na 89,8 % (rok 2020 = 100), v Česku na 93,1 % (relativně o 3,5 % nižší). | Z32 | ekonomika | 0,04 | 89,8 | 93,1 | 3,5 |  |
+| Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší). | Z33 | mzdy a zaměstnanost | 0,03 | 33 623 | 34 840 | 3,5 |  |
+| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší). | Z34 | odchylka od ČR | 0,03 | 9,5 | 9,2 | 3,3 |  |
 
 > Síla = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Rozdíly pod 3 % relativně se nehlásí. Položky struktury s podílem pod 5 % v území i v ČR se nehlásí. Popisy jsou věcné, bez interpretace.

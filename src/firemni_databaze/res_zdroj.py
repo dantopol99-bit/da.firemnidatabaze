@@ -476,3 +476,56 @@ def radky_mzdy(vyber: str, obsah: bytes, definice_sady: dict) -> list[dict]:
             "ukazatel": r["Ukazatel"], "hodnota": float(r["Hodnota"]), "predbezna": bool(r.get("OBS_STATUS")),
         })
     return radky
+
+
+# ---------------------------------------------------------------------------
+# Eurostat – regionální účty (JSON-stat, /eurostat/api/dissemination)
+# robots.txt ec.europa.eu cestu /eurostat/api/ nezakazuje (ověřeno 1. 10. 2026);
+# licence: další užití povoleno s uvedením zdroje, úpravy dat se musí označit.
+# ---------------------------------------------------------------------------
+
+EUROSTAT_DATA = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/"
+EUROSTAT_KRAJE = ("CZ010", "CZ020", "CZ031", "CZ032", "CZ041", "CZ042", "CZ051", "CZ052", "CZ053", "CZ063",
+                  "CZ064", "CZ071", "CZ072", "CZ080")
+EUROSTAT_REGIONY = ("CZ01", "CZ02", "CZ03", "CZ04", "CZ05", "CZ06", "CZ07", "CZ08")
+# sada → (území, filtry, převod (unit|wstatus|currency) → ukazatel)
+EUROSTAT_SADY = {
+    "nama_10r_3gva": (("CZ",) + EUROSTAT_REGIONY + EUROSTAT_KRAJE, {"unit": ["CP_MNAC", "PYP_MNAC"]},
+                      {"CP_MNAC": "HPH_CP", "PYP_MNAC": "HPH_PYP"}),
+    "nama_10r_3empers": (("CZ",) + EUROSTAT_KRAJE, {"unit": ["THS"]},
+                         {"EMP": "ZAM_EMP", "SAL": "ZAM_SAL", "SELF": "ZAM_SELF"}),
+    "nama_10r_2coe": (("CZ",) + EUROSTAT_REGIONY, {"currency": ["MIO_NAC"]}, {"MIO_NAC": "NAHRADY"}),
+}
+EUROSTAT_PAUZA_S = 2.0    # šetrné tempo: pauza mezi požadavky
+
+
+def url_eurostat(sada: str) -> str:
+    uzemi, filtry, _ = EUROSTAT_SADY[sada]
+    parametry = [("geo", g) for g in uzemi] + [(k, v) for k, hodnoty in filtry.items() for v in hodnoty]
+    return EUROSTAT_DATA + sada + "?" + urllib.parse.urlencode(parametry + [("lang", "EN")])
+
+
+def radky_eurostat(sada: str, obsah: bytes) -> list[dict]:
+    """JSON-stat Eurostatu → řádky res.eu_regionalni_ucty."""
+    import itertools
+    j = json.loads(obsah)
+    ids = j["id"]
+    kategorie = [[k for k, _ in sorted(j["dimension"][d]["category"]["index"].items(), key=lambda x: x[1])]
+                 for d in ids]
+    hodnoty, priznaky = j["value"], j.get("status", {})
+    prevod = EUROSTAT_SADY[sada][2]
+    klic_ukazatele = {"nama_10r_3gva": "unit", "nama_10r_3empers": "wstatus", "nama_10r_2coe": "currency"}[sada]
+    radky = []
+    for i, kombinace in enumerate(itertools.product(*kategorie)):
+        v = hodnoty.get(str(i)) if isinstance(hodnoty, dict) else hodnoty[i]
+        if v is None:
+            continue
+        d = dict(zip(ids, kombinace))
+        geo = d["geo"]
+        radky.append({
+            "sada": sada, "geo": geo, "uroven": "STAT" if geo == "CZ" else "REGION" if len(geo) == 4 else "KRAJ",
+            "nace": d["nace_r2"], "rok": int(d["time"]), "ukazatel": prevod[d[klic_ukazatele]],
+            "hodnota": float(v), "priznak": (priznaky.get(str(i), "") if isinstance(priznaky, dict) else "") or "",
+            "aktualizace": j.get("updated"),
+        })
+    return radky

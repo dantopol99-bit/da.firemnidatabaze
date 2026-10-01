@@ -610,3 +610,126 @@ ukazatele:
     chybejici_hodnoty: Kraj × odvětví čtvrtletní zjišťování nepublikuje.
     vyklad: Jiné zjišťování než MZDY_MZDA_OBOR; řady se nespojují.
     stav: částečně
+
+  # --- Blok 7b: ekonomický profil (Eurostat, regionální účty) ------------------------------
+
+  - kod: EKON_HPH
+    nazev: Hrubá přidaná hodnota skupiny odvětví (mil. Kč, běžné ceny)
+    typ: kontext
+    definice: Hrubá přidaná hodnota v základních cenách ve skupině odvětví A*10, do níž patří obor, v kraji, regionu soudržnosti nebo ČR.
+    vzorec: převzato (Eurostat nama_10r_3gva, unit CP_MNAC), zaokrouhleno na celé mil. Kč
+    zdroj: Eurostat, regionální účty (nama_10r_3gva)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen skupiny A*10 (oddíl a nižší úrovně → skupina s označením; B, D, E → B–E; G, H, I → G–I; M, N → M–N; O–Q; R–U); okresy neexistují (→ kraj s označením).
+    vyklad: Přidaná hodnota podle místa pracoviště jednotek, ne podle sídla subjektu.
+    stav: částečně
+
+  - kod: EKON_HPH_PODIL_UZEMI
+    nazev: Podíl skupiny odvětví na HPH území (%)
+    typ: podil
+    definice: HPH skupiny / HPH všech odvětví téhož území a roku × 100.
+    vzorec: "100 × EKON_HPH / HPH TOTAL"
+    zdroj: odvozeno z Eurostatu (nama_10r_3gva)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Váha oboru v ekonomice území; srovnání kraje s ČR ukazuje specializaci podle přidané hodnoty.
+    stav: částečně
+
+  - kod: EKON_HPH_PODIL_CR
+    nazev: Podíl kraje na HPH skupiny odvětví v ČR (%)
+    typ: podil
+    definice: HPH skupiny v kraji / HPH skupiny v ČR × 100.
+    vzorec: "100 × EKON_HPH(kraj) / EKON_HPH(ČR)"
+    zdroj: odvozeno z Eurostatu (nama_10r_3gva)
+    uroven: [kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Srovnávejte s podílem kraje na registrovaných subjektech oboru (REG_PODIL_CR).
+    stav: částečně
+
+  - kod: EKON_HPH_RUST
+    nazev: Objemová změna HPH proti předchozímu roku (%)
+    typ: index
+    definice: HPH v cenách předchozího roku / HPH v běžných cenách předchozího roku − 1, × 100.
+    vzorec: "100 × (HPH_PYP(t) / HPH_CP(t−1) − 1)"
+    zdroj: odvozeno z Eurostatu (nama_10r_3gva, unit PYP_MNAC a CP_MNAC)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Reálná (objemová) změna bez vlivu cen.
+    stav: částečně
+
+  - kod: EKON_HPH_OBJEM_INDEX
+    nazev: Objem HPH (první rok tabulky = 100)
+    typ: index
+    definice: Řetězení meziročních objemových změn HPH od prvního roku tabulky.
+    vzorec: "100 × Π (HPH_PYP(t) / HPH_CP(t−1))"
+    zdroj: odvozeno z Eurostatu (nama_10r_3gva)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány všechny roky.
+    vyklad: Reálný vývoj za celé období tabulky.
+    stav: částečně
+
+  - kod: EKON_ZAM
+    nazev: Zaměstnaní ve skupině odvětví (tis. osob, národní účty)
+    typ: kontext
+    definice: Zaměstnanost podle národních účtů – zaměstnanci i sebezaměstnaní (včetně podnikajících fyzických osob), podle místa pracoviště.
+    vzorec: převzato (Eurostat nama_10r_3empers, wstatus EMP)
+    zdroj: Eurostat, regionální účty (nama_10r_3empers)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jako EKON_HPH.
+    vyklad: Liší se od přepočtených zaměstnanců ČSÚ (MZDY_ZAM_OBOR) – zahrnuje sebezaměstnané a počítá osoby, ne plné úvazky.
+    stav: částečně
+
+  - kod: EKON_ZAM_PODIL_SELF
+    nazev: Podíl sebezaměstnaných na zaměstnaných (%)
+    typ: podil
+    definice: Sebezaměstnaní / zaměstnaní celkem × 100 (národní účty).
+    vzorec: "100 × ZAM_SELF / ZAM_EMP"
+    zdroj: odvozeno z Eurostatu (nama_10r_3empers)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Váha samostatně podnikajících v pracovní síle oboru.
+    stav: částečně
+
+  - kod: EKON_PRODUKTIVITA
+    nazev: Hrubá přidaná hodnota na zaměstnaného (tis. Kč)
+    typ: index
+    definice: HPH v běžných cenách / zaměstnaní (obojí Eurostat, regionální účty), zaokrouhleno na celé tis. Kč.
+    vzorec: "EKON_HPH / EKON_ZAM (mil. Kč / tis. osob = tis. Kč)"
+    zdroj: odvozeno z Eurostatu (nama_10r_3gva, nama_10r_3empers)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány oba údaje.
+    vyklad: Nominální produktivita na osobu (ne na odpracovanou hodinu).
+    stav: částečně
+
+  - kod: EKON_PRODUKTIVITA_INDEX_CR
+    nazev: Produktivita proti ČR (ČR = 100)
+    typ: index
+    definice: Produktivita skupiny v kraji / produktivita skupiny v ČR × 100.
+    vzorec: "100 × EKON_PRODUKTIVITA(kraj) / EKON_PRODUKTIVITA(ČR)"
+    zdroj: odvozeno z Eurostatu
+    uroven: [kraj]
+    chybejici_hodnoty: Jen jsou-li publikovány všechny údaje.
+    vyklad: Pod 100 = nižší přidaná hodnota na zaměstnaného než v oboru v ČR.
+    stav: částečně
+
+  - kod: EKON_NAHRADY
+    nazev: Náhrady zaměstnancům ve skupině odvětví (mil. Kč)
+    typ: kontext
+    definice: Mzdy a platy a sociální příspěvky zaměstnavatelů ve skupině A*10, region soudržnosti nebo ČR.
+    vzorec: převzato (Eurostat nama_10r_2coe, currency MIO_NAC)
+    zdroj: Eurostat, regionální účty (nama_10r_2coe)
+    uroven: [CR, region soudržnosti]
+    chybejici_hodnoty: Za kraje Eurostat nepublikuje – uvádí se region soudržnosti (NUTS 2) s označením.
+    vyklad: Region zahrnuje více krajů.
+    stav: částečně
+
+  - kod: EKON_NAHRADY_PODIL
+    nazev: Podíl náhrad zaměstnancům na HPH (%)
+    typ: podil
+    definice: Náhrady zaměstnancům / HPH v běžných cenách × 100, týž region a rok.
+    vzorec: "100 × EKON_NAHRADY / EKON_HPH (NUTS 2)"
+    zdroj: odvozeno z Eurostatu (nama_10r_2coe, nama_10r_3gva)
+    uroven: [CR, region soudržnosti]
+    chybejici_hodnoty: Jen region soudržnosti a ČR.
+    vyklad: Nízký podíl = větší část přidané hodnoty připadá na provozní přebytek a příjmy podnikatelů.
+    stav: částečně

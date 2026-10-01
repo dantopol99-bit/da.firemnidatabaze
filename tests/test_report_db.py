@@ -234,7 +234,7 @@ class TestReport(unittest.TestCase):
         self.assertTrue(all(x["sila"] >= 0.03 for x in z))
         typy = {x["typ"] for x in z}
         for typ in ("odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru", "divergence_poradi",
-                    "mzdy_zamestnanost"):
+                    "mzdy_zamestnanost", "ekonomika"):
             self.assertIn(typ, typy)
         tab = {t["kod"]: t for t in vysledek["tabulky"]}
         for x in z:
@@ -276,6 +276,40 @@ class TestReport(unittest.TestCase):
         vysledek, _ = spocitej(CONN, Zadani(["F", "G"], "CZ051"))
         CONN.rollback()
         self.assertFalse(tabulka(vysledek, "T20_mzdy_obor")["zverejneno"])
+
+    def test_ekonomika_jen_publikovana_cisla(self):
+        """T22/T23 = hodnoty Eurostatu z res.eu_regionalni_ucty beze změny kromě zaokrouhlení a poměrů."""
+        vysledek, _, _ = self.vystupy["F_LBK"]
+        t22, t23 = tabulka(vysledek, "T22_ekonomika"), tabulka(vysledek, "T23_nahrady")
+        self.assertTrue(t22["zverejneno"] and t23["zverejneno"])
+        with CONN.cursor() as cur:
+            cur.execute("SELECT ukazatel, geo, rok, hodnota FROM res.eu_regionalni_ucty WHERE nace = 'F'")
+            db = {(u, g, r): float(h) for u, g, r, h in cur.fetchall()}
+        CONN.rollback()
+        for r in t22["radky"]:
+            h = r["hodnoty"]
+            self.assertEqual(h["hph"], round(db[("HPH_CP", r["uzemi"], r["rok"])]))
+            self.assertEqual(h["zam"], round(db[("ZAM_EMP", r["uzemi"], r["rok"])], 2))
+            self.assertEqual(h["produktivita"], round(db[("HPH_CP", r["uzemi"], r["rok"])] / db[("ZAM_EMP", r["uzemi"], r["rok"])]))
+            self.assertEqual(h["rust"], round(100 * (db[("HPH_PYP", r["uzemi"], r["rok"])]
+                                                    / db[("HPH_CP", r["uzemi"], r["rok"] - 1)] - 1), 1))
+        self.assertEqual({r["uzemi"] for r in t22["radky"]}, {"CZ051", "CZ", "CZ052", "CZ041"})
+        # náhrady jen za regiony soudržnosti (CZ051 a CZ052 → CZ05, CZ041 → CZ04) a ČR
+        self.assertEqual({r["uzemi"] for r in t23["radky"]}, {"CZ05", "CZ", "CZ04"})
+        self.assertTrue(any("region soudržnosti" in p for p in t23["poznamky"]))
+
+    def test_ekonomika_nejblizsi_skupina(self):
+        # oddíl 62 → sekce J = skupina J (přesná); obor 10 → sekce C = skupina C; obor přes skupiny → nezveřejněno
+        v62, _, _ = self.vystupy["62_JES"]
+        t = tabulka(v62, "T22_ekonomika")
+        self.assertTrue(any("Nejbližší publikovaná úroveň: skupina" in p for p in t["poznamky"]))
+        self.assertTrue(any("okresy" in p for p in t["poznamky"]))
+        vysledek, _ = spocitej(CONN, Zadani(["H"], "CZ051"))
+        CONN.rollback()
+        self.assertTrue(any("součástí této širší skupiny" in p for p in tabulka(vysledek, "T22_ekonomika")["poznamky"]))
+        vysledek, _ = spocitej(CONN, Zadani(["F", "G"], "CZ051"))
+        CONN.rollback()
+        self.assertFalse(tabulka(vysledek, "T22_ekonomika")["zverejneno"])
 
     def test_zadny_vystup_nema_v_uzemi_nazev(self):
         from firemni_databaze.report_cestina import tabulka as lokativy

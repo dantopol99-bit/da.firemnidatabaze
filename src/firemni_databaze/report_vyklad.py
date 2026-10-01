@@ -26,7 +26,8 @@ NBSP = "\u202f"   # úzká nezlomitelná mezera – oddělovač tisíců (kontro
 KOREN = Path(__file__).resolve().parents[2]
 VYKLAD = KOREN / "reporty" / "vyklad"
 ZASTUPNY_TEXT = "ZÁSTUPNÝ TEXT"
-KAPITOLY = {"postaveni": "Postavení území", "struktura": "Struktura", "zamestnanost": "Zaměstnanost a mzdy",
+KAPITOLY = {"postaveni": "Postavení území", "struktura": "Struktura", "ekonomicky_profil": "Ekonomický profil",
+            "zamestnanost": "Zaměstnanost a mzdy",
             "dynamika": "Dynamika území a kontext ČR"}
 ODDILY = {"shrnuti": "Shrnutí", **KAPITOLY}     # oddíly souboru analytika (shrnutí = body strany 2)
 DRUHY_ANALYTIKA = {"Proč to tak může být": "proč", "Co z toho plyne": "plyne"}
@@ -145,6 +146,8 @@ def zjisteni_kapitoly(v: Vstup, kapitola: str, L: dict) -> list[dict]:
             return kapitola == "dynamika"
         if z["typ"] == "mzdy_zamestnanost":
             return kapitola == "zamestnanost"
+        if z["typ"] == "ekonomika":
+            return kapitola == "ekonomicky_profil"
         if z["typ"] == "odchylka_od_cr" and z["podtyp"].startswith("struktura"):
             return kapitola == "struktura"
         return kapitola == "postaveni"
@@ -270,6 +273,66 @@ def struktura(v: Vstup, L: dict) -> list[dict]:
 
 
 _FO = {"101", "102", "103", "104", "105", "106", "107", "108", "424", "425"}
+
+
+# ---------------------------------------------------------------------------
+# Co je vidět: ekonomický profil (Eurostat, regionální účty)
+# ---------------------------------------------------------------------------
+
+def ekonomika(v: Vstup, L: dict) -> list[dict]:
+    t22 = v.t("T22_ekonomika")
+    if not t22:
+        duvod = (v.tab.get("T22_ekonomika") or {}).get("duvod") or "údaje nejsou k dispozici"
+        return [_blok("vidět", f"Regionální účty za obor nejsou k dispozici: {duvod} ({L['T22']}).")]
+    sk = t22.get("skupina_nazev", "")
+    kraj = v.uzemi["kraj"] or "CZ"
+    v_kraji, v_cr = lokativ(kraj), lokativ("CZ")
+    radky = [r for r in t22["radky"] if r["uzemi"] == kraj]
+    cr = {r["rok"]: r for r in t22["radky"] if r["uzemi"] == "CZ"}
+    casti = []
+    if v.uzemi["typ"] == "OKRES":
+        casti.append(f"Regionální účty za okresy neexistují; uvádí se kraj jako nejbližší publikovaná úroveň ({L['T22']}).")
+    if any("součástí této širší skupiny" in p or "Nejbližší publikovaná úroveň: skupina" in p for p in t22["poznamky"]):
+        casti.append(f"Eurostat publikuje regionální účty jen za skupiny odvětví A*10; uvádí se skupina {sk}, "
+                     f"která obor zahrnuje ({L['T22']}).")
+    if radky and radky[-1]["rok"] in cr:
+        p, c = radky[-1], cr[radky[-1]["rok"]]
+        h, hc = p["hodnoty"], c["hodnoty"]
+        rok = p["rok"]
+        if kraj != "CZ":
+            casti.append(f"Podle regionálních účtů Eurostatu vytvořila skupina {sk} v roce {rok} {v_kraji} hrubou "
+                         f"přidanou hodnotu {cz(h['hph'])} mil. Kč, tj. {cz(h['hph_podil_uzemi'])} % HPH kraje "
+                         f"({vztah(h['hph_podil_uzemi'], hc['hph_podil_uzemi'], v_cr)}, {cz(hc['hph_podil_uzemi'])} %) "
+                         f"a {cz(h['hph_podil_cr'])} % HPH skupiny v ČR ({L['T22']}).")
+            casti.append(f"Zaměstnaných (národní účty, včetně sebezaměstnaných) bylo {cz(h['zam'])} tis., z toho "
+                         f"{cz(h['podil_self'])} % sebezaměstnaných ({v_cr} {cz(hc['podil_self'])} %). Hrubá přidaná "
+                         f"hodnota na zaměstnaného dosáhla {cz(h['produktivita'])} tis. Kč, tj. "
+                         f"{cz(h['produktivita_index_cr'])} % úrovně ČR ({cz(hc['produktivita'])} tis. Kč) "
+                         f"({L['g_ekon']}, {L['T22']}).")
+            srov = [f"{lokativ(r['uzemi'])} {cz(r['hodnoty']['produktivita'])} tis. Kč "
+                    f"({vztah(r['hodnoty']['produktivita'], h['produktivita'], v_kraji)})"
+                    for r in t22["radky"] if r["uzemi"] not in (kraj, "CZ") and r["rok"] == rok
+                    and r["hodnoty"]["produktivita"] is not None]
+            if srov:
+                casti.append("Ve srovnávacích krajích byla HPH na zaměstnaného " + ", ".join(srov) + f" ({L['T22']}).")
+        prvni = radky[0]
+        if prvni is not p and prvni["rok"] in cr:
+            casti.append(f"Objem HPH skupiny (ve stálých cenách) se mezi lety {prvni['rok']} a {rok} změnil {v_kraji} na "
+                         f"{cz(h['objem_index'])} % výchozí úrovně, {v_cr} na {cz(hc['objem_index'])} %; v roce {rok} "
+                         f"byla objemová změna {v_kraji} {cz(h['rust'])} %, {v_cr} {cz(hc['rust'])} % ({L['T22']}).")
+    t23 = v.t("T23_nahrady")
+    if t23 and radky:
+        rok = radky[-1]["rok"]
+        reg = next((r for r in t23["radky"] if r["uzemi"] == kraj[:4] and r["rok"] == rok), None)
+        c23 = next((r for r in t23["radky"] if r["uzemi"] == "CZ" and r["rok"] == rok), None)
+        if reg and c23 and kraj != "CZ":
+            casti.append(f"Náhrady zaměstnancům Eurostat za kraje nepublikuje; v regionu soudržnosti "
+                         f"{reg['popis'].split(' (')[0]} (nejbližší publikovaná úroveň) tvořily v roce {rok} "
+                         f"{cz(reg['hodnoty']['podil'])} % HPH skupiny, {v_cr} {cz(c23['hodnoty']['podil'])} % "
+                         f"({L['T23']}).")
+    if not casti:
+        return [_blok("vidět", f"Regionální účty pro toto území nejsou k dispozici ({L['T22']}).")]
+    return [_blok("vidět", " ".join(casti))] + zjisteni_kapitoly(v, "ekonomicky_profil", L)
 
 
 # ---------------------------------------------------------------------------

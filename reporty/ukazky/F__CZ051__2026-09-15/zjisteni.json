@@ -1011,6 +1011,35 @@
    "id": "Z31"
   },
   {
+   "typ": "ekonomika",
+   "typ_nazev": "ekonomika",
+   "podtyp": "objemový vývoj HPH proti ČR",
+   "sila": 0.0354,
+   "hodnota": 89.8,
+   "srovnani": 93.1,
+   "rozdil_pct": 3.5,
+   "smer": "nižší",
+   "cisla": [
+    {
+     "popis": "Objem HPH 2024 (2020 = 100) – kraj",
+     "hodnota": 89.8,
+     "tabulka": "T22_ekonomika",
+     "radek": "Liberecký kraj – 2024",
+     "sloupec": "objem_index"
+    },
+    {
+     "popis": "Objem HPH 2024 (2020 = 100) – Česko",
+     "hodnota": 93.1,
+     "tabulka": "T22_ekonomika",
+     "radek": "Česko – 2024",
+     "sloupec": "objem_index"
+    }
+   ],
+   "popis": "Objem hrubé přidané hodnoty skupiny Stavebnictví (F) se mezi lety 2020 a 2024 změnil v Libereckém kraji na 89,8 % (rok 2020 = 100), v Česku na 93,1 % (relativně o 3,5 % nižší).",
+   "poradi": 32,
+   "id": "Z32"
+  },
+  {
    "typ": "mzdy_zamestnanost",
    "typ_nazev": "mzdy a zaměstnanost",
    "podtyp": "průměrná mzda v oboru proti ČR",
@@ -1036,8 +1065,8 @@
     }
    ],
    "popis": "Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší).",
-   "poradi": 32,
-   "id": "Z32"
+   "poradi": 33,
+   "id": "Z33"
   },
   {
    "typ": "odchylka_od_cr",
@@ -1065,8 +1094,8 @@
     }
    ],
    "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 9,5 %, v Česku 9,2 % (relativně o 3,3 % vyšší).",
-   "poradi": 33,
-   "id": "Z33"
+   "poradi": 34,
+   "id": "Z34"
   }
  ]
 }

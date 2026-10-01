@@ -44,14 +44,6 @@ UKAZKY = KOREN / "reporty" / "ukazky"
 PORADI_KAPITOL = ["postaveni", "struktura", "ekonomicky_profil", "zamestnanost", "dynamika", "rizikovy_profil",
                   "zakazky"]
 NEDOSTUPNE_KAPITOLY = {
-    "ekonomicky_profil": {
-        "nadpis": "Ekonomický profil a koncentrace",
-        "duvod": "Účetní výkazy právnických osob (rozvaha, výkaz zisku a ztráty) zatím nejsou načtené; tržby, "
-                 "aktiva ani koncentraci oboru bez nich spočítat nelze.",
-        "zdroj": "Účetní výkazy ze Sbírky listin obchodního rejstříku.",
-        "obsah": "Tržby a aktiva právnických osob v oboru, koncentrace (podíl největších subjektů), srovnání s ČR "
-                 "a se srovnávacími kraji.",
-    },
     "rizikovy_profil": {
         "nadpis": "Rizikový profil (insolvence)",
         "duvod": "Webové služby insolvenčního rejstříku nejsou z cloudového prostředí dostupné; data přibudou "
@@ -68,6 +60,17 @@ NEDOSTUPNE_KAPITOLY = {
         "obsah": "Podíl subjektů oboru s veřejnou zakázkou nebo dotací a jejich objem, srovnání s ČR a se "
                  "srovnávacími kraji.",
     },
+}
+
+
+# pododdíl kapitoly Ekonomický profil bez dat (rozhodnutí 13: Sbírka listin jen po dohodě s MSp)
+POD_ODDIL_KONCENTRACE = {
+    "nadpis": "Koncentrace a firemní ukazatele",
+    "duvod": "Sbírka listin (účetní závěrky) zakazuje automatický přístup (robots.txt); cestou je dohoda "
+             "s Ministerstvem spravedlnosti.",
+    "zdroj": "Účetní závěrky ze Sbírky listin obchodního rejstříku – po dohodě s Ministerstvem spravedlnosti.",
+    "obsah": "Tržby, aktiva a vlastní kapitál právnických osob v oboru, koncentrace (podíl největších subjektů), "
+             "srovnání s ČR a se srovnávacími kraji.",
 }
 
 
@@ -167,7 +170,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         obsah.append(tabulka(v.tab["T03_kraje"], s.pismeno_tab("T03"), zdroj_res))
     if v.t("T04_okresy"):
         obsah.append(tabulka(v.tab["T04_okresy"], s.pismeno_tab("T04"), zdroj_res))
-    kapitoly.append({"nadpis": "Postavení území", "klic": "postaveni", "obsah": obsah})
+    kapitoly.append({"nadpis": "Postavení území", "klic": "postaveni", "obsah": obsah, "pododdil": None})
 
     # --- Struktura ------------------------------------------------------------------
     obsah = []
@@ -205,7 +208,29 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         obsah.append(tabulka(v.tab["T09_vekova_struktura"], s.pismeno_tab("T09"), zdroj_res))
     if v.t("T17_bench_vekova_struktura"):
         obsah.append(tabulka(v.tab["T17_bench_vekova_struktura"], s.pismeno_tab("T17"), zdroj_res))
-    kapitoly.append({"nadpis": "Struktura", "klic": "struktura", "obsah": obsah})
+    kapitoly.append({"nadpis": "Struktura", "klic": "struktura", "obsah": obsah, "pododdil": None})
+
+    # --- Ekonomický profil (Eurostat, regionální účty) ---------------------------------
+    obsah = []
+    t22 = v.radky("T22_ekonomika")
+    zdroj_eu = ("Zdroj: Eurostat, regionální účty (nama_10r_3gva, nama_10r_3empers, nama_10r_2coe); "
+                "upraveno – vlastní výpočet, za úpravy Eurostat neodpovídá.")
+    if t22:
+        uz22 = list(dict.fromkeys(r["uzemi"] for r in t22))
+        kraj22 = v.uzemi["kraj"] or "CZ"
+        rady = [{"popis": next(r["popis"] for r in t22 if r["uzemi"] == k).rsplit(" – ", 1)[0],
+                 "role": "uzemi" if k == kraj22 else "cr" if k == "CZ" else "srovnani",
+                 "body": [(r["rok"], r["hodnoty"]["produktivita"]) for r in t22 if r["uzemi"] == k]} for k in uz22]
+        p = s.pismeno_graf("g_ekon")
+        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.miry_v_case(
+            [{"nazev": "HPH na zaměstnaného (tis. Kč, běžné ceny)", "rady": rady}], adresar / "g_ekon.svg", "tis. Kč")),
+            "nazev": f"Hrubá přidaná hodnota na zaměstnaného – {v.tab['T22_ekonomika'].get('skupina_nazev', '')}",
+            "zdroj": zdroj_eu})
+        obsah.append(tabulka(v.tab["T22_ekonomika"], s.pismeno_tab("T22"), zdroj_eu))
+    if v.t("T23_nahrady"):
+        obsah.append(tabulka(v.tab["T23_nahrady"], s.pismeno_tab("T23"), zdroj_eu))
+    kapitoly.append({"nadpis": "Ekonomický profil", "klic": "ekonomicky_profil", "obsah": obsah,
+                     "pododdil": POD_ODDIL_KONCENTRACE})
 
     # --- Zaměstnanost a mzdy (ČSÚ) ----------------------------------------------------
     obsah = []
@@ -226,7 +251,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
     if v.t("T21_mzdy_aktualni"):
         obsah.append(tabulka(v.tab["T21_mzdy_aktualni"], s.pismeno_tab("T21"),
                              "Zdroj: ČSÚ, DataStat (MZDR – čtvrtletní zjišťování, kumulace za rok)."))
-    kapitoly.append({"nadpis": "Zaměstnanost a mzdy", "klic": "zamestnanost", "obsah": obsah})
+    kapitoly.append({"nadpis": "Zaměstnanost a mzdy", "klic": "zamestnanost", "obsah": obsah, "pododdil": None})
 
     # --- Dynamika území a kontext ČR -------------------------------------------------
     obsah = []
@@ -281,16 +306,17 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
                       "nazev": "Míra vzniků podniků v ČR – kontext (jednotka podnik, ne registrovaný subjekt)",
                       "zdroj": "Zdroj: ČSÚ, DataStat, RESDP00 (demografie podniků)."})
         obsah.append(tabulka(v.tab["T12_demografie_cr"], s.pismeno_tab("T12"), "Zdroj: ČSÚ, DataStat, RESDP00."))
-    kapitoly.append({"nadpis": "Dynamika území a kontext ČR", "klic": "dynamika", "obsah": obsah})
+    kapitoly.append({"nadpis": "Dynamika území a kontext ČR", "klic": "dynamika", "obsah": obsah, "pododdil": None})
 
 
     # --- výklad (po přidělení písmen) --------------------------------------------------
     L = {k: s.L.get(k, "příloha") for k in
-         [f"T{i:02d}" for i in range(1, 22)]
-         + ["g_dyn", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
+         [f"T{i:02d}" for i in range(1, 24)]
+         + ["g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
     for k in kapitoly:
         k["nedostupne"] = None
-        k["vyklad"] = {"postaveni": vy.postaveni, "struktura": vy.struktura, "zamestnanost": vy.zamestnanost,
+        k["vyklad"] = {"postaveni": vy.postaveni, "struktura": vy.struktura, "ekonomicky_profil": vy.ekonomika,
+                       "zamestnanost": vy.zamestnanost,
                        "dynamika": vy.dynamika}[k["klic"]](v, L)
         if vyklad_analytika is None:
             k["vyklad"].append(vy._blok("proč", "Výklad analytika zatím chybí."))
@@ -298,8 +324,10 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
             k["vyklad"] += vyklad_analytika.get(k["klic"], [])
 
     # --- pevné kapitoly bez dat, seřazení podle osnovy ----------------------------------
+    odchylky.append(f"Pododdíl {POD_ODDIL_KONCENTRACE['nadpis']} (kapitola Ekonomický profil): zatím nedostupné – "
+                    f"{POD_ODDIL_KONCENTRACE['duvod']}")
     for klic, n in NEDOSTUPNE_KAPITOLY.items():
-        kapitoly.append({"nadpis": n["nadpis"], "klic": klic, "obsah": [], "vyklad": [],
+        kapitoly.append({"nadpis": n["nadpis"], "klic": klic, "obsah": [], "vyklad": [], "pododdil": None,
                          "nedostupne": {"duvod": n["duvod"], "zdroj": n["zdroj"], "obsah": n["obsah"]}})
         odchylky.append(f"Kapitola {n['nadpis']}: zatím nedostupné – {n['duvod']}")
     kapitoly.sort(key=lambda k: PORADI_KAPITOL.index(k["klic"]))

@@ -260,6 +260,52 @@ Co ČSÚ v DataStatu publikuje (ověřeno v katalogu sad a výběrů, 1. 10. 202
 - Import: `python -m firemni_databaze.res_import mzdy` (i součást `agregaty`), každý výběr ve vlastní
   dávce `dev.import_davka`.
 
+## Ekonomický profil – regionální účty Eurostatu (Blok 7b, T22–T23)
+
+**Zdroj a podmínky** (ověřeno 1. 10. 2026, před prvním datovým požadavkem): robots.txt
+`ec.europa.eu` pro `User-agent: *` nezakazuje cestu `/eurostat/api/` (zakázané jsou jen staré
+`/eurostat/SDMX/diss-web/rest/`, vyhledávání a data-browser). Licence (Copyright notice and free re-use of
+data): další užití, i komerční, je povoleno s uvedením zdroje; úpravy dat se musí výslovně označit
+a připojit doložku, že za ně Eurostat neodpovídá. Citace: kód sady s odkazem do data browseru a datum
+stažení – v reportu v dalších zdrojích, poznámkách tabulek a na listu „Zdroj a licence“. Stahuje se
+API JSON-stat (`/eurostat/api/dissemination/statistics/1.0/data/<sada>`), 3 požadavky s pauzou 2 s.
+
+Co Eurostat publikuje pro Česko (stav sad: HPH aktualizace 23. 3. 2026, zaměstnanost 31. 7. 2026,
+náhrady 10. 2. 2026):
+
+| sada | ukazatel | území | odvětví | roky | jednotky |
+|---|---|---|---|---|---|
+| `nama_10r_3gva` | hrubá přidaná hodnota v základních cenách | ČR, regiony soudržnosti, **14 krajů** | A*10 (+ C, G–J, K–N, O–U) | 2000–2024 | mil. Kč běžné ceny (CP_MNAC), mil. Kč v cenách předchozího roku (PYP_MNAC); také EUR |
+| `nama_10r_3empers` | zaměstnanost (národní účty) | ČR, **14 krajů** | A*10 | 2000–2024 | tis. osob: zaměstnaní (EMP), zaměstnanci (SAL), sebezaměstnaní (SELF) |
+| `nama_10r_2coe` | náhrady zaměstnancům | ČR, **regiony soudržnosti** (ne kraje) | A*10 | 2000–2024 | mil. Kč (MIO_NAC) |
+
+- **Okresy** v regionálních účtech nejsou. **Stálé ceny** jsou jen jako ceny předchozího roku
+  (objemová změna rok k roku); objem za více let vzniká řetězením těchto změn.
+- **Příznaky**: Eurostat u žádné hodnoty neuvádí příznak předběžnosti (p) ani odhadu (e); poslední rok
+  2024 se ale při revizích může změnit (poznámka v T22).
+- **Skupiny A*10** (sekce → skupina): A; B, D, E → B–E (Průmysl kromě stavebnictví); C (samostatně);
+  **F (samostatně)**; G, H, I → G–I; J; K; L; M, N → M–N; O, P, Q → O–Q; R, S, T, U → R–U. Odpovídá-li
+  skupina sekci přesně (A, C, F, J, K, L), tabulka to uvádí; jinak je označena jako širší skupina
+  (nejbližší publikovaná úroveň). Oddíl a nižší úrovně → skupina jeho sekce, okres → kraj, vždy
+  s označením. Obor přes více skupin → T22/T23 se nezveřejní s důvodem.
+- **Konzistence s ČSÚ**: HPH Libereckého kraje celkem 2023 = 213 778 mil. Kč u Eurostatu i v DataStatu
+  (NUC06R) – regionální účty Eurostatu jsou údaje ČSÚ předané Eurostatu.
+- **Produktivita** = HPH v běžných cenách / zaměstnaní (obojí z regionálních účtů, tedy konzistentní
+  definice), v tis. Kč na zaměstnanou osobu (ne na hodinu ani na plný úvazek).
+- **Proč se zaměstnanost liší od kapitoly Zaměstnanost a mzdy**: Eurostat (národní účty) počítá osoby
+  včetně sebezaměstnaných (podnikajících FO) podle místa pracoviště; ČSÚ ve statistice mezd uvádí jen
+  zaměstnance v pracovním poměru přepočtené na plné úvazky. Pilot 2022: 13,23 tis. zaměstnaných ve
+  stavebnictví Libereckého kraje (Eurostat; z toho 33,8 % sebezaměstnaných) proti 6,4 tis. přepočtených
+  zaměstnanců (ČSÚ). Ani jedno číslo není počet registrovaných subjektů.
+- **Náhrady zaměstnancům / HPH** jen za region soudržnosti (kraj Liberecký patří do Severovýchodu
+  spolu s Královéhradeckým a Pardubickým) – vždy označeno; srovnávací kraj ze stejného regionu má
+  stejné hodnoty.
+- **Detektor** má typ `ekonomika`: produktivita, podíl skupiny na HPH území, podíl sebezaměstnaných
+  a objem HPH (kraj proti ČR); podíl náhrad na HPH (region soudržnosti proti ČR). Pravidlo 3 % platí.
+- **Pododdíl „Koncentrace a firemní ukazatele“** zůstává „zatím nedostupné“ (rozhodnutí 13).
+- Import: `python -m firemni_databaze.res_import eurostat` (i součást `agregaty`), tabulka
+  `res.eu_regionalni_ucty`, každá sada ve vlastní dávce `dev.import_davka` (zdroj `EUROSTAT`).
+
 ## Ukazatele, které nelze (plně) naplnit
 
 | ukazatel | proč |
@@ -272,4 +318,5 @@ Co ČSÚ v DataStatu publikuje (ověřeno v katalogu sad a výběrů, 1. 10. 202
 | `AKTIVNI_PODIL_KRAJ` za okres | ČSÚ podíl aktivity za okres podle převažující činnosti nepublikuje, uvádí se krajský |
 | `OBYVATELE` okresu Praha | v OBY02A nemá Praha okres; použije se kraj Hlavní město Praha (totožné území) |
 | `PORADI_*` pro ČR | nemá smysl |
+| `EKON_*` jen částečně | jen skupiny A*10, ne oddíly; jen kraje, ne okresy; náhrady zaměstnancům jen za region soudržnosti |
 | `MZDY_*` obor × kraj jen částečně | ČSÚ publikuje jen sekce, jen kraje, jen roky 2010–2022 (roční zjišťování); medián vůbec |
