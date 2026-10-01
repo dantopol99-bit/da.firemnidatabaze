@@ -26,6 +26,12 @@ VYKLAD_HOTOVY = """# Výklad analytika
 
 <!-- pokyn pro analytika se do sazby nedostane -->
 
+## Shrnutí
+
+Kraj má 14 799 registrovaných subjektů oboru.
+
+Druhý bod shrnutí analytika.
+
 ## Postavení území
 
 ### Proč to tak může být
@@ -76,7 +82,7 @@ class TestBezDatabaze(unittest.TestCase):
 
     def texty_stroje(self, L):
         v = Vstup(json.loads((VZOR / "vysledek.json").read_text(encoding="utf-8")))
-        texty = report_vyklad.shrnuti(v, L)
+        texty = report_vyklad.zjisteni_priloha(v, L)
         bloky = []
         for f in (report_vyklad.postaveni, report_vyklad.struktura, report_vyklad.dynamika):
             bloky += f(v, L)
@@ -102,19 +108,30 @@ class TestBezDatabaze(unittest.TestCase):
             self.assertNotRegex(t, r"[Vv] území [A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]")
 
     @unittest.skipUnless((VZOR / "vysledek.json").exists(), "vzorový výstup chybí")
-    def test_shrnuti_z_nejsilnejsich_zjisteni(self):
+    def test_priloha_obsahuje_vsechna_zjisteni(self):
         v = Vstup(json.loads((VZOR / "vysledek.json").read_text(encoding="utf-8")))
-        vybrana = report_vyklad.vyber_shrnuti(v.zjisteni)
-        self.assertEqual(len(vybrana), 5)
-        self.assertEqual(vybrana[0], v.zjisteni[0])                         # nejsilnější je vždy první
-        self.assertTrue(all(sum(1 for z in vybrana if z["typ"] == t) <= 2 for t in {z["typ"] for z in vybrana}))
-        body = report_vyklad.shrnuti(v, L_VSE)
-        for z, b in zip(vybrana, body):
-            self.assertTrue(b.startswith(z["popis"].rstrip(".")), b)
-        # vynechané je jen zjištění typu, který už má dvě silnější
-        for z in v.zjisteni[:v.zjisteni.index(vybrana[-1])]:
-            if z not in vybrana:
-                self.assertEqual(sum(1 for x in vybrana if x["typ"] == z["typ"]), 2)
+        priloha = report_vyklad.zjisteni_priloha(v, L_VSE)
+        self.assertEqual(len(priloha), len(v.zjisteni))
+        for z, b in zip(v.zjisteni, priloha):
+            self.assertTrue(b.startswith(z["id"]), b)
+
+    def test_mezery_mezi_cislicemi_jsou_oddelovac_tisicu(self):
+        self.assertEqual(report_vyklad.tisice("na 1 000 obyvatel, 14 799 subjektů"),
+                         "na 1\u202f000 obyvatel, 14\u202f799 subjektů")
+        self.assertEqual(report_vyklad.tisice("1. 1.–15. 9. 2026"), "1. 1.–15. 9. 2026")
+        self.assertEqual(cisla_v_textu(report_vyklad.tisice("na 1 000 obyvatel")), {"1000"})
+
+    @unittest.skipUnless((VZOR / "vysledek.json").exists(), "vzorový výstup chybí")
+    def test_spatne_tisicove_cislo_kontrola_zachyti(self):
+        """Bez převodu by „14 798“ prošlo jako „14“ a „798“; s převodem je to číslo 14798, které v datech není."""
+        povolena = povolena_cisla(VZOR)
+        with tempfile.TemporaryDirectory() as tmp:
+            cesta = Path(tmp) / "X.md"
+            cesta.write_text(VYKLAD_HOTOVY.replace("14 799", "14 798"), encoding="utf-8")
+            _, bloky = report_vyklad.nacti_vyklad_analytika(cesta)
+        self.assertEqual(cisla_v_textu(bloky["shrnuti"][0]["text"]) - povolena, {"14798"})
+        dobre = report_vyklad.tisice("Kraj má 14 799 registrovaných subjektů oboru.")
+        self.assertEqual(cisla_v_textu(dobre) - povolena, set())
 
     def test_vyklad_analytika(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -127,16 +144,25 @@ class TestBezDatabaze(unittest.TestCase):
             cesta.write_text(VYKLAD_HOTOVY, encoding="utf-8")
             stav, bloky = report_vyklad.nacti_vyklad_analytika(cesta)
         self.assertEqual(stav, "hotovy")
+        self.assertEqual([b["druh"] for b in bloky["shrnuti"]], ["shrnutí", "shrnutí"])
         self.assertEqual([b["druh"] for b in bloky["postaveni"]], ["proč", "proč", "plyne"])
         self.assertTrue(bloky["postaveni"][1]["hypoteza"])
         self.assertFalse(bloky["postaveni"][1]["text"].startswith("Hypotéza"))
 
-    def test_pilotni_vyklad_je_zastupny(self):
+    def test_chybejici_nebo_zastupne_shrnuti_blokuje_schvaleni(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cesta = Path(tmp) / "X.md"
+            cesta.write_text(VYKLAD_HOTOVY.replace("## Shrnutí", "## Něco jiného"), encoding="utf-8")
+            self.assertEqual(report_vyklad.nacti_vyklad_analytika(cesta)[0], "zastupny")
+            cesta.write_text(VYKLAD_HOTOVY.replace("Druhý bod shrnutí analytika.", "ZÁSTUPNÝ TEXT – doplní analytik."),
+                             encoding="utf-8")
+            self.assertEqual(report_vyklad.nacti_vyklad_analytika(cesta)[0], "zastupny")
+
+    def test_pilotni_vyklad_je_hotovy(self):
         soubor = KOREN / "reporty" / "vyklad" / "F__CZ051__2026-09-15.md"
-        self.assertTrue(soubor.exists())
         stav, bloky = report_vyklad.nacti_vyklad_analytika(soubor)
-        self.assertEqual(stav, "zastupny")
-        self.assertEqual(set(bloky), {"postaveni", "struktura", "dynamika"})
+        self.assertEqual(stav, "hotovy")
+        self.assertEqual(set(bloky), {"shrnuti", "postaveni", "struktura", "dynamika"})
 
 
 @unittest.skipIf(TYPST is None, "typst není v PATH")
@@ -191,6 +217,8 @@ class TestSazba(unittest.TestCase):
         text = text_pdf(pdf)
         self.assertNotIn("KONCEPT", text)
         self.assertIn("obor sídlí jinde, než působí", text)
+        self.assertIn("Druhý bod shrnutí analytika", text)
+        self.assertIn("Příloha: zjištění detektoru", text)
         self.assertNotIn("pokyn pro analytika", text)
         self.assertEqual(zkontroluj_pdf(pdf, self.vystup), [])
 
@@ -198,7 +226,8 @@ class TestSazba(unittest.TestCase):
         from firemni_databaze.report_pdf import ChybaSazby, vysazej
         from firemni_databaze.report_vyklad import sablona_vykladu
         vysledek = json.loads((self.vystup / "vysledek.json").read_text(encoding="utf-8"))
-        for text in (None, sablona_vykladu(vysledek, self.vystup.name)):
+        bez_shrnuti = VYKLAD_HOTOVY.replace("## Shrnutí", "## Něco jiného")
+        for text in (None, sablona_vykladu(vysledek, self.vystup.name), bez_shrnuti):
             with self.assertRaises(ChybaSazby):
                 vysazej(self.vystup, self.tmp / "neschvaleno", koncept=False, adresar_vykladu=self.vyklady(text))
             # jako KONCEPT se vysázet dá
@@ -225,8 +254,8 @@ class TestSazba(unittest.TestCase):
 
     def test_nesoulad_zastavi_sazbu(self):
         from firemni_databaze.report_pdf import ChybaSazby, vysazej
-        puvodni = report_vyklad.shrnuti
-        with mock.patch.object(report_vyklad, "shrnuti", lambda v, L: puvodni(v, L) + ["Vymyšlených 987 654."]):
+        puvodni = report_vyklad.zjisteni_priloha
+        with mock.patch.object(report_vyklad, "zjisteni_priloha", lambda v, L: puvodni(v, L) + ["Vymyšlených 987 654."]):
             with self.assertRaises(ChybaSazby):
                 vysazej(self.vystup, self.tmp / "spatne")
         self.assertFalse((self.tmp / "spatne" / "report.pdf").exists())

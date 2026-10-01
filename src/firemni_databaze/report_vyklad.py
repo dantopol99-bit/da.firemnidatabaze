@@ -9,8 +9,9 @@
        relativně je „srovnatelné“,
      * názvy území v 6. pádě z ručně psané tabulky (report_cestina), nikdy „v území <název>“,
      * slova „firmy“ a „aktivní“ se nepoužívají (rozhodnutí 1).
-2. Vrstva analytika: „proč to tak může být“ a „co z toho plyne“ píše člověk do
-   reporty/vyklad/<id_reportu>.md (nacti_vyklad_analytika). Sazba text vloží a kontrola
+2. Vrstva analytika: shrnutí na straně 2, „proč to tak může být“ a „co z toho plyne“
+   píše člověk do reporty/vyklad/<id_reportu>.md (nacti_vyklad_analytika). Sazba text
+   vloží (mezery mezi číslicemi převede na nezlomitelný oddělovač tisíců) a kontrola
    čísel na něj platí stejně. Dokud soubor chybí nebo obsahuje zástupný text, nelze
    report vysázet jako schválený (--vyklad-schvalen).
 """
@@ -26,9 +27,8 @@ KOREN = Path(__file__).resolve().parents[2]
 VYKLAD = KOREN / "reporty" / "vyklad"
 ZASTUPNY_TEXT = "ZÁSTUPNÝ TEXT"
 KAPITOLY = {"postaveni": "Postavení území", "struktura": "Struktura", "dynamika": "Dynamika území a kontext ČR"}
+ODDILY = {"shrnuti": "Shrnutí", **KAPITOLY}     # oddíly souboru analytika (shrnutí = body strany 2)
 DRUHY_ANALYTIKA = {"Proč to tak může být": "proč", "Co z toho plyne": "plyne"}
-SHRNUTI_POCET = 5            # rozhodnutí E: shrnutí z 5 nejsilnějších zjištění
-SHRNUTI_MAX_TYPU = 2         # … nejvýš 2 téhož typu, aby shrnutí nepopisovalo jeden jev pětkrát
 ZJISTENI_NA_KAPITOLU = 5
 
 
@@ -127,31 +127,14 @@ def zjisteni_text(z: dict, L: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Shrnutí: 5 nejsilnějších zjištění detektoru (dlaždice sestavuje report_pdf)
+# Zjištění detektoru: v kapitolách (nejsilnější) a celá v příloze
 # ---------------------------------------------------------------------------
 
-def vyber_shrnuti(zjisteni: list[dict]) -> list[dict]:
-    vybrana, podle_typu = [], {}
-    for z in zjisteni:                      # už seřazená podle síly
-        if podle_typu.get(z["typ"], 0) >= SHRNUTI_MAX_TYPU:
-            continue
-        vybrana.append(z)
-        podle_typu[z["typ"]] = podle_typu.get(z["typ"], 0) + 1
-        if len(vybrana) == SHRNUTI_POCET:
-            break
-    return vybrana
-
-
-def shrnuti(v: Vstup, L: dict) -> list[str]:
-    n = v.t01("REG_POCET")
-    if n is None:
-        return [f"Počet registrovaných subjektů oboru {v.v_uzemi} je pod prahem zveřejnění ({L['T01']})."]
-    body = [zjisteni_text(z, L) for z in vyber_shrnuti(v.zjisteni)]
-    if not body:
-        body.append(f"Detektor nenašel žádný rozdíl alespoň 3 % relativně – hodnoty jsou srovnatelné s ČR ({L['T02']}).")
-    for varovani in v.meta["varovani"]:
-        body.append("Varování: " + varovani)
-    return body
+def zjisteni_priloha(v: Vstup, L: dict) -> list[str]:
+    """Všechna zjištění detektoru seřazená podle síly (příloha PDF)."""
+    if not v.zjisteni:
+        return ["Detektor nenašel žádný rozdíl alespoň 3 % relativně."]
+    return [f"{z['id']} ({z['typ_nazev']}, síla {cz(z['sila'])}): {zjisteni_text(z, L)}" for z in v.zjisteni]
 
 
 def zjisteni_kapitoly(v: Vstup, kapitola: str, L: dict) -> list[dict]:
@@ -165,7 +148,7 @@ def zjisteni_kapitoly(v: Vstup, kapitola: str, L: dict) -> list[dict]:
     vybrana = [z for z in v.zjisteni if patri(z)]
     bloky = [_blok("zjištění", f"{z['id']}: {zjisteni_text(z, L)}") for z in vybrana[:ZJISTENI_NA_KAPITOLU]]
     if len(vybrana) > ZJISTENI_NA_KAPITOLU:
-        bloky.append(_blok("zjištění", "Další zjištění této kapitoly jsou v datové příloze a v souboru zjisteni.json."))
+        bloky.append(_blok("zjištění", "Další zjištění této kapitoly jsou v příloze Zjištění detektoru."))
     return bloky
 
 
@@ -346,23 +329,30 @@ def soubor_vykladu(id_reportu: str, adresar: Path = VYKLAD) -> Path:
     return adresar / f"{id_reportu}.md"
 
 
-def nacti_vyklad_analytika(cesta: Path) -> tuple[str, dict[str, list[dict]]]:
-    """Vrátí (stav, {kapitola: [bloky proč/plyne]}); stav: chybi | zastupny | hotovy.
+def tisice(text: str) -> str:
+    """Mezera mezi číslicemi = oddělovač tisíců („1 000“ → 1 000 s úzkou nezlomitelnou mezerou),
+    takže sazba číslo nerozdělí a kontrola čísel ho čte jako jedno číslo (1000)."""
+    return re.sub(r"(?<=\d)[ \u00a0](?=\d)", NBSP, text)
 
-    Formát: „## <název kapitoly>“, pod ním „### Proč to tak může být“ a „### Co z toho plyne“,
-    odstavce oddělené prázdným řádkem; odstavec začínající „Hypotéza:“ se vysází jako hypotéza.
-    HTML komentáře (<!-- … -->) jsou pokyny pro analytika a do sazby nejdou."""
+
+def nacti_vyklad_analytika(cesta: Path) -> tuple[str, dict[str, list[dict]]]:
+    """Vrátí (stav, {oddíl: [bloky]}); stav: chybi | zastupny | hotovy.
+
+    Formát: „## Shrnutí“ (body strany 2, odstavce oddělené prázdným řádkem), pak „## <název
+    kapitoly>“ a pod ní „### Proč to tak může být“ a „### Co z toho plyne“; odstavec začínající
+    „Hypotéza:“ se vysází jako hypotéza. HTML komentáře (<!-- … -->) jsou pokyny pro analytika
+    a do sazby nejdou. Chybí-li některý oddíl nebo obsahuje zástupný text, stav je „zastupny“."""
     if not cesta.exists():
         return "chybi", {}
     text = re.sub(r"<!--.*?-->", "", cesta.read_text(encoding="utf-8"), flags=re.S)
-    podle_nazvu = {n: k for k, n in KAPITOLY.items()}
-    bloky: dict[str, list[dict]] = {k: [] for k in KAPITOLY}
+    podle_nazvu = {n: k for k, n in ODDILY.items()}
+    bloky: dict[str, list[dict]] = {k: [] for k in ODDILY}
     kapitola = druh = None
     odstavec: list[str] = []
 
     def uzavri():
         if odstavec and kapitola and druh:
-            t = " ".join(s.strip() for s in odstavec).strip()
+            t = tisice(" ".join(s.strip() for s in odstavec).strip())
             hyp = t.startswith("Hypotéza:")
             bloky[kapitola].append(_blok(druh, t.removeprefix("Hypotéza:").strip() if hyp else t, hyp))
         odstavec.clear()
@@ -370,7 +360,8 @@ def nacti_vyklad_analytika(cesta: Path) -> tuple[str, dict[str, list[dict]]]:
     for radek in text.splitlines():
         if radek.startswith("## "):
             uzavri()
-            kapitola, druh = podle_nazvu.get(radek[3:].strip()), None
+            kapitola = podle_nazvu.get(radek[3:].strip())
+            druh = "shrnutí" if kapitola == "shrnuti" else None
         elif radek.startswith("### "):
             uzavri()
             druh = DRUHY_ANALYTIKA.get(radek[4:].strip())
@@ -389,14 +380,16 @@ def sablona_vykladu(vysledek: dict, id_reportu: str) -> str:
     radky = [f"# Výklad analytika: {m['obor_popis']} × {m['uzemi']['nazev']}, snímek RES {m['zadani']['datum_snimku']}",
              "",
              "<!--",
-             "Rozhodnutí 12: stroj píše „co je vidět“ a zjištění detektoru (zjisteni.json), analytik píše",
-             "„proč to tak může být“ a „co z toho plyne“. Pravidla:",
+             "Rozhodnutí 12: stroj píše dlaždice, „co je vidět“ a zjištění detektoru (zjisteni.json), analytik",
+             "píše shrnutí (strana 2), „proč to tak může být“ a „co z toho plyne“. Pravidla:",
+             "  * shrnutí: body oddělené prázdným řádkem pod nadpisem „## Shrnutí“,",
              "  * odstavce oddělené prázdným řádkem; odstavec začínající „Hypotéza:“ se vysází jako hypotéza,",
              "  * každé číslo musí být ve vysledek.json i v priloha.xlsx (kontrola čísel v PDF platí i sem),",
              "  * odkazujte na zjištění (Z01 …) a tabulky; nepoužívejte slova „firmy“ ani „aktivní“,",
              f"  * dokud soubor obsahuje „{ZASTUPNY_TEXT}“, nelze report vysázet s --vyklad-schvalen.",
              "-->",
              ""]
+    radky += [f"## {ODDILY['shrnuti']}", "", f"{ZASTUPNY_TEXT} – doplní analytik.", ""]
     for nazev in KAPITOLY.values():
         radky += [f"## {nazev}", ""]
         for druh in DRUHY_ANALYTIKA:

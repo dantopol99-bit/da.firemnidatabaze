@@ -35,6 +35,19 @@ sekundárním slučování přeskočí, pokud je z čeho vybírat; (b) právní 
 |---|---|---|
 | 12 | **Výklad má dvě vrstvy.** Stroj píše „co je vidět“ a detektor zjištění. „Proč“ a „co z toho plyne“ píše analytik do `reporty/vyklad/<id_reportu>.md`. Sazba text vloží a kontrola čísel na něj platí stejně. Dokud soubor chybí nebo obsahuje zástupný text, nejde použít `--vyklad-schvalen`. | `report_vyklad` (strojová vrstva + `nacti_vyklad_analytika`), `report_zjisteni`, `report_pdf.vysazej` (blokace schválení, kontrola čísel a zakázaných slov i v textu analytika); `report` při prvním výpočtu založí soubor se zástupným textem |
 
+**Rozšíření rozhodnutí 12 (schváleno 1. 10. 2026):** body shrnutí na straně 2 píše analytik do oddílu
+`## Shrnutí` téhož souboru (body oddělené prázdným řádkem). Dlaždice (počet, LQ, hustota, pořadí) a
+varování zůstávají strojové. Chybí-li oddíl nebo obsahuje zástupný text, platí blokace
+`--vyklad-schvalen` jako u ostatních oddílů. Strojová zjištění detektoru se ze strany 2 přesunula do
+kapitol (nejvýš 5 nejsilnějších v každé) a celá do přílohy „Zjištění detektoru“; pravidlo „5 nejsilnějších,
+nejvýš 2 téhož typu“ pro shrnutí tím zaniká.
+
+**Čísla v textu analytika:** sazba převede mezeru (i pevnou) mezi dvěma číslicemi na úzkou nezlomitelnou
+mezeru, tedy na oddělovač tisíců. „1 000“ se proto vysází nerozdělené a kontrola čísel ho čte jako
+1000; špatně zapsané tisícové číslo (např. „14 798“ místo „14 799“) kontrola zachytí. Seznam čísel
+oddělený jen mezerou („2023 2024“) se tím sloučí v jedno číslo a kontrolu neprojde – je třeba psát
+čárku nebo spojku.
+
 Pravidla Bloku 4 zadaná spolu s rozhodnutím 12:
 
 - **Benchmarky struktury** (T13–T17): u FO/PO, právních forem, velikosti FO a PO (včetně
@@ -47,7 +60,7 @@ Pravidla Bloku 4 zadaná spolu s rozhodnutím 12:
   popisuje jako „srovnatelné“.
 - **Čeština**: názvy území v 6. pádě z ručně psané tabulky `reporty/cestina/lokativ.yaml`
   (14 krajů, 77 okresů, ČR); text nikdy nepoužije „v území <název>“.
-- **Shrnutí** (strana 2) tvoří 5 nejsilnějších zjištění, dlaždice zůstávají.
+- **Shrnutí** (strana 2): původně 5 nejsilnějších zjištění; od rozšíření rozhodnutí 12 ho píše analytik.
 
 **Upřesnění k rozhodnutí 1:** kontrola zakázaných slov povoluje jen sousloví **„aktivní podnik(y)“**.
 Je to oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10), ne označení
@@ -144,8 +157,8 @@ Pracuje jen se zveřejněnými čísly tabulek. Typy:
   v území i v ČR (relativní rozdíl malých podílů je nestabilní); posun pořadí okresů o jedno místo.
 - Každé zjištění nese čísla s odkazem na tabulku, řádek a sloupec. Vypočtená čísla (průměr let,
   index, relativní rozdíl) jsou v tabulce T19, takže jsou v JSON i XLSX a projdou kontrolou PDF.
-- **Shrnutí** v PDF: 5 nejsilnějších zjištění, nejvýš 2 téhož typu (jinak by u pilotu čtyři z pěti
-  bodů popisovaly tentýž jev – míru zániku PO).
+- **V PDF**: nejsilnější zjištění (nejvýš 5) u každé kapitoly, všechna v příloze „Zjištění detektoru“.
+  Shrnutí na straně 2 píše analytik (rozšíření rozhodnutí 12).
 
 ## Ochrana malých buněk – přesný postup
 
