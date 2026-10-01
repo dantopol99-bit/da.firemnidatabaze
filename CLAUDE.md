@@ -24,6 +24,13 @@ v [docs/report_metodika.md](docs/report_metodika.md).
 - Bez pokynu smíš jen založit nový soubor se zástupným textem (to dělá `report` automaticky)
   nebo vložit text, který analytik dodal, beze změny znění.
 
+## Zdroje dat
+- robots.txt a podmínky provozu poskytovatelů zdrojů se respektují vždy, bez výjimek, i pro jednorázové
+  měření nebo test. Než se ke zdroji přistupuje automaticky, zkontroluj robots.txt a podmínky.
+- Při zákazu nebo pochybnosti se zastav a napiš, co zdroj omezuje; nic neobcházej (jiný port, jiná
+  cesta, webové rozhraní místo zakázané služby apod.).
+- Firemní účetní údaje ze Sbírky listin (or.justice.cz) jen po dohodě s Ministerstvem spravedlnosti.
+
 ## Co do gitu nepatří
 - Surová data (soubory RES, stažené CSV a exporty z DataStatu, výpisy databáze). Patří mimo
   repozitář nebo do gitignorovaného `data/`.
