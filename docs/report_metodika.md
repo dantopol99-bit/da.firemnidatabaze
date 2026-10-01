@@ -158,6 +158,12 @@ Pracuje jen se zveřejněnými čísly tabulek. Typy:
 | `aktivita_oboru` | podíl se zjištěnou aktivitou v sekci proti všem oborům kraje (ČSÚ) | T01 |
 | `divergence_poradi` | pořadí podle počtu proti pořadí podle hustoty (kraj mezi 14 kraji, okresy v kraji) | T01, T04 |
 
+- **Stálé ID** (od 2. 10. 2026): `Z` + typ (OD, TR, UZ, AK, PO, MZ, EK) + `-` + 4 písmena z otisku toho,
+  co zjištění srovnává (typ, podtyp, tabulka/řádek/sloupec převzatých čísel; ne hodnoty ani pořadí), např.
+  `ZTR-IMTV`. Nové zjištění proto stávající nepřečísluje a odkazy v textu analytika zůstávají platné;
+  pořadí podle síly je v poli `poradi`. ID neobsahuje číslice, aby ho kontrola čísel v PDF nečetla jako
+  číslo. Test ověřuje, že každý odkaz v souboru výkladu existuje v `zjisteni.json`. Rok v popisu řádku
+  (např. míra zániku 2025) je součástí otisku, takže u nového snímku s jinými roky vzniknou nová ID.
 - **Síla** = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Obě míry
   jsou bezrozměrné a 0 znamená shodu, takže jdou řadit společně.
 - **Nehlásí se**: rozdíl pod 3 % relativně (v textu „srovnatelné“); položky struktury s podílem pod 5 %

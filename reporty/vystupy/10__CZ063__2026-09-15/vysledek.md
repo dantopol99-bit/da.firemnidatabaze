@@ -378,42 +378,42 @@ _Nezveřejněno: celé členění pod prahem._
 
 | Položka | Zjištění | Typ zjištění | Síla | Hodnota | Srovnání | Relativní rozdíl (%) | Poznámka |
 |---|---|---|---|---|---|---|---|
-| Okres Pelhřimov je mezi okresy kraje 5. podle počtu registrovaných subjektů oboru a 1. podle hustoty. | Z01 | divergence pořadí | 1 | 5 | 1 | – |  |
-| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 21,7 %, v Česku 14,3 % (relativně o 51,7 % vyšší). | Z02 | odchylka od ČR | 0,52 | 21,7 | 14,3 | 51,7 |  |
-| Okres Jihlava je mezi okresy kraje 3. podle počtu registrovaných subjektů oboru a 5. podle hustoty. | Z03 | divergence pořadí | 0,5 | 3 | 5 | – |  |
-| Velikost FO – „1–9 zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 13,2 %, v Česku 9,1 % (relativně o 45,1 % vyšší). | Z04 | odchylka od ČR | 0,45 | 13,2 | 9,1 | 45,1 |  |
-| Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,1 %, v Česku 13 % (relativně o 39,2 % vyšší). | Z05 | odchylka od ČR | 0,39 | 18,1 | 13 | 39,2 |  |
-| Sekce C tvořila v roce 2022 v Kraji Vysočina 37,46 % zaměstnanců (přepočtené počty), v Česku 27,15 % (relativně o 38 % vyšší). | Z06 | mzdy a zaměstnanost | 0,38 | 37,46 | 27,15 | 38 |  |
-| Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava. | Z07 | rozdíly uvnitř území | 0,35 | 2,02 | 1,5 | 34,7 |  |
-| Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Česku 2,27 (relativně o 33,9 % nižší). | Z08 | rozdíly uvnitř území | 0,34 | 1,5 | 2,27 | 33,9 |  |
-| Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,6 %, v Česku 26,1 % (relativně o 28,7 % nižší). | Z09 | odchylka od ČR | 0,29 | 18,6 | 26,1 | 28,7 |  |
-| Sebezaměstnaní tvořili v roce 2024 ve skupině Zpracovatelský průmysl (C) v Kraji Vysočina 5,9 % zaměstnaných, v Česku 8,2 % (relativně o 28 % nižší). | Z10 | ekonomika | 0,28 | 5,9 | 8,2 | 28 |  |
-| Velikost PO – „Neuvedeno“: podíl na PO oboru je v Kraji Vysočina 37 %, v Česku 50,9 % (relativně o 27,3 % nižší). | Z11 | odchylka od ČR | 0,27 | 37 | 50,9 | 27,3 |  |
-| Na 1 000 obyvatel připadá v okrese Havlíčkův Brod 1,66 registrovaných subjektů oboru, v Česku 2,27 (relativně o 26,9 % nižší). | Z12 | rozdíly uvnitř území | 0,27 | 1,66 | 2,27 | 26,9 |  |
-| Na 1 000 obyvatel připadá v Kraji Vysočina 1,7 registrovaných subjektů oboru, v Česku 2,27 (relativně o 25,1 % nižší). | Z13 | odchylka od ČR | 0,25 | 1,7 | 2,27 | 25,1 |  |
-| Skupina Zpracovatelský průmysl (C) tvořila v roce 2024 v Kraji Vysočina 27,08 % hrubé přidané hodnoty, v Česku 21,78 % (relativně o 24,3 % vyšší). | Z14 | ekonomika | 0,24 | 27,08 | 21,78 | 24,3 |  |
-| Na 1 000 obyvatel připadá v okrese Třebíč 1,72 registrovaných subjektů oboru, v Česku 2,27 (relativně o 24,2 % nižší). | Z15 | rozdíly uvnitř území | 0,24 | 1,72 | 2,27 | 24,2 |  |
-| Na 1 000 obyvatel připadá v okrese Žďár nad Sázavou 1,73 registrovaných subjektů oboru, v Česku 2,27 (relativně o 23,8 % nižší). | Z16 | rozdíly uvnitř území | 0,24 | 1,73 | 2,27 | 23,8 |  |
-| Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 21,5 %, v Česku 27,7 % (relativně o 22,4 % nižší). | Z17 | odchylka od ČR | 0,22 | 21,5 | 27,7 | 22,4 |  |
-| Věk subjektu – „6–10 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15 %, v Česku 19,2 % (relativně o 21,9 % nižší). | Z18 | odchylka od ČR | 0,22 | 15 | 19,2 | 21,9 |  |
-| Hrubá přidaná hodnota na zaměstnaného ve skupině Zpracovatelský průmysl (C) byla v roce 2024 v Kraji Vysočina 973 tis. Kč, v Česku 1 221 tis. Kč (relativně o 20,3 % nižší). | Z19 | ekonomika | 0,2 | 973 | 1 221 | 20,3 |  |
-| Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 18,8 % vyšší). | Z20 | rozdíly uvnitř území | 0,19 | 2,02 | 1,7 | 18,8 |  |
-| Věk subjektu – „21–30 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15,8 %, v Česku 13,4 % (relativně o 17,9 % vyšší). | Z21 | odchylka od ČR | 0,18 | 15,8 | 13,4 | 17,9 |  |
-| Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 11,5 %, v Česku 13,5 % (relativně o 14,8 % nižší). | Z22 | odchylka od ČR | 0,15 | 11,5 | 13,5 | 14,8 |  |
-| Velikost FO – „Neuvedeno“: podíl na FO oboru je v Kraji Vysočina 41,8 %, v Česku 48,6 % (relativně o 14 % nižší). | Z23 | odchylka od ČR | 0,14 | 41,8 | 48,6 | 14 |  |
-| Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 11,8 % nižší). | Z24 | rozdíly uvnitř území | 0,12 | 1,5 | 1,7 | 11,8 |  |
-| Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Česku 2,27 (relativně o 11 % nižší). | Z25 | rozdíly uvnitř území | 0,11 | 2,02 | 2,27 | 11 |  |
-| Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 76,5 %, v Česku 69,6 % (relativně o 9,9 % vyšší). | Z26 | odchylka od ČR | 0,1 | 76,5 | 69,6 | 9,9 |  |
-| Náhrady zaměstnancům tvořily v roce 2024 ve skupině Zpracovatelský průmysl (C) v regionu soudržnosti Jihovýchod (nejbližší publikovaná úroveň) 60,1 % hrubé přidané hodnoty, v Česku 54,7 % (relativně o 9,9 % vyšší). | Z27 | ekonomika | 0,1 | 60,1 | 54,7 | 9,9 |  |
-| Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 78,5 %, v Česku 72,3 % (relativně o 8,6 % vyšší). | Z28 | odchylka od ČR | 0,09 | 78,5 | 72,3 | 8,6 |  |
-| Kraj je mezi 14 kraji 12. podle počtu registrovaných subjektů oboru a 13. podle hustoty na 1 000 obyvatel. | Z29 | divergence pořadí | 0,08 | 12 | 13 | – |  |
-| Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 26,5 %, v Česku 28,4 % (relativně o 6,7 % nižší). | Z30 | odchylka od ČR | 0,07 | 26,5 | 28,4 | 6,7 |  |
-| Lokalizační koeficient oboru je v Kraji Vysočina 0,94 proti 1 za ČR (relativně o 6 % nižší). | Z31 | odchylka od ČR | 0,06 | 0,94 | 1 | 6 |  |
-| Průměrná hrubá měsíční mzda v sekci C byla v roce 2022 v Kraji Vysočina 37 229 Kč, v Česku 39 208 Kč (relativně o 5 % nižší). | Z32 | mzdy a zaměstnanost | 0,05 | 37 229 | 39 208 | 5 |  |
-| Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 24,8 %, v Česku 26 % (relativně o 4,6 % nižší). | Z33 | odchylka od ČR | 0,05 | 24,8 | 26 | 4,6 |  |
-| Průměrná mzda v sekci C dosahovala v roce 2022 v Kraji Vysočina 100,4 % průměrné mzdy všech odvětví kraje, v Česku 96,5 % (relativně o 4 % vyšší). | Z34 | mzdy a zaměstnanost | 0,04 | 100,4 | 96,5 | 4 |  |
-| Velikost FO – „bez zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 42,4 %, v Česku 41 % (relativně o 3,4 % vyšší). | Z35 | odchylka od ČR | 0,03 | 42,4 | 41 | 3,4 |  |
-| Objem hrubé přidané hodnoty skupiny Zpracovatelský průmysl (C) se mezi lety 2020 a 2024 změnil v Kraji Vysočina na 106 % (rok 2020 = 100), v Česku na 109,7 % (relativně o 3,4 % nižší). | Z36 | ekonomika | 0,03 | 106 | 109,7 | 3,4 |  |
-| V sekci C se počet zaměstnanců mezi lety 2018 a 2022 změnil v Kraji Vysočina z 70,2 tis. na 64,4 tis. (index 0,92), v Česku z 1 157,3 tis. na 1 095,2 tis. (index 0,95); index je relativně o 3,2 % nižší než v Česku. | Z37 | mzdy a zaměstnanost | 0,03 | 0,92 | 0,95 | 3,2 |  |
+| Okres Pelhřimov je mezi okresy kraje 5. podle počtu registrovaných subjektů oboru a 1. podle hustoty. | ZPO-DKFF | divergence pořadí | 1 | 5 | 1 | – |  |
+| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 21,7 %, v Česku 14,3 % (relativně o 51,7 % vyšší). | ZOD-JLNI | odchylka od ČR | 0,52 | 21,7 | 14,3 | 51,7 |  |
+| Okres Jihlava je mezi okresy kraje 3. podle počtu registrovaných subjektů oboru a 5. podle hustoty. | ZPO-MSIG | divergence pořadí | 0,5 | 3 | 5 | – |  |
+| Velikost FO – „1–9 zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 13,2 %, v Česku 9,1 % (relativně o 45,1 % vyšší). | ZOD-AMLW | odchylka od ČR | 0,45 | 13,2 | 9,1 | 45,1 |  |
+| Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,1 %, v Česku 13 % (relativně o 39,2 % vyšší). | ZOD-CAID | odchylka od ČR | 0,39 | 18,1 | 13 | 39,2 |  |
+| Sekce C tvořila v roce 2022 v Kraji Vysočina 37,46 % zaměstnanců (přepočtené počty), v Česku 27,15 % (relativně o 38 % vyšší). | ZMZ-JXKD | mzdy a zaměstnanost | 0,38 | 37,46 | 27,15 | 38 |  |
+| Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava. | ZUZ-XTWO | rozdíly uvnitř území | 0,35 | 2,02 | 1,5 | 34,7 |  |
+| Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Česku 2,27 (relativně o 33,9 % nižší). | ZUZ-BPIC | rozdíly uvnitř území | 0,34 | 1,5 | 2,27 | 33,9 |  |
+| Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,6 %, v Česku 26,1 % (relativně o 28,7 % nižší). | ZOD-SRRX | odchylka od ČR | 0,29 | 18,6 | 26,1 | 28,7 |  |
+| Sebezaměstnaní tvořili v roce 2024 ve skupině Zpracovatelský průmysl (C) v Kraji Vysočina 5,9 % zaměstnaných, v Česku 8,2 % (relativně o 28 % nižší). | ZEK-LLUJ | ekonomika | 0,28 | 5,9 | 8,2 | 28 |  |
+| Velikost PO – „Neuvedeno“: podíl na PO oboru je v Kraji Vysočina 37 %, v Česku 50,9 % (relativně o 27,3 % nižší). | ZOD-NDPG | odchylka od ČR | 0,27 | 37 | 50,9 | 27,3 |  |
+| Na 1 000 obyvatel připadá v okrese Havlíčkův Brod 1,66 registrovaných subjektů oboru, v Česku 2,27 (relativně o 26,9 % nižší). | ZUZ-BZDP | rozdíly uvnitř území | 0,27 | 1,66 | 2,27 | 26,9 |  |
+| Na 1 000 obyvatel připadá v Kraji Vysočina 1,7 registrovaných subjektů oboru, v Česku 2,27 (relativně o 25,1 % nižší). | ZOD-LPXY | odchylka od ČR | 0,25 | 1,7 | 2,27 | 25,1 |  |
+| Skupina Zpracovatelský průmysl (C) tvořila v roce 2024 v Kraji Vysočina 27,08 % hrubé přidané hodnoty, v Česku 21,78 % (relativně o 24,3 % vyšší). | ZEK-ZFLO | ekonomika | 0,24 | 27,08 | 21,78 | 24,3 |  |
+| Na 1 000 obyvatel připadá v okrese Třebíč 1,72 registrovaných subjektů oboru, v Česku 2,27 (relativně o 24,2 % nižší). | ZUZ-UOZM | rozdíly uvnitř území | 0,24 | 1,72 | 2,27 | 24,2 |  |
+| Na 1 000 obyvatel připadá v okrese Žďár nad Sázavou 1,73 registrovaných subjektů oboru, v Česku 2,27 (relativně o 23,8 % nižší). | ZUZ-QEWV | rozdíly uvnitř území | 0,24 | 1,73 | 2,27 | 23,8 |  |
+| Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 21,5 %, v Česku 27,7 % (relativně o 22,4 % nižší). | ZOD-SXHQ | odchylka od ČR | 0,22 | 21,5 | 27,7 | 22,4 |  |
+| Věk subjektu – „6–10 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15 %, v Česku 19,2 % (relativně o 21,9 % nižší). | ZOD-NRJV | odchylka od ČR | 0,22 | 15 | 19,2 | 21,9 |  |
+| Hrubá přidaná hodnota na zaměstnaného ve skupině Zpracovatelský průmysl (C) byla v roce 2024 v Kraji Vysočina 973 tis. Kč, v Česku 1 221 tis. Kč (relativně o 20,3 % nižší). | ZEK-JLYB | ekonomika | 0,2 | 973 | 1 221 | 20,3 |  |
+| Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 18,8 % vyšší). | ZUZ-LLUX | rozdíly uvnitř území | 0,19 | 2,02 | 1,7 | 18,8 |  |
+| Věk subjektu – „21–30 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15,8 %, v Česku 13,4 % (relativně o 17,9 % vyšší). | ZOD-LQZR | odchylka od ČR | 0,18 | 15,8 | 13,4 | 17,9 |  |
+| Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 11,5 %, v Česku 13,5 % (relativně o 14,8 % nižší). | ZOD-DKSF | odchylka od ČR | 0,15 | 11,5 | 13,5 | 14,8 |  |
+| Velikost FO – „Neuvedeno“: podíl na FO oboru je v Kraji Vysočina 41,8 %, v Česku 48,6 % (relativně o 14 % nižší). | ZOD-DHJV | odchylka od ČR | 0,14 | 41,8 | 48,6 | 14 |  |
+| Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 11,8 % nižší). | ZUZ-MASV | rozdíly uvnitř území | 0,12 | 1,5 | 1,7 | 11,8 |  |
+| Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Česku 2,27 (relativně o 11 % nižší). | ZUZ-UUNQ | rozdíly uvnitř území | 0,11 | 2,02 | 2,27 | 11 |  |
+| Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 76,5 %, v Česku 69,6 % (relativně o 9,9 % vyšší). | ZOD-DWBZ | odchylka od ČR | 0,1 | 76,5 | 69,6 | 9,9 |  |
+| Náhrady zaměstnancům tvořily v roce 2024 ve skupině Zpracovatelský průmysl (C) v regionu soudržnosti Jihovýchod (nejbližší publikovaná úroveň) 60,1 % hrubé přidané hodnoty, v Česku 54,7 % (relativně o 9,9 % vyšší). | ZEK-EETU | ekonomika | 0,1 | 60,1 | 54,7 | 9,9 |  |
+| Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 78,5 %, v Česku 72,3 % (relativně o 8,6 % vyšší). | ZOD-KHDN | odchylka od ČR | 0,09 | 78,5 | 72,3 | 8,6 |  |
+| Kraj je mezi 14 kraji 12. podle počtu registrovaných subjektů oboru a 13. podle hustoty na 1 000 obyvatel. | ZPO-QDHA | divergence pořadí | 0,08 | 12 | 13 | – |  |
+| Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 26,5 %, v Česku 28,4 % (relativně o 6,7 % nižší). | ZOD-TOQY | odchylka od ČR | 0,07 | 26,5 | 28,4 | 6,7 |  |
+| Lokalizační koeficient oboru je v Kraji Vysočina 0,94 proti 1 za ČR (relativně o 6 % nižší). | ZOD-MNMN | odchylka od ČR | 0,06 | 0,94 | 1 | 6 |  |
+| Průměrná hrubá měsíční mzda v sekci C byla v roce 2022 v Kraji Vysočina 37 229 Kč, v Česku 39 208 Kč (relativně o 5 % nižší). | ZMZ-KUOD | mzdy a zaměstnanost | 0,05 | 37 229 | 39 208 | 5 |  |
+| Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 24,8 %, v Česku 26 % (relativně o 4,6 % nižší). | ZOD-SMOT | odchylka od ČR | 0,05 | 24,8 | 26 | 4,6 |  |
+| Průměrná mzda v sekci C dosahovala v roce 2022 v Kraji Vysočina 100,4 % průměrné mzdy všech odvětví kraje, v Česku 96,5 % (relativně o 4 % vyšší). | ZMZ-TFKJ | mzdy a zaměstnanost | 0,04 | 100,4 | 96,5 | 4 |  |
+| Velikost FO – „bez zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 42,4 %, v Česku 41 % (relativně o 3,4 % vyšší). | ZOD-UCWP | odchylka od ČR | 0,03 | 42,4 | 41 | 3,4 |  |
+| Objem hrubé přidané hodnoty skupiny Zpracovatelský průmysl (C) se mezi lety 2020 a 2024 změnil v Kraji Vysočina na 106 % (rok 2020 = 100), v Česku na 109,7 % (relativně o 3,4 % nižší). | ZEK-XLXH | ekonomika | 0,03 | 106 | 109,7 | 3,4 |  |
+| V sekci C se počet zaměstnanců mezi lety 2018 a 2022 změnil v Kraji Vysočina z 70,2 tis. na 64,4 tis. (index 0,92), v Česku z 1 157,3 tis. na 1 095,2 tis. (index 0,95); index je relativně o 3,2 % nižší než v Česku. | ZMZ-BKMG | mzdy a zaměstnanost | 0,03 | 0,92 | 0,95 | 3,2 |  |
 
 > Síla = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Rozdíly pod 3 % relativně se nehlásí. Položky struktury s podílem pod 5 % v území i v ČR se nehlásí. Popisy jsou věcné, bez interpretace.

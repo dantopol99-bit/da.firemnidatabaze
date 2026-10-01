@@ -54,7 +54,7 @@
    ],
    "popis": "Okres Pelhřimov je mezi okresy kraje 5. podle počtu registrovaných subjektů oboru a 1. podle hustoty.",
    "poradi": 1,
-   "id": "Z01"
+   "id": "ZPO-DKFF"
   },
   {
    "typ": "odchylka_od_cr",
@@ -83,7 +83,7 @@
    ],
    "popis": "Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 21,7 %, v Česku 14,3 % (relativně o 51,7 % vyšší).",
    "poradi": 2,
-   "id": "Z02"
+   "id": "ZOD-JLNI"
   },
   {
    "typ": "divergence_poradi",
@@ -112,7 +112,7 @@
    ],
    "popis": "Okres Jihlava je mezi okresy kraje 3. podle počtu registrovaných subjektů oboru a 5. podle hustoty.",
    "poradi": 3,
-   "id": "Z03"
+   "id": "ZPO-MSIG"
   },
   {
    "typ": "odchylka_od_cr",
@@ -141,7 +141,7 @@
    ],
    "popis": "Velikost FO – „1–9 zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 13,2 %, v Česku 9,1 % (relativně o 45,1 % vyšší).",
    "poradi": 4,
-   "id": "Z04"
+   "id": "ZOD-AMLW"
   },
   {
    "typ": "odchylka_od_cr",
@@ -170,7 +170,7 @@
    ],
    "popis": "Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,1 %, v Česku 13 % (relativně o 39,2 % vyšší).",
    "poradi": 5,
-   "id": "Z05"
+   "id": "ZOD-CAID"
   },
   {
    "typ": "mzdy_zamestnanost",
@@ -199,7 +199,7 @@
    ],
    "popis": "Sekce C tvořila v roce 2022 v Kraji Vysočina 37,46 % zaměstnanců (přepočtené počty), v Česku 27,15 % (relativně o 38 % vyšší).",
    "poradi": 6,
-   "id": "Z06"
+   "id": "ZMZ-JXKD"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -228,7 +228,7 @@
    ],
    "popis": "Nejvyšší hustotu oboru mezi okresy kraje má okres Pelhřimov (2,02 na 1 000 obyvatel), nejnižší okres Jihlava (1,5); hustota v okrese Pelhřimov je relativně o 34,7 % vyšší než v okrese Jihlava.",
    "poradi": 7,
-   "id": "Z07"
+   "id": "ZUZ-XTWO"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -257,7 +257,7 @@
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Česku 2,27 (relativně o 33,9 % nižší).",
    "poradi": 8,
-   "id": "Z08"
+   "id": "ZUZ-BPIC"
   },
   {
    "typ": "odchylka_od_cr",
@@ -286,7 +286,7 @@
    ],
    "popis": "Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 18,6 %, v Česku 26,1 % (relativně o 28,7 % nižší).",
    "poradi": 9,
-   "id": "Z09"
+   "id": "ZOD-SRRX"
   },
   {
    "typ": "ekonomika",
@@ -315,7 +315,7 @@
    ],
    "popis": "Sebezaměstnaní tvořili v roce 2024 ve skupině Zpracovatelský průmysl (C) v Kraji Vysočina 5,9 % zaměstnaných, v Česku 8,2 % (relativně o 28 % nižší).",
    "poradi": 10,
-   "id": "Z10"
+   "id": "ZEK-LLUJ"
   },
   {
    "typ": "odchylka_od_cr",
@@ -344,7 +344,7 @@
    ],
    "popis": "Velikost PO – „Neuvedeno“: podíl na PO oboru je v Kraji Vysočina 37 %, v Česku 50,9 % (relativně o 27,3 % nižší).",
    "poradi": 11,
-   "id": "Z11"
+   "id": "ZOD-NDPG"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -373,7 +373,7 @@
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Havlíčkův Brod 1,66 registrovaných subjektů oboru, v Česku 2,27 (relativně o 26,9 % nižší).",
    "poradi": 12,
-   "id": "Z12"
+   "id": "ZUZ-BZDP"
   },
   {
    "typ": "odchylka_od_cr",
@@ -402,7 +402,7 @@
    ],
    "popis": "Na 1 000 obyvatel připadá v Kraji Vysočina 1,7 registrovaných subjektů oboru, v Česku 2,27 (relativně o 25,1 % nižší).",
    "poradi": 13,
-   "id": "Z13"
+   "id": "ZOD-LPXY"
   },
   {
    "typ": "ekonomika",
@@ -431,7 +431,7 @@
    ],
    "popis": "Skupina Zpracovatelský průmysl (C) tvořila v roce 2024 v Kraji Vysočina 27,08 % hrubé přidané hodnoty, v Česku 21,78 % (relativně o 24,3 % vyšší).",
    "poradi": 14,
-   "id": "Z14"
+   "id": "ZEK-ZFLO"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -460,7 +460,7 @@
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Třebíč 1,72 registrovaných subjektů oboru, v Česku 2,27 (relativně o 24,2 % nižší).",
    "poradi": 15,
-   "id": "Z15"
+   "id": "ZUZ-UOZM"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -489,7 +489,7 @@
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Žďár nad Sázavou 1,73 registrovaných subjektů oboru, v Česku 2,27 (relativně o 23,8 % nižší).",
    "poradi": 16,
-   "id": "Z16"
+   "id": "ZUZ-QEWV"
   },
   {
    "typ": "odchylka_od_cr",
@@ -518,7 +518,7 @@
    ],
    "popis": "Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 21,5 %, v Česku 27,7 % (relativně o 22,4 % nižší).",
    "poradi": 17,
-   "id": "Z17"
+   "id": "ZOD-SXHQ"
   },
   {
    "typ": "odchylka_od_cr",
@@ -547,7 +547,7 @@
    ],
    "popis": "Věk subjektu – „6–10 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15 %, v Česku 19,2 % (relativně o 21,9 % nižší).",
    "poradi": 18,
-   "id": "Z18"
+   "id": "ZOD-NRJV"
   },
   {
    "typ": "ekonomika",
@@ -576,7 +576,7 @@
    ],
    "popis": "Hrubá přidaná hodnota na zaměstnaného ve skupině Zpracovatelský průmysl (C) byla v roce 2024 v Kraji Vysočina 973 tis. Kč, v Česku 1 221 tis. Kč (relativně o 20,3 % nižší).",
    "poradi": 19,
-   "id": "Z19"
+   "id": "ZEK-JLYB"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -605,7 +605,7 @@
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 18,8 % vyšší).",
    "poradi": 20,
-   "id": "Z20"
+   "id": "ZUZ-LLUX"
   },
   {
    "typ": "odchylka_od_cr",
@@ -634,7 +634,7 @@
    ],
    "popis": "Věk subjektu – „21–30 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 15,8 %, v Česku 13,4 % (relativně o 17,9 % vyšší).",
    "poradi": 21,
-   "id": "Z21"
+   "id": "ZOD-LQZR"
   },
   {
    "typ": "odchylka_od_cr",
@@ -663,7 +663,7 @@
    ],
    "popis": "Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 11,5 %, v Česku 13,5 % (relativně o 14,8 % nižší).",
    "poradi": 22,
-   "id": "Z22"
+   "id": "ZOD-DKSF"
   },
   {
    "typ": "odchylka_od_cr",
@@ -692,7 +692,7 @@
    ],
    "popis": "Velikost FO – „Neuvedeno“: podíl na FO oboru je v Kraji Vysočina 41,8 %, v Česku 48,6 % (relativně o 14 % nižší).",
    "poradi": 23,
-   "id": "Z23"
+   "id": "ZOD-DHJV"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -721,7 +721,7 @@
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Jihlava 1,5 registrovaných subjektů oboru, v Kraji Vysočina 1,7 (relativně o 11,8 % nižší).",
    "poradi": 24,
-   "id": "Z24"
+   "id": "ZUZ-MASV"
   },
   {
    "typ": "rozdily_uvnitr_uzemi",
@@ -750,7 +750,7 @@
    ],
    "popis": "Na 1 000 obyvatel připadá v okrese Pelhřimov 2,02 registrovaných subjektů oboru, v Česku 2,27 (relativně o 11 % nižší).",
    "poradi": 25,
-   "id": "Z25"
+   "id": "ZUZ-UUNQ"
   },
   {
    "typ": "odchylka_od_cr",
@@ -779,7 +779,7 @@
    ],
    "popis": "Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 76,5 %, v Česku 69,6 % (relativně o 9,9 % vyšší).",
    "poradi": 26,
-   "id": "Z26"
+   "id": "ZOD-DWBZ"
   },
   {
    "typ": "ekonomika",
@@ -808,7 +808,7 @@
    ],
    "popis": "Náhrady zaměstnancům tvořily v roce 2024 ve skupině Zpracovatelský průmysl (C) v regionu soudržnosti Jihovýchod (nejbližší publikovaná úroveň) 60,1 % hrubé přidané hodnoty, v Česku 54,7 % (relativně o 9,9 % vyšší).",
    "poradi": 27,
-   "id": "Z27"
+   "id": "ZEK-EETU"
   },
   {
    "typ": "odchylka_od_cr",
@@ -837,7 +837,7 @@
    ],
    "popis": "Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 78,5 %, v Česku 72,3 % (relativně o 8,6 % vyšší).",
    "poradi": 28,
-   "id": "Z28"
+   "id": "ZOD-KHDN"
   },
   {
    "typ": "divergence_poradi",
@@ -866,7 +866,7 @@
    ],
    "popis": "Kraj je mezi 14 kraji 12. podle počtu registrovaných subjektů oboru a 13. podle hustoty na 1 000 obyvatel.",
    "poradi": 29,
-   "id": "Z29"
+   "id": "ZPO-QDHA"
   },
   {
    "typ": "odchylka_od_cr",
@@ -895,7 +895,7 @@
    ],
    "popis": "Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Kraji Vysočina 26,5 %, v Česku 28,4 % (relativně o 6,7 % nižší).",
    "poradi": 30,
-   "id": "Z30"
+   "id": "ZOD-TOQY"
   },
   {
    "typ": "odchylka_od_cr",
@@ -924,7 +924,7 @@
    ],
    "popis": "Lokalizační koeficient oboru je v Kraji Vysočina 0,94 proti 1 za ČR (relativně o 6 % nižší).",
    "poradi": 31,
-   "id": "Z31"
+   "id": "ZOD-MNMN"
   },
   {
    "typ": "mzdy_zamestnanost",
@@ -953,7 +953,7 @@
    ],
    "popis": "Průměrná hrubá měsíční mzda v sekci C byla v roce 2022 v Kraji Vysočina 37 229 Kč, v Česku 39 208 Kč (relativně o 5 % nižší).",
    "poradi": 32,
-   "id": "Z32"
+   "id": "ZMZ-KUOD"
   },
   {
    "typ": "odchylka_od_cr",
@@ -982,7 +982,7 @@
    ],
    "popis": "Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Kraji Vysočina 24,8 %, v Česku 26 % (relativně o 4,6 % nižší).",
    "poradi": 33,
-   "id": "Z33"
+   "id": "ZOD-SMOT"
   },
   {
    "typ": "mzdy_zamestnanost",
@@ -1011,7 +1011,7 @@
    ],
    "popis": "Průměrná mzda v sekci C dosahovala v roce 2022 v Kraji Vysočina 100,4 % průměrné mzdy všech odvětví kraje, v Česku 96,5 % (relativně o 4 % vyšší).",
    "poradi": 34,
-   "id": "Z34"
+   "id": "ZMZ-TFKJ"
   },
   {
    "typ": "odchylka_od_cr",
@@ -1040,7 +1040,7 @@
    ],
    "popis": "Velikost FO – „bez zaměstnanců“: podíl na FO oboru je v Kraji Vysočina 42,4 %, v Česku 41 % (relativně o 3,4 % vyšší).",
    "poradi": 35,
-   "id": "Z35"
+   "id": "ZOD-UCWP"
   },
   {
    "typ": "ekonomika",
@@ -1069,7 +1069,7 @@
    ],
    "popis": "Objem hrubé přidané hodnoty skupiny Zpracovatelský průmysl (C) se mezi lety 2020 a 2024 změnil v Kraji Vysočina na 106 % (rok 2020 = 100), v Česku na 109,7 % (relativně o 3,4 % nižší).",
    "poradi": 36,
-   "id": "Z36"
+   "id": "ZEK-XLXH"
   },
   {
    "typ": "mzdy_zamestnanost",
@@ -1126,7 +1126,7 @@
    ],
    "popis": "V sekci C se počet zaměstnanců mezi lety 2018 a 2022 změnil v Kraji Vysočina z 70,2 tis. na 64,4 tis. (index 0,92), v Česku z 1 157,3 tis. na 1 095,2 tis. (index 0,95); index je relativně o 3,2 % nižší než v Česku.",
    "poradi": 37,
-   "id": "Z37"
+   "id": "ZMZ-BKMG"
   }
  ]
 }

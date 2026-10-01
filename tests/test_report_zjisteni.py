@@ -75,7 +75,35 @@ class TestDetektor(unittest.TestCase):
         sily = [z["sila"] for z in self.zjisteni]
         self.assertEqual(sily, sorted(sily, reverse=True))
         self.assertTrue(all(s >= PRAH_ZJISTENI for s in sily))
-        self.assertEqual([z["id"] for z in self.zjisteni], [f"Z{i:02d}" for i in range(1, len(sily) + 1)])
+        self.assertEqual([z["poradi"] for z in self.zjisteni], list(range(1, len(sily) + 1)))
+
+    def test_stala_id(self):
+        """ID se neodvozuje z pořadí: je jedinečné, bez číslic a nezmění se, přibude-li silnější zjištění."""
+        import copy, re
+        from firemni_databaze.report_zjisteni import stale_id
+        ids = [z["id"] for z in self.zjisteni]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertTrue(all(re.fullmatch(r"Z[A-Z]{2}-[A-Z]{4}", i) for i in ids))
+        vysledek = copy.deepcopy(self.vysledek)
+        t02 = next(t for t in vysledek["tabulky"] if t["kod"] == "T02_srovnani")
+        uz = next(r for r in t02["radky"] if r["popis"].endswith("(zkoumané území)"))
+        uz["hodnoty"]["lq"] = 9.99                          # zesílí jedno zjištění → změní pořadí
+        nova = {z["id"]: z for z in detekuj(vysledek)}
+        for z in self.zjisteni:
+            self.assertIn(z["id"], nova)
+            self.assertEqual(nova[z["id"]]["podtyp"], z["podtyp"])
+        self.assertEqual(stale_id(self.zjisteni[0]), self.zjisteni[0]["id"])
+
+    def test_odkazy_ve_vykladu_existuji(self):
+        """Každý odkaz na zjištění v textu analytika existuje v zjisteni.json; žádné staré číselné ID."""
+        import re
+        soubor = KOREN / "reporty" / "vyklad" / "F__CZ051__2026-09-15.md"
+        text = re.sub(r"<!--.*?-->", "", soubor.read_text(encoding="utf-8"), flags=re.S)
+        ids = {z["id"] for z in json.loads((VZOR / "zjisteni.json").read_text(encoding="utf-8"))["zjisteni"]}
+        odkazy = re.findall(r"\bZ[A-Z]{2}-[A-Z]{4}\b", text)
+        self.assertTrue(odkazy)
+        self.assertEqual(set(odkazy) - ids, set())
+        self.assertEqual(re.findall(r"\bZ\d{2}\b", text), [])
 
     def test_zadny_rozdil_pod_3_procenta(self):
         for z in self.zjisteni:

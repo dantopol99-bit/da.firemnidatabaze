@@ -374,8 +374,28 @@ def _ekonomika(self) -> None:
 _Detektor.ekonomika = _ekonomika
 
 
+PREDPONY_ID = {"odchylka_od_cr": "OD", "zmena_trendu": "TR", "rozdily_uvnitr_uzemi": "UZ", "aktivita_oboru": "AK",
+               "divergence_poradi": "PO", "mzdy_zamestnanost": "MZ", "ekonomika": "EK"}
+
+
+def stale_id(z: dict) -> str:
+    """Stálé ID zjištění odvozené z jeho obsahu, ne z pořadí: typ + podtyp + co se srovnává (tabulka,
+    řádek, sloupec převzatých čísel; vypočtená čísla z T19 se nepočítají). Nové zjištění tak nepřečísluje
+    stávající a odkazy v textu analytika zůstanou platné. Tvar ZXX-XXXX jen z písmen, aby ID
+    neobsahovalo číslice (kontrola čísel v PDF by je četla jako čísla)."""
+    import hashlib
+    klic = "|".join([z["typ"], z["podtyp"]] + sorted(f"{c['tabulka']}/{c['radek']}/{c['sloupec']}"
+                                                      for c in z["cisla"] if c["tabulka"] != "T19_zjisteni"))
+    n = int(hashlib.sha256(klic.encode("utf-8")).hexdigest(), 16)
+    pismena = ""
+    for _ in range(4):
+        n, zbytek = divmod(n, 26)
+        pismena += chr(ord("A") + zbytek)
+    return f"Z{PREDPONY_ID[z['typ']]}-{pismena}"
+
+
 def detekuj(vysledek: dict) -> list[dict]:
-    """Zjištění seřazená podle síly (sestupně); id Z01… podle pořadí."""
+    """Zjištění seřazená podle síly (sestupně); id stálé podle obsahu (stale_id), pořadí v poli „poradi“."""
     d = _Detektor(vysledek)
     d.odchylka_od_cr()
     d.zmena_trendu()
@@ -387,7 +407,9 @@ def detekuj(vysledek: dict) -> list[dict]:
     z = sorted(d.zjisteni, key=lambda x: (-x["sila"], PORADI_TYPU.index(x["typ"]), x["podtyp"]))
     for i, x in enumerate(z, start=1):
         x["poradi"] = i
-        x["id"] = f"Z{i:02d}"
+        x["id"] = stale_id(x)
+    if len({x["id"] for x in z}) != len(z):
+        raise AssertionError("dvě zjištění mají stejné stálé ID")
     return z
 
 

@@ -518,7 +518,8 @@ def sablona_vykladu(vysledek: dict, id_reportu: str) -> str:
              "  * shrnutí: body oddělené prázdným řádkem pod nadpisem „## Shrnutí“,",
              "  * odstavce oddělené prázdným řádkem; odstavec začínající „Hypotéza:“ se vysází jako hypotéza,",
              "  * každé číslo musí být ve vysledek.json i v priloha.xlsx (kontrola čísel v PDF platí i sem),",
-             "  * odkazujte na zjištění (Z01 …) a tabulky; nepoužívejte slova „firmy“ ani „aktivní“,",
+             "  * odkazujte na zjištění stálým ID ze zjisteni.json (tvar ZXX-XXXX) a na tabulky;",
+             "    nepoužívejte slova „firmy“ ani „aktivní“,",
              f"  * dokud soubor obsahuje „{ZASTUPNY_TEXT}“, nelze report vysázet s --vyklad-schvalen.",
              "-->",
              ""]
