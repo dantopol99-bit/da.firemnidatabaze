@@ -740,8 +740,8 @@ ukazatele:
   - kod: MODEL_HPH
     nazev: Přidaná hodnota oboru v kraji podle velikostní třídy (mil. Kč, modelový odhad)
     typ: odhad
-    definice: Krajská přidaná hodnota skupiny (Eurostat, regionální účty) rozpočítaná mezi třídy podle počtu subjektů (RES, KATPO, podíl se zjištěnou aktivitou podle ČSÚ) × celostátní přidané hodnoty na podnik třídy (Eurostat SBS).
-    vzorec: "HPH_kraj × n(c)·AV(c)/ENT(c) / Σ n·AV/ENT; pásmo podle zařazení KATPO „Neuvedeno“"
+    definice: Krajská přidaná hodnota skupiny (Eurostat, regionální účty) přepočtená na úroveň statistiky podniků (MODEL_POMER_SBS) a rozpočítaná mezi třídy podle počtu subjektů (RES, KATPO, podíl se zjištěnou aktivitou podle ČSÚ) × celostátní přidané hodnoty na podnik třídy (Eurostat SBS).
+    vzorec: "HPH_kraj × MODEL_POMER_SBS × n(c)·AV(c)/ENT(c) / Σ n·AV/ENT; pásmo podle zařazení KATPO „Neuvedeno“"
     zdroj: modelový odhad (RES, ČSÚ RES02QT1, Eurostat nama_10r_3gva, sbs_sc_ovw)
     uroven: [CR, kraj]
     chybejici_hodnoty: Jen obor = celá sekce, která je samostatnou skupinou A*10; třídy pod prahem 10 subjektů sloučeny.
@@ -767,7 +767,7 @@ ukazatele:
     zdroj: modelový odhad
     uroven: [CR, kraj]
     chybejici_hodnoty: Jako MODEL_HPH.
-    vyklad: Nadhodnocený – přidaná hodnota národních účtů je vyšší než v SBS (viz MODEL_KONTROLA).
+    vyklad: Vychází z přidané hodnoty přepočtené na úroveň SBS; kontrola na ČR viz MODEL_KONTROLA.
     stav: částečně
 
   - kod: MODEL_KONCENTRACE
@@ -834,4 +834,26 @@ ukazatele:
     uroven: [CR]
     chybejici_hodnoty: –
     vyklad: Fakt za ČR, ne odhad za kraj; hrubý provozní přebytek zahrnuje i odměnu podnikatelů bez zaměstnanců.
+    stav: naplněno
+
+  - kod: MODEL_POMER_SBS
+    nazev: Poměr přidané hodnoty SBS a národních účtů za ČR (týž obor a rok)
+    typ: odhad
+    definice: Přidaná hodnota sekce za ČR ze statistiky podniků (SBS, v Kč) / přidaná hodnota téže sekce za ČR z národních (regionálních) účtů.
+    vzorec: "AV_MEUR(ČR) × kurz / HPH_CP(ČR)"
+    zdroj: odvozeno z Eurostatu (sbs_sc_ovw, ert_bil_eur_a, nama_10r_3gva)
+    uroven: [CR]
+    chybejici_hodnoty: Jen jsou-li publikovány obě hodnoty pro týž rok.
+    vyklad: Měřítko přepočtu krajské přidané hodnoty pro model (rozhodnutí 14); předpokládá stejný podíl neregistrované ekonomiky v kraji jako v ČR.
+    stav: naplněno
+
+  - kod: SBS_HPH
+    nazev: Přidaná hodnota sekce za ČR podle statistiky podniků (mil. Kč)
+    typ: kontext
+    definice: Přidaná hodnota v nákladech na výrobní činitele (SBS), mil. EUR převedené ročním průměrným kurzem.
+    vzorec: "AV_MEUR × kurz"
+    zdroj: Eurostat, sbs_sc_ovw, ert_bil_eur_a
+    uroven: [CR]
+    chybejici_hodnoty: –
+    vyklad: Nižší než přidaná hodnota národních účtů (bez neregistrované ekonomiky, jiné ocenění).
     stav: naplněno

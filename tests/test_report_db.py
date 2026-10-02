@@ -318,7 +318,13 @@ class TestReport(unittest.TestCase):
         t25, t27 = tabulka(vysledek, "T25_model_koncentrace"), tabulka(vysledek, "T27_model_kontrola")
         self.assertTrue(t24["zverejneno"])
         rok = t24["rok"]
-        hph_kraj = next(r for r in t22["radky"] if r["uzemi"] == "CZ051" and r["rok"] == rok)["hodnoty"]["hph"]
+        t28 = tabulka(vysledek, "T28_model_prepocet")
+        h28 = {r["ukazatele"]["hodnota"]: r["hodnoty"]["hodnota"] for r in t28["radky"] if r["popis"].find("Liberecký") >= 0}
+        hph_na = next(r for r in t22["radky"] if r["uzemi"] == "CZ051" and r["rok"] == rok)["hodnoty"]["hph"]
+        self.assertEqual(h28["EKON_HPH"], hph_na)                      # fakt z národních účtů v tabulce přepočtu
+        pomer = next(r for r in t28["radky"] if r["ukazatele"]["hodnota"] == "MODEL_POMER_SBS")["hodnoty"]["hodnota"]
+        self.assertAlmostEqual(h28["MODEL_HPH"], hph_na * pomer, delta=2)
+        hph_kraj = h28["MODEL_HPH"]                                     # vstup modelu na úrovni SBS
         celkem = next(r for r in t24["radky"] if r["typ"] == "celkem")
         self.assertEqual(celkem["hodnoty"]["hph_lo"], hph_kraj)
         tridy = [r for r in t24["radky"] if r["typ"] == "polozka"]
@@ -332,6 +338,13 @@ class TestReport(unittest.TestCase):
         for r in t27["radky"]:
             if r["popis"].startswith("Podíl třídy"):
                 self.assertEqual(r["hodnoty"]["odchylka"], 0, r["popis"])
+        # rozhodnutí 14, varianta 1: obrat SBS za ČR v pásmu modelu a obě meze do ±1 %
+        obrat = next(r for r in t27["radky"] if r["popis"].startswith("Obrat"))["hodnoty"]
+        self.assertTrue(obrat["model_lo"] <= obrat["sbs"] <= obrat["model_hi"])
+        self.assertLessEqual(abs(obrat["model_lo"] / obrat["sbs"] - 1), 0.01)
+        self.assertLessEqual(abs(obrat["model_hi"] / obrat["sbs"] - 1), 0.01)
+        self.assertTrue(t27["kriterium_splneno"])
+        self.assertEqual(round(obrat["sbs"]), 1299398)
 
     def test_modelove_odhady_jen_pro_celou_sekci(self):
         v62, _, _ = self.vystupy["62_JES"]

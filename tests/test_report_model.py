@@ -44,6 +44,17 @@ class TestModel(unittest.TestCase):
             self.assertAlmostEqual(r["hph"][t], SBS[("AV_MEUR", t)], places=6)
             self.assertAlmostEqual(r["obrat"][t], SBS[("NETTUR_MEUR", t)], places=6)
 
+    def test_prepocet_je_jen_meritko(self):
+        """Přepočet přidané hodnoty na úroveň SBS (rozhodnutí 14) nemění podíly ani koncentraci."""
+        pocty = {"0-9": 500, "10-19": 30, "20-49": 15, "50-249": 4, "GE250": 1}
+        a = m.rozpocet(pocty, 0.6, 12598.0, SBS)
+        b = m.rozpocet(pocty, 0.6, 12598.0 * 0.7345, SBS)
+        for k in ("hph_podil_10", "hph_podil_50", "obrat_podil_10", "obrat_podil_50"):
+            self.assertAlmostEqual(a[k], b[k], places=9)
+        for t in m.TRIDY:
+            self.assertAlmostEqual(b["hph"][t] / a["hph"][t], 0.7345, places=9)
+        self.assertAlmostEqual(b["obrat_celkem"] / a["obrat_celkem"], 0.7345, places=9)
+
     def test_slucovani_trid_pod_prahem(self):
         sk = m.skupiny_publikace({"0-9": 500, "10-19": 30, "20-49": 15, "50-249": 12, "GE250": 3})
         self.assertEqual([t for _, t in sk], [("0-9",), ("10-19",), ("20-49",), ("50-249", "GE250")])

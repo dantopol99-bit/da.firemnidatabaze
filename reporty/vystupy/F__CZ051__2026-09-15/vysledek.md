@@ -260,20 +260,34 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 > Nejbližší publikovaná úroveň: region soudržnosti (NUTS 2) – náhrady zaměstnancům Eurostat za kraje nepublikuje. Region zahrnuje více krajů; srovnávací kraj ze stejného regionu má stejné hodnoty.
 > Podíl náhrad zaměstnancům na HPH ukazuje, jaká část přidané hodnoty připadá na mzdy a pojistné zaměstnanců; zbytek tvoří hlavně hrubý provozní přebytek a smíšený důchod (příjem podnikatelů).
 
+## T28_model_prepocet: Přepočet přidané hodnoty na úroveň statistiky podniků (vstup modelu) – Liberecký kraj, 2024
+
+| Položka | Hodnota | Poznámka |
+|---|---|---|
+| Přidaná hodnota oboru – Liberecký kraj, národní účty (fakt, Eurostat, mil. Kč) | 12 598 |  |
+| Přidaná hodnota oboru – Česko, národní účty (fakt, Eurostat, mil. Kč) | 409 647 |  |
+| Přidaná hodnota oboru – Česko, statistika podniků SBS (fakt, Eurostat, mil. Kč) | 300 901 |  |
+| Poměr SBS / národní účty za ČR | 0,73 |  |
+| Přidaná hodnota oboru – Liberecký kraj, přepočtená na úroveň SBS (vstup modelu, mil. Kč) | 9 254 | modelový odhad |
+
+> Přidaná hodnota národních účtů (regionální účty, kapitola Ekonomický profil) zahrnuje i neregistrovanou ekonomiku a oceňuje jinak než statistika podniků (SBS), z níž model bere poměry obratu. Před výpočtem obratu se proto krajská přidaná hodnota přepočte poměrem SBS / národní účty za ČR pro týž obor a rok (rozhodnutí 14).
+> Předpoklad: podíl neregistrované ekonomiky a rozdílů v ocenění je v kraji stejný jako v ČR.
+> Přidaná hodnota SBS převedena z mil. EUR ročním průměrným kurzem 25,12 Kč/EUR (Eurostat ert_bil_eur_a). Rok 2024.
+
 ## T24_model_velikost: Modelový odhad: přidaná hodnota a obrat oboru podle velikosti subjektů – Liberecký kraj, 2024
 
-| Položka | Přidaná hodnota – dolní mez (mil. Kč) | Přidaná hodnota – horní mez (mil. Kč) | Podíl na přidané hodnotě – dolní (%) | Podíl na přidané hodnotě – horní (%) | Obrat – dolní mez (mil. Kč) | Obrat – horní mez (mil. Kč) | Poznámka |
+| Položka | Přidaná hodnota na úrovni SBS – dolní (mil. Kč) | Přidaná hodnota na úrovni SBS – horní (mil. Kč) | Podíl na přidané hodnotě – dolní (%) | Podíl na přidané hodnotě – horní (%) | Obrat – dolní mez (mil. Kč) | Obrat – horní mez (mil. Kč) | Poznámka |
 |---|---|---|---|---|---|---|---|
-| 0–9 osob | 6 124 | 7 996 | 48,6 | 63,5 | 25 342 | 33 088 | modelový odhad |
-| 10–19 osob | 1 061 | 1 493 | 8,4 | 11,9 | 4 615 | 6 497 | modelový odhad |
-| 20–49 osob | 1 434 | 2 017 | 11,4 | 16 | 5 961 | 8 386 | modelový odhad |
-| 50 a více osob | 2 108 | 2 965 | 16,7 | 23,5 | 9 543 | 13 419 | modelový odhad |
-| **celkem (Liberecký kraj)** | 12 598 | 12 598 | 100 | 100 | 53 207 | 53 644 | přidaná hodnota celkem = fakt (Eurostat); obrat = modelový odhad |
+| 0–9 osob | 4 498 | 5 873 | 48,6 | 63,5 | 18 615 | 24 304 | modelový odhad |
+| 10–19 osob | 779 | 1 097 | 8,4 | 11,9 | 3 390 | 4 773 | modelový odhad |
+| 20–49 osob | 1 053 | 1 481 | 11,4 | 16 | 4 379 | 6 160 | modelový odhad |
+| 50 a více osob | 1 549 | 2 178 | 16,7 | 23,5 | 7 009 | 9 856 | modelový odhad |
+| **celkem (Liberecký kraj)** | 9 254 | 9 254 | 100 | 100 | 39 083 | 39 403 | přidaná hodnota na úrovni SBS (vstup modelu, tab. přepočtu); obrat = modelový odhad |
 
-> Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.
+> Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je přepočtena na úroveň statistiky podniků (SBS) a rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.
 > Rok: ekonomika (regionální účty a SBS) 2024; struktura subjektů z RES ke dni snímku. Spojení různých let je součástí modelu.
 > KATPO udává počet zaměstnanců, třídy SBS počet zaměstnaných osob včetně majitelů – na hranicích tříd se mohou lišit. Třídy pod prahem 10 subjektů jsou sloučeny s vyšší třídou.
-> Obrat vychází z přidané hodnoty národních účtů, která je vyšší než přidaná hodnota SBS (zahrnuje i neregistrovanou ekonomiku a jiné ocenění); model proto obrat nadhodnocuje – viz kontrola konzistence.
+> Přidaná hodnota v této tabulce je na úrovni SBS: krajská přidaná hodnota z národních účtů (12598 mil. Kč, fakt) × poměr SBS / národní účty za ČR. Předpoklad: podíl neregistrované ekonomiky a rozdílů v ocenění je v kraji stejný jako v ČR. Podíly tříd se přepočtem nemění (jde jen o měřítko).
 
 ## T25_model_koncentrace: Modelový odhad: koncentrace – podíl subjektů s 10+ a 50+ zaměstnanými osobami – Liberecký kraj, 2024
 
@@ -282,7 +296,7 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 | Subjekty s 10 a více osob | 36,5 | 51,4 | 37,8 | 52,8 | modelový odhad |
 | Subjekty s 50 a více osob | 16,7 | 23,5 | 17,9 | 25 | modelový odhad |
 
-> Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.
+> Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je přepočtena na úroveň statistiky podniků (SBS) a rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.
 > Rok: ekonomika (regionální účty a SBS) 2024; struktura subjektů z RES ke dni snímku. Spojení různých let je součástí modelu.
 > Koncentrace podle velikostních tříd, ne podle jednotlivých subjektů; podíl největších firem by vyžadoval účetní závěrky (Sbírka listin).
 
@@ -310,8 +324,8 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 | Podíl třídy 20–49 osob na přidané hodnotě (%) | 12,3 | 16,2 | 14,1 | 0 | fakt SBS uvnitř pásma |
 | Podíl třídy 50–249 osob na přidané hodnotě (%) | 17,7 | 23,3 | 18,7 | 0 | fakt SBS uvnitř pásma |
 | Podíl třídy 250 a více osob na přidané hodnotě (%) | 14,5 | 19,1 | 15,8 | 0 | fakt SBS uvnitř pásma |
-| Obrat sekce celkem (mil. Kč) | 1 762 447 | 1 783 878 | 1 299 398 | 35,6 | model nadhodnocuje (% od bližší meze) |
-| Přidaná hodnota sekce celkem (mil. Kč) | 409 647 | 409 647 | 300 901 | 36,1 | vstup modelu (národní účty) proti SBS, rozdíl v %; příčina nadhodnocení obratu |
+| Obrat sekce celkem (mil. Kč) | 1 294 582 | 1 310 324 | 1 299 398 | 0,84 | kritérium splněno: SBS v pásmu, obě meze do ±1 % (větší odchylka v %) |
+| Přidaná hodnota sekce celkem, vstup modelu po přepočtu (mil. Kč) | 300 901 | 300 901 | 300 901 | 0 | přepočet na úroveň SBS (odchylka v %) |
 
 > Model se stejnými vstupy, ale za celou ČR (RES ČR, podíl se zjištěnou aktivitou za ČR, přidaná hodnota sekce v ČR z regionálních účtů), porovnaný s celostátními hodnotami SBS. Odchylky ukazují, jak přesný model je i tam, kde fakt známe.
 > Rok: ekonomika (regionální účty a SBS) 2024; struktura subjektů z RES ke dni snímku. Spojení různých let je součástí modelu.

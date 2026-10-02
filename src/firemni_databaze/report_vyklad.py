@@ -342,17 +342,25 @@ def ekonomika(v: Vstup, L: dict) -> list[dict]:
 
 def modelove_odhady(v: Vstup, L: dict) -> list[dict]:
     t24, t25, t27 = v.t("T24_model_velikost"), v.t("T25_model_koncentrace"), v.t("T27_model_kontrola")
+    t28 = v.t("T28_model_prepocet")
     if not t24:
         duvod = (v.tab.get("T24_model_velikost") or {}).get("duvod") or "vstupy nejsou k dispozici"
         return [_blok("vidět", f"Modelové odhady pro tento obor nelze sestavit: {duvod} ({L['T24']}).")]
     rok = t24.get("rok")
     kraj = v.uzemi["kraj"] or "CZ"
     v_kraji = lokativ(kraj)
-    casti = [f"Modelový odhad (ne statistika), rok {rok}:"]
+    casti = [f"Modelový odhad (ne statistika), rok {rok}."]
+    if t28:
+        h = {}
+        for r in t28["radky"]:                      # první řádek ukazatele = zkoumané území (ČR následuje)
+            h.setdefault(r["ukazatele"]["hodnota"], r["hodnoty"]["hodnota"])
+        casti.append(f"Model nepracuje s přidanou hodnotou národních účtů ({cz(h['EKON_HPH'])} mil. Kč, fakt z kapitoly "
+                     f"výše), ale s hodnotou přepočtenou na úroveň statistiky podniků poměrem {cz(h['MODEL_POMER_SBS'])} "
+                     f"za ČR: {cz(h['MODEL_HPH'])} mil. Kč ({L['T28']}).")
     cel = next((r for r in t24["radky"] if r["typ"] == "celkem"), None)
     if cel:
         h = cel["hodnoty"]
-        casti.append(f"obrat oboru {v_kraji} vychází odhadem na {cz(h['obrat_lo'])}–{cz(h['obrat_hi'])} mil. Kč "
+        casti.append(f"Obrat oboru {v_kraji} vychází odhadem na {cz(h['obrat_lo'])}–{cz(h['obrat_hi'])} mil. Kč "
                      f"({L['T24']}).")
     if t25:
         for r in t25["radky"]:
@@ -365,9 +373,10 @@ def modelove_odhady(v: Vstup, L: dict) -> list[dict]:
         obrat = next((r for r in t27["radky"] if r["popis"].startswith("Obrat")), None)
         veta = (f"Kontrola na celé ČR: celostátní podíl tříd na přidané hodnotě (SBS) leží uvnitř pásma modelu "
                 f"u {cz(uvnitr)} z {cz(len(tridy))} tříd")
-        if obrat and obrat["hodnoty"]["odchylka"]:
-            veta += (f"; obrat model nadhodnocuje o {cz(obrat['hodnoty']['odchylka'])} %, protože přidaná hodnota "
-                     f"národních účtů je vyšší než v SBS")
+        if obrat:
+            o = obrat["hodnoty"]
+            veta += (f"; celostátní obrat SBS ({cz(o['sbs'])} mil. Kč) model vrací v pásmu {cz(o['model_lo'])}–"
+                     f"{cz(o['model_hi'])} mil. Kč, s odchylkou mezí nejvýš {cz(o['odchylka'])} %")
         casti.append(veta + f" ({L['T27']}).")
     return [_blok("vidět", " ".join(casti))]
 

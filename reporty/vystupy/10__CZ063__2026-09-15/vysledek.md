@@ -259,6 +259,10 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 > Nejbližší publikovaná úroveň: region soudržnosti (NUTS 2) – náhrady zaměstnancům Eurostat za kraje nepublikuje. Region zahrnuje více krajů; srovnávací kraj ze stejného regionu má stejné hodnoty.
 > Podíl náhrad zaměstnancům na HPH ukazuje, jaká část přidané hodnoty připadá na mzdy a pojistné zaměstnanců; zbytek tvoří hlavně hrubý provozní přebytek a smíšený důchod (příjem podnikatelů).
 
+## T28_model_prepocet: Přepočet přidané hodnoty na úroveň statistiky podniků (vstup modelu)
+
+_Nezveřejněno: model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně._
+
 ## T24_model_velikost: Modelový odhad: přidaná hodnota a obrat oboru podle velikosti subjektů
 
 _Nezveřejněno: model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně._
