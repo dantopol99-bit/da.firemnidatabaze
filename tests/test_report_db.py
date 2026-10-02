@@ -311,6 +311,39 @@ class TestReport(unittest.TestCase):
         CONN.rollback()
         self.assertFalse(tabulka(vysledek, "T22_ekonomika")["zverejneno"])
 
+    def test_modelove_odhady(self):
+        """Součet tříd = krajský fakt, pásmo spodní ≤ horní, kontrola na ČR: fakt SBS uvnitř pásma u podílů."""
+        vysledek, _, _ = self.vystupy["F_LBK"]
+        t22, t24 = tabulka(vysledek, "T22_ekonomika"), tabulka(vysledek, "T24_model_velikost")
+        t25, t27 = tabulka(vysledek, "T25_model_koncentrace"), tabulka(vysledek, "T27_model_kontrola")
+        self.assertTrue(t24["zverejneno"])
+        rok = t24["rok"]
+        hph_kraj = next(r for r in t22["radky"] if r["uzemi"] == "CZ051" and r["rok"] == rok)["hodnoty"]["hph"]
+        celkem = next(r for r in t24["radky"] if r["typ"] == "celkem")
+        self.assertEqual(celkem["hodnoty"]["hph_lo"], hph_kraj)
+        tridy = [r for r in t24["radky"] if r["typ"] == "polozka"]
+        # každá varianta dává součet tříd = celek, tedy Σ dolních mezí ≤ celek ≤ Σ horních mezí (± zaokrouhlení)
+        self.assertLessEqual(sum(r["hodnoty"]["hph_lo"] for r in tridy), hph_kraj + len(tridy))
+        self.assertGreaterEqual(sum(r["hodnoty"]["hph_hi"] for r in tridy), hph_kraj - len(tridy))
+        for r in tridy + t25["radky"]:
+            for k in ("hph", "obrat"):
+                self.assertLessEqual(r["hodnoty"][f"{k}_lo"], r["hodnoty"][f"{k}_hi"])
+            self.assertEqual(r["poznamka"], "modelový odhad")
+        for r in t27["radky"]:
+            if r["popis"].startswith("Podíl třídy"):
+                self.assertEqual(r["hodnoty"]["odchylka"], 0, r["popis"])
+
+    def test_modelove_odhady_jen_pro_celou_sekci(self):
+        v62, _, _ = self.vystupy["62_JES"]
+        self.assertFalse(tabulka(v62, "T24_model_velikost")["zverejneno"])
+        self.assertIn("celá sekce", tabulka(v62, "T24_model_velikost")["duvod"])
+
+    def test_odhady_nevstupuji_do_detektoru(self):
+        vysledek, _, _ = self.vystupy["F_LBK"]
+        for z in vysledek["zjisteni"]:
+            for c in z["cisla"]:
+                self.assertNotIn(c["tabulka"][:3], ("T24", "T25", "T26", "T27"), z["id"])
+
     def test_zadny_vystup_nema_v_uzemi_nazev(self):
         from firemni_databaze.report_cestina import tabulka as lokativy
         nazvy = [z["nazev"] for z in lokativy().values()]

@@ -529,3 +529,42 @@ def radky_eurostat(sada: str, obsah: bytes) -> list[dict]:
             "aktualizace": j.get("updated"),
         })
     return radky
+
+
+# Statistika podniků podle velikostních tříd (SBS) a kurz – vstupy modelových odhadů (Blok 8)
+SBS_UKAZATELE = ("ENT_NR", "EMP_NR", "AV_MEUR", "NETTUR_MEUR", "GOS_MEUR")
+
+
+def url_sbs() -> str:
+    return EUROSTAT_DATA + "sbs_sc_ovw?" + urllib.parse.urlencode(
+        [("geo", "CZ")] + [("indic_sbs", u) for u in SBS_UKAZATELE] + [("lang", "EN")])
+
+
+def url_kurz() -> str:
+    return EUROSTAT_DATA + "ert_bil_eur_a?" + urllib.parse.urlencode(
+        {"currency": "CZK", "statinfo": "AVG", "sinceTimePeriod": "2015", "lang": "EN"})
+
+
+def _jsonstat(obsah: bytes):
+    import itertools
+    j = json.loads(obsah)
+    ids = j["id"]
+    kategorie = [[k for k, _ in sorted(j["dimension"][d]["category"]["index"].items(), key=lambda x: x[1])]
+                 for d in ids]
+    hodnoty, priznaky = j["value"], j.get("status", {})
+    for i, kombinace in enumerate(itertools.product(*kategorie)):
+        v = hodnoty.get(str(i)) if isinstance(hodnoty, dict) else hodnoty[i]
+        if v is not None:
+            yield dict(zip(ids, kombinace)), float(v), (priznaky.get(str(i), "") if isinstance(priznaky, dict) else ""), j
+
+
+def radky_sbs(obsah: bytes) -> list[dict]:
+    return [{"sada": "sbs_sc_ovw", "nace": d["nace_r2"], "velikost": d["size_emp"], "rok": int(d["time"]),
+             "ukazatel": d["indic_sbs"], "hodnota": v, "priznak": s or "", "aktualizace": j.get("updated")}
+            for d, v, s, j in _jsonstat(obsah)]
+
+
+def radky_kurz(obsah: bytes) -> list[dict]:
+    return [{"sada": "ert_bil_eur_a", "nace": "-", "velikost": "-", "rok": int(d["time"]),
+             "ukazatel": "KURZ_CZK_EUR", "hodnota": v, "priznak": s or "", "aktualizace": j.get("updated")}
+            for d, v, s, j in _jsonstat(obsah)]

@@ -733,3 +733,105 @@ ukazatele:
     chybejici_hodnoty: Jen region soudržnosti a ČR.
     vyklad: Nízký podíl = větší část přidané hodnoty připadá na provozní přebytek a příjmy podnikatelů.
     stav: částečně
+
+  # --- Blok 8: modelové odhady (NE fakta; nevstupují do detektoru zjištění) -------------------
+  # typ odhad = modelový odhad z kombinace zdrojů; zveřejňuje se jen jako pásmo s označením
+
+  - kod: MODEL_HPH
+    nazev: Přidaná hodnota oboru v kraji podle velikostní třídy (mil. Kč, modelový odhad)
+    typ: odhad
+    definice: Krajská přidaná hodnota skupiny (Eurostat, regionální účty) rozpočítaná mezi třídy podle počtu subjektů (RES, KATPO, podíl se zjištěnou aktivitou podle ČSÚ) × celostátní přidané hodnoty na podnik třídy (Eurostat SBS).
+    vzorec: "HPH_kraj × n(c)·AV(c)/ENT(c) / Σ n·AV/ENT; pásmo podle zařazení KATPO „Neuvedeno“"
+    zdroj: modelový odhad (RES, ČSÚ RES02QT1, Eurostat nama_10r_3gva, sbs_sc_ovw)
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jen obor = celá sekce, která je samostatnou skupinou A*10; třídy pod prahem 10 subjektů sloučeny.
+    vyklad: Modelový odhad, ne statistika. Součet tříd = krajský fakt.
+    stav: částečně
+
+  - kod: MODEL_HPH_PODIL
+    nazev: Podíl velikostní třídy na přidané hodnotě oboru v kraji (%, modelový odhad)
+    typ: odhad
+    definice: MODEL_HPH třídy / přidaná hodnota skupiny v kraji × 100.
+    vzorec: "100 × MODEL_HPH / EKON_HPH"
+    zdroj: modelový odhad
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jako MODEL_HPH.
+    vyklad: Modelový odhad.
+    stav: částečně
+
+  - kod: MODEL_OBRAT
+    nazev: Obrat oboru v kraji (mil. Kč, modelový odhad)
+    typ: odhad
+    definice: MODEL_HPH třídy × celostátní poměr čistého obratu k přidané hodnotě v třídě (SBS).
+    vzorec: "Σ MODEL_HPH(c) × NETTUR(c)/AV(c)"
+    zdroj: modelový odhad
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Jako MODEL_HPH.
+    vyklad: Nadhodnocený – přidaná hodnota národních účtů je vyšší než v SBS (viz MODEL_KONTROLA).
+    stav: částečně
+
+  - kod: MODEL_KONCENTRACE
+    nazev: Podíl subjektů s 10+ a 50+ zaměstnanými osobami na přidané hodnotě a obratu (%, modelový odhad)
+    typ: odhad
+    definice: Součet MODEL_HPH, resp. MODEL_OBRAT tříd nad hranicí / celek × 100.
+    vzorec: "100 × Σ_{c ≥ hranice} MODEL_HPH(c) / Σ MODEL_HPH"
+    zdroj: modelový odhad
+    uroven: [CR, kraj]
+    chybejici_hodnoty: Nezveřejní se, pokud by hranice rozdělila sloučenou třídu pod prahem.
+    vyklad: Koncentrace podle tříd, ne podle jednotlivých subjektů.
+    stav: částečně
+
+  - kod: MODEL_KONTROLA
+    nazev: Kontrola konzistence modelu na celé ČR
+    typ: odhad
+    definice: Model se stejnými vstupy za celou ČR proti hodnotám SBS; odchylka v p. b. (podíly) nebo % (obrat).
+    vzorec: report.tabulky_model
+    zdroj: modelový odhad a Eurostat SBS
+    uroven: [CR]
+    chybejici_hodnoty: –
+    vyklad: Ukazuje přesnost modelu tam, kde fakt známe.
+    stav: naplněno
+
+  - kod: SBS_PODNIKY
+    nazev: Počet podniků v ČR podle velikostní třídy (Eurostat SBS)
+    typ: kontext
+    definice: Aktivní podniky v sekci za ČR, třída podle počtu zaměstnaných osob.
+    vzorec: převzato (sbs_sc_ovw, ENT_NR)
+    zdroj: Eurostat, sbs_sc_ovw
+    uroven: [CR]
+    chybejici_hodnoty: –
+    vyklad: Podniky, ne registrované subjekty.
+    stav: naplněno
+
+  - kod: SBS_OSOBY
+    nazev: Zaměstnané osoby v ČR podle velikostní třídy (Eurostat SBS)
+    typ: kontext
+    definice: Zaměstnané osoby včetně majitelů a spolupracujících osob.
+    vzorec: převzato (sbs_sc_ovw, EMP_NR)
+    zdroj: Eurostat, sbs_sc_ovw
+    uroven: [CR]
+    chybejici_hodnoty: –
+    vyklad: –
+    stav: naplněno
+
+  - kod: SBS_OBRAT_PODNIK
+    nazev: Průměrný obrat podniku v ČR podle velikostní třídy (mil. Kč)
+    typ: kontext
+    definice: Čistý obrat / počet podniků, převedeno ročním průměrným kurzem CZK/EUR; pásmo min.–max. mezi oddíly sekce.
+    vzorec: "NETTUR_MEUR / ENT_NR × kurz"
+    zdroj: Eurostat, sbs_sc_ovw, ert_bil_eur_a
+    uroven: [CR]
+    chybejici_hodnoty: Peněžní údaje jen za třídy 0–9, 10–19, 20–49, 50–249, 250+.
+    vyklad: Průměr, ne medián; fakt za ČR.
+    stav: naplněno
+
+  - kod: SBS_MARZE
+    nazev: Hrubý provozní přebytek / obrat v ČR podle velikostní třídy (%)
+    typ: kontext
+    definice: Hrubý provozní přebytek / čistý obrat × 100, za ČR.
+    vzorec: "100 × GOS_MEUR / NETTUR_MEUR"
+    zdroj: Eurostat, sbs_sc_ovw
+    uroven: [CR]
+    chybejici_hodnoty: –
+    vyklad: Fakt za ČR, ne odhad za kraj; hrubý provozní přebytek zahrnuje i odměnu podnikatelů bez zaměstnanců.
+    stav: naplněno

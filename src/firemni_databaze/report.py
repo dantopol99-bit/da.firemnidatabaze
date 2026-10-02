@@ -516,6 +516,194 @@ def tabulky_ekonomika(uz: "Uzemi", srovnani: list["Uzemi"], obor: list[dict], kr
     return [t22, t23]
 
 
+def nacti_sbs(cur, sekce: str | None) -> dict:
+    """SBS ČR (sekce a její oddíly) a kurz CZK/EUR: {(ukazatel, nace, třída, rok): hodnota}."""
+    cur.execute("SELECT to_regclass('res.eu_sbs')")
+    if cur.fetchone()[0] is None or not sekce:
+        return {}
+    cur.execute("SELECT ukazatel, nace, velikost, rok, hodnota, stazeno::date FROM res.eu_sbs "
+                "WHERE (sada = 'sbs_sc_ovw' AND (nace = %s OR nace ~ ('^' || %s || '[0-9]{2}$'))) "
+                "OR sada = 'ert_bil_eur_a'", (sekce, sekce))
+    radky = cur.fetchall()
+    out = {(u, n, v, r): float(h) for u, n, v, r, h, _ in radky}
+    if radky:
+        out["_stazeno"] = max(x[5] for x in radky)
+    return out
+
+
+def tabulky_model(uz: "Uzemi", obor: list[dict], kraje: dict, subjekty_uzemi: list[tuple],
+                  subjekty_cr: list[tuple], aktivita: dict, ek: dict, sbs: dict, prah: int) -> list[dict]:
+    """Modelové odhady (Blok 8): T24 přidaná hodnota a obrat podle velikosti, T25 koncentrace,
+    T26 fakta SBS za ČR (typický obrat, marže), T27 kontrola konzistence modelu na celé ČR."""
+    from firemni_databaze import report_model as m
+    sl24 = [{"kod": "hph_lo", "nazev": "Přidaná hodnota – dolní mez (mil. Kč)", "ukazatel": "MODEL_HPH"},
+            {"kod": "hph_hi", "nazev": "Přidaná hodnota – horní mez (mil. Kč)", "ukazatel": "MODEL_HPH"},
+            {"kod": "podil_lo", "nazev": "Podíl na přidané hodnotě – dolní (%)", "ukazatel": "MODEL_HPH_PODIL"},
+            {"kod": "podil_hi", "nazev": "Podíl na přidané hodnotě – horní (%)", "ukazatel": "MODEL_HPH_PODIL"},
+            {"kod": "obrat_lo", "nazev": "Obrat – dolní mez (mil. Kč)", "ukazatel": "MODEL_OBRAT"},
+            {"kod": "obrat_hi", "nazev": "Obrat – horní mez (mil. Kč)", "ukazatel": "MODEL_OBRAT"}]
+    sl25 = [{"kod": "hph_lo", "nazev": "Podíl na přidané hodnotě – dolní (%)", "ukazatel": "MODEL_KONCENTRACE"},
+            {"kod": "hph_hi", "nazev": "Podíl na přidané hodnotě – horní (%)", "ukazatel": "MODEL_KONCENTRACE"},
+            {"kod": "obrat_lo", "nazev": "Podíl na obratu – dolní (%)", "ukazatel": "MODEL_KONCENTRACE"},
+            {"kod": "obrat_hi", "nazev": "Podíl na obratu – horní (%)", "ukazatel": "MODEL_KONCENTRACE"}]
+    sl26 = [{"kod": "podniky", "nazev": "Podniky", "ukazatel": "SBS_PODNIKY"},
+            {"kod": "osoby", "nazev": "Zaměstnané osoby", "ukazatel": "SBS_OSOBY"},
+            {"kod": "obrat_podnik", "nazev": "Obrat na podnik (mil. Kč)", "ukazatel": "SBS_OBRAT_PODNIK"},
+            {"kod": "obrat_podnik_lo", "nazev": "Obrat na podnik, oddíly – min. (mil. Kč)", "ukazatel": "SBS_OBRAT_PODNIK"},
+            {"kod": "obrat_podnik_hi", "nazev": "Obrat na podnik, oddíly – max. (mil. Kč)", "ukazatel": "SBS_OBRAT_PODNIK"},
+            {"kod": "marze", "nazev": "Hrubý provozní přebytek / obrat (%)", "ukazatel": "SBS_MARZE"}]
+    sl27 = [{"kod": "model_lo", "nazev": "Model – dolní", "ukazatel": "MODEL_KONTROLA"},
+            {"kod": "model_hi", "nazev": "Model – horní", "ukazatel": "MODEL_KONTROLA"},
+            {"kod": "sbs", "nazev": "SBS (fakt)", "ukazatel": "MODEL_KONTROLA"},
+            {"kod": "odchylka", "nazev": "Vzdálenost faktu od pásma (p. b. nebo %)", "ukazatel": "MODEL_KONTROLA"}]
+    n24 = "Modelový odhad: přidaná hodnota a obrat oboru podle velikosti subjektů"
+    n25 = "Modelový odhad: koncentrace – podíl subjektů s 10+ a 50+ zaměstnanými osobami"
+    n26 = "Statistika podniků za ČR podle velikosti: typický obrat a marže (fakt za ČR, Eurostat SBS)"
+    n27 = "Kontrola konzistence: model použitý na celou ČR proti statistice podniků (SBS)"
+    vse = [(n24, "T24_model_velikost", sl24), (n25, "T25_model_koncentrace", sl25),
+           (n26, "T26_sbs_cr", sl26), (n27, "T27_model_kontrola", sl27)]
+    sekce = {o["sekce"] for o in obor}
+    s = next(iter(sekce)) if len(sekce) == 1 else None
+    duvod = None
+    if not ek or not sbs:
+        duvod = "vstupy modelu nejsou načtené (res_import eurostat)"
+    elif s is None or len(obor) != 1 or obor[0]["uroven"] != 1:
+        duvod = ("model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen "
+                 "za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně")
+    elif SKUPINY_A10.get(s, ("",))[0] != s:
+        duvod = f"sekce {s} je v regionálních účtech součástí širší skupiny A*10; přidaná hodnota sekce za kraj neexistuje"
+    elif not any(k[1] == s for k in sbs if isinstance(k, tuple) and k[0] == "AV_MEUR"):
+        duvod = f"Eurostat SBS sekci {s} nepublikuje"
+    if duvod:
+        return [tabulka_nezverejnena(kod, n, duvod, sl) for n, kod, sl in vse]
+    roky_sbs = {k[3] for k in sbs if isinstance(k, tuple) and k[0] == "AV_MEUR" and k[1] == s}
+    roky_ek = {k[3] for k in ek if isinstance(k, tuple) and k[0] == "HPH_CP" and k[2] == s}
+    rok = max(roky_sbs & roky_ek)
+    kurz = sbs[("KURZ_CZK_EUR", "-", "-", rok)]
+    S = {(u, tr): sbs[(u, s, tr, rok)] for u in ("ENT_NR", "EMP_NR", "AV_MEUR", "NETTUR_MEUR", "GOS_MEUR")
+         for tr in m.TRIDY + ("TOTAL",) if (u, s, tr, rok) in sbs}
+    kraj = uz.kraj_kod or "CZ"
+    geo = "CZ" if uz.typ == "CR" else kraj
+    subj = subjekty_uzemi
+    a = aktivita.get((kraj, s), {})
+    podil_akt = a["4958_akt"] / a["4958_reg"] if a.get("4958_reg") else None
+    a_cr = aktivita.get(("CZ", s), {})
+    podil_akt_cr = a_cr["4958_akt"] / a_cr["4958_reg"] if a_cr.get("4958_reg") else None
+    if podil_akt is None or podil_akt_cr is None:
+        return [tabulka_nezverejnena(kod, n, "ČSÚ nepublikuje podíl se zjištěnou aktivitou pro sekci a kraj", sl)
+                for n, kod, sl in vse]
+    hph_uz = ek[("HPH_CP", geo, s, rok)]
+    var = {v: m.rozpocet(m.pocty_trid(subj, v), podil_akt, hph_uz, S) for v in ("zakladni", "pomerna")}
+    for v in var.values():                                  # kontrola: součet tříd = krajský celek
+        if abs(sum(v["hph"].values()) - hph_uz) > 1e-6 * hph_uz:
+            raise AssertionError("modelová přidaná hodnota tříd nesedí na krajský celek")
+    pocty_min = {tr: min(m.pocty_trid(subj, v)[tr] for v in var) for tr in m.TRIDY}
+    skupiny = m.skupiny_publikace(pocty_min, prah)
+    uz_popis = f"{kraje[kraj]['nazev']}" if geo != "CZ" else "Česko"
+    pozn_rok = (f"Rok: ekonomika (regionální účty a SBS) {rok}; struktura subjektů z RES ke dni snímku. "
+                f"Spojení různých let je součástí modelu.")
+    radky24 = []
+    for nazev, tridy in skupiny:
+        h = [sum(var[v]["hph"][x] for x in tridy) for v in var]
+        o = [sum(var[v]["obrat"][x] for x in tridy) for v in var]
+        p_ = [100 * x / hph_uz for x in h]
+        radky24.append({"popis": nazev, "typ": "polozka", "hodnoty": {
+            "hph_lo": m.pasmo(*h)[0], "hph_hi": m.pasmo(*h)[1], "podil_lo": m.pasmo(*p_, 1)[0],
+            "podil_hi": m.pasmo(*p_, 1)[1], "obrat_lo": m.pasmo(*o)[0], "obrat_hi": m.pasmo(*o)[1]},
+            "poznamka": "modelový odhad"})
+    o_cel = [var[v]["obrat_celkem"] for v in var]
+    radky24.append({"popis": f"celkem ({uz_popis})", "typ": "celkem", "hodnoty": {
+        "hph_lo": round(hph_uz), "hph_hi": round(hph_uz), "podil_lo": 100.0, "podil_hi": 100.0,
+        "obrat_lo": m.pasmo(*o_cel)[0], "obrat_hi": m.pasmo(*o_cel)[1]},
+        "poznamka": "přidaná hodnota celkem = fakt (Eurostat); obrat = modelový odhad"})
+    metodika = ("Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je "
+                "rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl "
+                "se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat "
+                "= přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ "
+                "v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.")
+    pozn24 = [metodika, pozn_rok,
+              "KATPO udává počet zaměstnanců, třídy SBS počet zaměstnaných osob včetně majitelů – na hranicích "
+              "tříd se mohou lišit. Třídy pod prahem 10 subjektů jsou sloučeny s vyšší třídou.",
+              "Obrat vychází z přidané hodnoty národních účtů, která je vyšší než přidaná hodnota SBS (zahrnuje "
+              "i neregistrovanou ekonomiku a jiné ocenění); model proto obrat nadhodnocuje – viz kontrola "
+              "konzistence."]
+    if uz.typ == "OKRES":
+        pozn24.insert(0, f"Nejbližší úroveň: kraj {kraje[kraj]['nazev']} – regionální účty za okresy neexistují.")
+    t24 = {"kod": "T24_model_velikost", "nazev": f"{n24} – {uz_popis}, {rok}", "sloupce": sl24, "radky": radky24,
+           "zverejneno": True, "duvod": None, "poznamky": pozn24, "rok": rok, "model": True}
+
+    hranice = {tr for _, tridy in skupiny for tr in tridy[:1]}           # první třídy publikovaných skupin
+    radky25 = []
+    for prahk, klic, tr in (("10 a více osob", "10", "10-19"), ("50 a více osob", "50", "50-249")):
+        if tr not in hranice:
+            continue                                       # hranice by rozdělila sloučenou skupinu
+        hp = [var[v][f"hph_podil_{klic}"] for v in var]
+        op = [var[v][f"obrat_podil_{klic}"] for v in var]
+        radky25.append({"popis": f"Subjekty s {prahk}", "typ": "polozka", "hodnoty": {
+            "hph_lo": m.pasmo(*hp, 1)[0], "hph_hi": m.pasmo(*hp, 1)[1],
+            "obrat_lo": m.pasmo(*op, 1)[0], "obrat_hi": m.pasmo(*op, 1)[1]}, "poznamka": "modelový odhad"})
+    t25 = {"kod": "T25_model_koncentrace", "nazev": f"{n25} – {uz_popis}, {rok}", "sloupce": sl25,
+           "radky": radky25, "zverejneno": bool(radky25),
+           "duvod": None if radky25 else "velikostní třídy nad 10 osob jsou pod prahem – koncentraci nelze zveřejnit",
+           "poznamky": [metodika, pozn_rok, "Koncentrace podle velikostních tříd, ne podle jednotlivých subjektů; "
+                        "podíl největších firem by vyžadoval účetní závěrky (Sbírka listin)."], "rok": rok, "model": True}
+
+    radky26 = []
+    oddily = sorted({k[1] for k in sbs if isinstance(k, tuple) and k[0] == "AV_MEUR" and k[1] != s and k[3] == rok})
+    for tr in m.TRIDY + ("TOTAL",):
+        ent, emp = S.get(("ENT_NR", tr)), S.get(("EMP_NR", tr))
+        obr, gos = S.get(("NETTUR_MEUR", tr)), S.get(("GOS_MEUR", tr))
+        na_podnik = [sbs[("NETTUR_MEUR", o, tr, rok)] / sbs[("ENT_NR", o, tr, rok)] * kurz for o in oddily
+                     if (("NETTUR_MEUR", o, tr, rok) in sbs and sbs.get(("ENT_NR", o, tr, rok)))]
+        radky26.append({"popis": "celkem" if tr == "TOTAL" else m.NAZVY_TRID[tr],
+                        "typ": "celkem" if tr == "TOTAL" else "polozka", "hodnoty": {
+            "podniky": round(ent) if ent else None, "osoby": round(emp) if emp else None,
+            "obrat_podnik": round(obr / ent * kurz, 2) if obr and ent else None,
+            "obrat_podnik_lo": round(min(na_podnik), 2) if na_podnik else None,
+            "obrat_podnik_hi": round(max(na_podnik), 2) if na_podnik else None,
+            "marze": round(100 * gos / obr, 1) if gos is not None and obr else None}})
+    t26 = {"kod": "T26_sbs_cr", "nazev": f"{n26} – sekce {s}, {rok}", "sloupce": sl26, "radky": radky26,
+           "zverejneno": True, "duvod": None, "rok": rok,
+           "poznamky": [f"Fakt za ČR, ne odhad za kraj. Zdroj: Eurostat, sbs_sc_ovw (podniky, zaměstnané osoby, čistý "
+                        f"obrat, hrubý provozní přebytek; mil. EUR převedeno ročním průměrným kurzem {str(kurz).replace('.', ',')} "
+                        f"Kč/EUR, ert_bil_eur_a). Rok {rok}.",
+                        f"Obrat na podnik je průměr třídy (ne medián); pásmo min.–max. ukazuje rozdíly mezi oddíly "
+                        f"({', '.join(o[1:] for o in oddily)}). Podniky SBS jsou aktivní podniky, ne registrované subjekty.",
+                        "Peněžní údaje SBS jsou jen za třídy 0–9, 10–19, 20–49, 50–249 a 250+; rozdělení 0–1 a 2–9 "
+                        "osob Eurostat publikuje jen u počtů."]}
+
+    # kontrola konzistence: model na celou ČR (RES ČR, podíl aktivity ČR, HPH ČR z regionálních účtů)
+    hph_cr = ek[("HPH_CP", "CZ", s, rok)]
+    var_cr = {v: m.rozpocet(m.pocty_trid(subjekty_cr, v), podil_akt_cr, hph_cr, S) for v in ("zakladni", "pomerna")}
+    radky27 = []
+    for tr in m.TRIDY:
+        mp = [100 * var_cr[v]["hph"][tr] / hph_cr for v in var_cr]
+        sp = 100 * S[("AV_MEUR", tr)] / S[("AV_MEUR", "TOTAL")]
+        lo, hi = m.pasmo(*mp, 1)
+        sp = round(sp, 1)
+        odch = 0.0 if lo <= sp <= hi else min(abs(lo - sp), abs(hi - sp))
+        radky27.append({"popis": f"Podíl třídy {m.NAZVY_TRID[tr]} na přidané hodnotě (%)", "typ": "polozka",
+                        "hodnoty": {"model_lo": lo, "model_hi": hi, "sbs": sp, "odchylka": round(odch, 1)},
+                        "poznamka": "fakt SBS uvnitř pásma" if odch == 0 else "fakt SBS mimo pásmo (p. b.)"})
+    obr_m = [var_cr[v]["obrat_celkem"] for v in var_cr]
+    obr_s = S[("NETTUR_MEUR", "TOTAL")] * kurz
+    lo_o, hi_o = m.pasmo(*obr_m)
+    radky27.append({"popis": "Obrat sekce celkem (mil. Kč)", "typ": "polozka", "hodnoty": {
+        "model_lo": lo_o, "model_hi": hi_o, "sbs": round(obr_s),
+        "odchylka": 0.0 if lo_o <= obr_s <= hi_o else round(100 * (min(abs(lo_o - obr_s), abs(hi_o - obr_s)) / obr_s), 1)},
+        "poznamka": "model nadhodnocuje (% od bližší meze)" if lo_o > obr_s else "fakt SBS mimo pásmo (%)"})
+    radky27.append({"popis": "Přidaná hodnota sekce celkem (mil. Kč)", "typ": "polozka", "hodnoty": {
+        "model_lo": round(hph_cr), "model_hi": round(hph_cr), "sbs": round(S[("AV_MEUR", "TOTAL")] * kurz),
+        "odchylka": round(100 * (hph_cr / (S[("AV_MEUR", "TOTAL")] * kurz) - 1), 1)},
+        "poznamka": "vstup modelu (národní účty) proti SBS, rozdíl v %; příčina nadhodnocení obratu"})
+    t27 = {"kod": "T27_model_kontrola", "nazev": f"{n27} – sekce {s}, {rok}", "sloupce": sl27, "radky": radky27,
+           "zverejneno": True, "duvod": None, "rok": rok, "model": True,
+           "poznamky": ["Model se stejnými vstupy, ale za celou ČR (RES ČR, podíl se zjištěnou aktivitou za ČR, přidaná "
+                        "hodnota sekce v ČR z regionálních účtů), porovnaný s celostátními hodnotami SBS. Odchylky "
+                        "ukazují, jak přesný model je i tam, kde fakt známe.", pozn_rok]}
+    return [t24, t25, t26, t27]
+
+
 def nacti_dynamiku(cur, uzemi_kod: str) -> list[tuple]:
     cur.execute("SELECT forma_kod, obdobi, ukazatel_kod, hodnota FROM res.csu_vznik_zanik WHERE uzemi_kod = %s "
                 "AND obdobi >= %s ORDER BY obdobi", (uzemi_kod, f"{ZANIKY_OD_ROKU}-Q1"))
@@ -651,6 +839,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
         _sekce = {o["sekce"] for o in obor}
         _skupiny = {SKUPINY_A10[s][0] for s in _sekce if s in SKUPINY_A10}
         ekonomika = nacti_ekonomiku(cur, next(iter(_skupiny)) if len(_skupiny) == 1 else None)
+        sbs = nacti_sbs(cur, next(iter(_sekce)) if len(_sekce) == 1 else None)
         mzdy = nacti_mzdy(cur, next(iter({o["sekce"] for o in obor})) if len({o["sekce"] for o in obor}) == 1 else None)
         sekce_oboru = {o["sekce"] for o in obor}
         demografie = nacti_demografii(cur, next(iter(sekce_oboru)) if len(sekce_oboru) == 1 else None)
@@ -1390,6 +1579,11 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
 
     tabulky = ([t01_tab, t02, t03] + ([t04] if t04 else []) + tabulky_uzemi + tabulky_bench
                + tabulky_ekonomika(uz, srovnani, obor, kraje, ekonomika)
+               + tabulky_model(uz, obor, kraje,
+                               [(f, kp) for okres, f, kp, _ in d["subjekty"]
+                                if v_uzemi(okres, uz if uz.typ != "OKRES" else
+                                           Uzemi("KRAJ", uz.kraj_kod, kraje[uz.kraj_kod]["nazev"], uz.kraj_kod))],
+                               [(f, kp) for _, f, kp, _ in d["subjekty"]], d["aktivita"], ekonomika, sbs, prah)
                + tabulky_mzdy(uz, srovnani, obor, kraje, mzdy) + [t10, t18, t11, t12])
     for t in tabulky:
         for r in t["radky"]:
@@ -1421,6 +1615,8 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
             "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
             "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy",
             EUROSTAT_CITACE.format(datum=ekonomika.get("_stazeno", "–")),
+            f"Eurostat, statistika podniků podle velikosti (sbs_sc_ovw) a kurz CZK/EUR (ert_bil_eur_a), staženo "
+            f"{sbs.get('_stazeno', '–')}; použito pro modelové odhady – upraveno, za úpravy Eurostat neodpovídá.",
         ],
         "licence": {"nazev": "CC BY 4.0", "url": LICENCE_URL},
         "vygenerovano": datetime.now(timezone.utc).isoformat(timespec="seconds"),

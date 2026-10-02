@@ -42,13 +42,14 @@
    "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
    "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
    "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy",
-   "Eurostat, regionální účty: nama_10r_3gva, nama_10r_3empers, nama_10r_2coe (https://ec.europa.eu/eurostat/databrowser/view/<kód sady>/default/table), staženo 2026-10-01; upraveno (výběr, podíly, poměry, řetězení objemových změn) – za úpravy Eurostat neodpovídá."
+   "Eurostat, regionální účty: nama_10r_3gva, nama_10r_3empers, nama_10r_2coe (https://ec.europa.eu/eurostat/databrowser/view/<kód sady>/default/table), staženo 2026-10-01; upraveno (výběr, podíly, poměry, řetězení objemových změn) – za úpravy Eurostat neodpovídá.",
+   "Eurostat, statistika podniků podle velikosti (sbs_sc_ovw) a kurz CZK/EUR (ert_bil_eur_a), staženo 2026-10-02; použito pro modelové odhady – upraveno, za úpravy Eurostat neodpovídá."
   ],
   "licence": {
    "nazev": "CC BY 4.0",
    "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
   },
-  "vygenerovano": "2026-10-01T20:21:56+00:00",
+  "vygenerovano": "2026-10-02T06:43:18+00:00",
   "ukazatele": [
    {
     "kod": "REG_POCET",
@@ -537,6 +538,78 @@
     "definice": "Náhrady zaměstnancům / HPH v běžných cenách × 100, týž region a rok.",
     "chybejici_hodnoty": "Jen region soudržnosti a ČR.",
     "vyklad": "Nízký podíl = větší část přidané hodnoty připadá na provozní přebytek a příjmy podnikatelů."
+   },
+   {
+    "kod": "MODEL_HPH",
+    "nazev": "Přidaná hodnota oboru v kraji podle velikostní třídy (mil. Kč, modelový odhad)",
+    "typ": "odhad",
+    "definice": "Krajská přidaná hodnota skupiny (Eurostat, regionální účty) rozpočítaná mezi třídy podle počtu subjektů (RES, KATPO, podíl se zjištěnou aktivitou podle ČSÚ) × celostátní přidané hodnoty na podnik třídy (Eurostat SBS).",
+    "chybejici_hodnoty": "Jen obor = celá sekce, která je samostatnou skupinou A*10; třídy pod prahem 10 subjektů sloučeny.",
+    "vyklad": "Modelový odhad, ne statistika. Součet tříd = krajský fakt."
+   },
+   {
+    "kod": "MODEL_HPH_PODIL",
+    "nazev": "Podíl velikostní třídy na přidané hodnotě oboru v kraji (%, modelový odhad)",
+    "typ": "odhad",
+    "definice": "MODEL_HPH třídy / přidaná hodnota skupiny v kraji × 100.",
+    "chybejici_hodnoty": "Jako MODEL_HPH.",
+    "vyklad": "Modelový odhad."
+   },
+   {
+    "kod": "MODEL_OBRAT",
+    "nazev": "Obrat oboru v kraji (mil. Kč, modelový odhad)",
+    "typ": "odhad",
+    "definice": "MODEL_HPH třídy × celostátní poměr čistého obratu k přidané hodnotě v třídě (SBS).",
+    "chybejici_hodnoty": "Jako MODEL_HPH.",
+    "vyklad": "Nadhodnocený – přidaná hodnota národních účtů je vyšší než v SBS (viz MODEL_KONTROLA)."
+   },
+   {
+    "kod": "MODEL_KONCENTRACE",
+    "nazev": "Podíl subjektů s 10+ a 50+ zaměstnanými osobami na přidané hodnotě a obratu (%, modelový odhad)",
+    "typ": "odhad",
+    "definice": "Součet MODEL_HPH, resp. MODEL_OBRAT tříd nad hranicí / celek × 100.",
+    "chybejici_hodnoty": "Nezveřejní se, pokud by hranice rozdělila sloučenou třídu pod prahem.",
+    "vyklad": "Koncentrace podle tříd, ne podle jednotlivých subjektů."
+   },
+   {
+    "kod": "MODEL_KONTROLA",
+    "nazev": "Kontrola konzistence modelu na celé ČR",
+    "typ": "odhad",
+    "definice": "Model se stejnými vstupy za celou ČR proti hodnotám SBS; odchylka v p. b. (podíly) nebo % (obrat).",
+    "chybejici_hodnoty": "–",
+    "vyklad": "Ukazuje přesnost modelu tam, kde fakt známe."
+   },
+   {
+    "kod": "SBS_PODNIKY",
+    "nazev": "Počet podniků v ČR podle velikostní třídy (Eurostat SBS)",
+    "typ": "kontext",
+    "definice": "Aktivní podniky v sekci za ČR, třída podle počtu zaměstnaných osob.",
+    "chybejici_hodnoty": "–",
+    "vyklad": "Podniky, ne registrované subjekty."
+   },
+   {
+    "kod": "SBS_OSOBY",
+    "nazev": "Zaměstnané osoby v ČR podle velikostní třídy (Eurostat SBS)",
+    "typ": "kontext",
+    "definice": "Zaměstnané osoby včetně majitelů a spolupracujících osob.",
+    "chybejici_hodnoty": "–",
+    "vyklad": "–"
+   },
+   {
+    "kod": "SBS_OBRAT_PODNIK",
+    "nazev": "Průměrný obrat podniku v ČR podle velikostní třídy (mil. Kč)",
+    "typ": "kontext",
+    "definice": "Čistý obrat / počet podniků, převedeno ročním průměrným kurzem CZK/EUR; pásmo min.–max. mezi oddíly sekce.",
+    "chybejici_hodnoty": "Peněžní údaje jen za třídy 0–9, 10–19, 20–49, 50–249, 250+.",
+    "vyklad": "Průměr, ne medián; fakt za ČR."
+   },
+   {
+    "kod": "SBS_MARZE",
+    "nazev": "Hrubý provozní přebytek / obrat v ČR podle velikostní třídy (%)",
+    "typ": "kontext",
+    "definice": "Hrubý provozní přebytek / čistý obrat × 100, za ČR.",
+    "chybejici_hodnoty": "–",
+    "vyklad": "Fakt za ČR, ne odhad za kraj; hrubý provozní přebytek zahrnuje i odměnu podnikatelů bez zaměstnanců."
    }
   ]
  },
@@ -3011,6 +3084,409 @@
     "Podíl náhrad zaměstnancům na HPH ukazuje, jaká část přidané hodnoty připadá na mzdy a pojistné zaměstnanců; zbytek tvoří hlavně hrubý provozní přebytek a smíšený důchod (příjem podnikatelů)."
    ],
    "skupina": "F"
+  },
+  {
+   "kod": "T24_model_velikost",
+   "nazev": "Modelový odhad: přidaná hodnota a obrat oboru podle velikosti subjektů – Liberecký kraj, 2024",
+   "sloupce": [
+    {
+     "kod": "hph_lo",
+     "nazev": "Přidaná hodnota – dolní mez (mil. Kč)",
+     "ukazatel": "MODEL_HPH"
+    },
+    {
+     "kod": "hph_hi",
+     "nazev": "Přidaná hodnota – horní mez (mil. Kč)",
+     "ukazatel": "MODEL_HPH"
+    },
+    {
+     "kod": "podil_lo",
+     "nazev": "Podíl na přidané hodnotě – dolní (%)",
+     "ukazatel": "MODEL_HPH_PODIL"
+    },
+    {
+     "kod": "podil_hi",
+     "nazev": "Podíl na přidané hodnotě – horní (%)",
+     "ukazatel": "MODEL_HPH_PODIL"
+    },
+    {
+     "kod": "obrat_lo",
+     "nazev": "Obrat – dolní mez (mil. Kč)",
+     "ukazatel": "MODEL_OBRAT"
+    },
+    {
+     "kod": "obrat_hi",
+     "nazev": "Obrat – horní mez (mil. Kč)",
+     "ukazatel": "MODEL_OBRAT"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "0–9 osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "hph_lo": 6124,
+      "hph_hi": 7996,
+      "podil_lo": 48.6,
+      "podil_hi": 63.5,
+      "obrat_lo": 25342,
+      "obrat_hi": 33088
+     },
+     "poznamka": "modelový odhad"
+    },
+    {
+     "popis": "10–19 osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "hph_lo": 1061,
+      "hph_hi": 1493,
+      "podil_lo": 8.4,
+      "podil_hi": 11.9,
+      "obrat_lo": 4615,
+      "obrat_hi": 6497
+     },
+     "poznamka": "modelový odhad"
+    },
+    {
+     "popis": "20–49 osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "hph_lo": 1434,
+      "hph_hi": 2017,
+      "podil_lo": 11.4,
+      "podil_hi": 16.0,
+      "obrat_lo": 5961,
+      "obrat_hi": 8386
+     },
+     "poznamka": "modelový odhad"
+    },
+    {
+     "popis": "50 a více osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "hph_lo": 2108,
+      "hph_hi": 2965,
+      "podil_lo": 16.7,
+      "podil_hi": 23.5,
+      "obrat_lo": 9543,
+      "obrat_hi": 13419
+     },
+     "poznamka": "modelový odhad"
+    },
+    {
+     "popis": "celkem (Liberecký kraj)",
+     "typ": "celkem",
+     "hodnoty": {
+      "hph_lo": 12598,
+      "hph_hi": 12598,
+      "podil_lo": 100.0,
+      "podil_hi": 100.0,
+      "obrat_lo": 53207,
+      "obrat_hi": 53644
+     },
+     "poznamka": "přidaná hodnota celkem = fakt (Eurostat); obrat = modelový odhad"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.",
+    "Rok: ekonomika (regionální účty a SBS) 2024; struktura subjektů z RES ke dni snímku. Spojení různých let je součástí modelu.",
+    "KATPO udává počet zaměstnanců, třídy SBS počet zaměstnaných osob včetně majitelů – na hranicích tříd se mohou lišit. Třídy pod prahem 10 subjektů jsou sloučeny s vyšší třídou.",
+    "Obrat vychází z přidané hodnoty národních účtů, která je vyšší než přidaná hodnota SBS (zahrnuje i neregistrovanou ekonomiku a jiné ocenění); model proto obrat nadhodnocuje – viz kontrola konzistence."
+   ],
+   "rok": 2024,
+   "model": true
+  },
+  {
+   "kod": "T25_model_koncentrace",
+   "nazev": "Modelový odhad: koncentrace – podíl subjektů s 10+ a 50+ zaměstnanými osobami – Liberecký kraj, 2024",
+   "sloupce": [
+    {
+     "kod": "hph_lo",
+     "nazev": "Podíl na přidané hodnotě – dolní (%)",
+     "ukazatel": "MODEL_KONCENTRACE"
+    },
+    {
+     "kod": "hph_hi",
+     "nazev": "Podíl na přidané hodnotě – horní (%)",
+     "ukazatel": "MODEL_KONCENTRACE"
+    },
+    {
+     "kod": "obrat_lo",
+     "nazev": "Podíl na obratu – dolní (%)",
+     "ukazatel": "MODEL_KONCENTRACE"
+    },
+    {
+     "kod": "obrat_hi",
+     "nazev": "Podíl na obratu – horní (%)",
+     "ukazatel": "MODEL_KONCENTRACE"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Subjekty s 10 a více osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "hph_lo": 36.5,
+      "hph_hi": 51.4,
+      "obrat_lo": 37.8,
+      "obrat_hi": 52.8
+     },
+     "poznamka": "modelový odhad"
+    },
+    {
+     "popis": "Subjekty s 50 a více osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "hph_lo": 16.7,
+      "hph_hi": 23.5,
+      "obrat_lo": 17.9,
+      "obrat_hi": 25.0
+     },
+     "poznamka": "modelový odhad"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "poznamky": [
+    "Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.",
+    "Rok: ekonomika (regionální účty a SBS) 2024; struktura subjektů z RES ke dni snímku. Spojení různých let je součástí modelu.",
+    "Koncentrace podle velikostních tříd, ne podle jednotlivých subjektů; podíl největších firem by vyžadoval účetní závěrky (Sbírka listin)."
+   ],
+   "rok": 2024,
+   "model": true
+  },
+  {
+   "kod": "T26_sbs_cr",
+   "nazev": "Statistika podniků za ČR podle velikosti: typický obrat a marže (fakt za ČR, Eurostat SBS) – sekce F, 2024",
+   "sloupce": [
+    {
+     "kod": "podniky",
+     "nazev": "Podniky",
+     "ukazatel": "SBS_PODNIKY"
+    },
+    {
+     "kod": "osoby",
+     "nazev": "Zaměstnané osoby",
+     "ukazatel": "SBS_OSOBY"
+    },
+    {
+     "kod": "obrat_podnik",
+     "nazev": "Obrat na podnik (mil. Kč)",
+     "ukazatel": "SBS_OBRAT_PODNIK"
+    },
+    {
+     "kod": "obrat_podnik_lo",
+     "nazev": "Obrat na podnik, oddíly – min. (mil. Kč)",
+     "ukazatel": "SBS_OBRAT_PODNIK"
+    },
+    {
+     "kod": "obrat_podnik_hi",
+     "nazev": "Obrat na podnik, oddíly – max. (mil. Kč)",
+     "ukazatel": "SBS_OBRAT_PODNIK"
+    },
+    {
+     "kod": "marze",
+     "nazev": "Hrubý provozní přebytek / obrat (%)",
+     "ukazatel": "SBS_MARZE"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "0–9 osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "podniky": 202896,
+      "osoby": 243996,
+      "obrat_podnik": 2.53,
+      "obrat_podnik_lo": 1.98,
+      "obrat_podnik_hi": 14.72,
+      "marze": 18.2
+     }
+    },
+    {
+     "popis": "10–19 osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "podniky": 2966,
+      "osoby": 40604,
+      "obrat_podnik": 44.78,
+      "obrat_podnik_lo": 38.16,
+      "obrat_podnik_hi": 58.99,
+      "marze": 8.7
+     }
+    },
+    {
+     "popis": "20–49 osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "podniky": 1646,
+      "osoby": 47573,
+      "obrat_podnik": 107.3,
+      "obrat_podnik_lo": 89.51,
+      "obrat_podnik_hi": 127.79,
+      "marze": 8.8
+     }
+    },
+    {
+     "popis": "50–249 osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "podniky": 510,
+      "osoby": 47016,
+      "obrat_podnik": 461.61,
+      "obrat_podnik_lo": 334.36,
+      "obrat_podnik_hi": 576.66,
+      "marze": 8.7
+     }
+    },
+    {
+     "popis": "250 a více osob",
+     "typ": "polozka",
+     "hodnoty": {
+      "podniky": 52,
+      "osoby": 33544,
+      "obrat_podnik": 4647.87,
+      "obrat_podnik_lo": 1135.11,
+      "obrat_podnik_hi": 5450.62,
+      "marze": 5.7
+     }
+    },
+    {
+     "popis": "celkem",
+     "typ": "celkem",
+     "hodnoty": {
+      "podniky": 208070,
+      "osoby": 412733,
+      "obrat_podnik": 6.25,
+      "obrat_podnik_lo": 3.12,
+      "obrat_podnik_hi": 186.89,
+      "marze": 11.9
+     }
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "rok": 2024,
+   "poznamky": [
+    "Fakt za ČR, ne odhad za kraj. Zdroj: Eurostat, sbs_sc_ovw (podniky, zaměstnané osoby, čistý obrat, hrubý provozní přebytek; mil. EUR převedeno ročním průměrným kurzem 25,12 Kč/EUR, ert_bil_eur_a). Rok 2024.",
+    "Obrat na podnik je průměr třídy (ne medián); pásmo min.–max. ukazuje rozdíly mezi oddíly (41, 42, 43). Podniky SBS jsou aktivní podniky, ne registrované subjekty.",
+    "Peněžní údaje SBS jsou jen za třídy 0–9, 10–19, 20–49, 50–249 a 250+; rozdělení 0–1 a 2–9 osob Eurostat publikuje jen u počtů."
+   ]
+  },
+  {
+   "kod": "T27_model_kontrola",
+   "nazev": "Kontrola konzistence: model použitý na celou ČR proti statistice podniků (SBS) – sekce F, 2024",
+   "sloupce": [
+    {
+     "kod": "model_lo",
+     "nazev": "Model – dolní",
+     "ukazatel": "MODEL_KONTROLA"
+    },
+    {
+     "kod": "model_hi",
+     "nazev": "Model – horní",
+     "ukazatel": "MODEL_KONTROLA"
+    },
+    {
+     "kod": "sbs",
+     "nazev": "SBS (fakt)",
+     "ukazatel": "MODEL_KONTROLA"
+    },
+    {
+     "kod": "odchylka",
+     "nazev": "Vzdálenost faktu od pásma (p. b. nebo %)",
+     "ukazatel": "MODEL_KONTROLA"
+    }
+   ],
+   "radky": [
+    {
+     "popis": "Podíl třídy 0–9 osob na přidané hodnotě (%)",
+     "typ": "polozka",
+     "hodnoty": {
+      "model_lo": 29.8,
+      "model_hi": 46.7,
+      "sbs": 41.2,
+      "odchylka": 0.0
+     },
+     "poznamka": "fakt SBS uvnitř pásma"
+    },
+    {
+     "popis": "Podíl třídy 10–19 osob na přidané hodnotě (%)",
+     "typ": "polozka",
+     "hodnoty": {
+      "model_lo": 8.9,
+      "model_hi": 11.6,
+      "sbs": 10.1,
+      "odchylka": 0.0
+     },
+     "poznamka": "fakt SBS uvnitř pásma"
+    },
+    {
+     "popis": "Podíl třídy 20–49 osob na přidané hodnotě (%)",
+     "typ": "polozka",
+     "hodnoty": {
+      "model_lo": 12.3,
+      "model_hi": 16.2,
+      "sbs": 14.1,
+      "odchylka": 0.0
+     },
+     "poznamka": "fakt SBS uvnitř pásma"
+    },
+    {
+     "popis": "Podíl třídy 50–249 osob na přidané hodnotě (%)",
+     "typ": "polozka",
+     "hodnoty": {
+      "model_lo": 17.7,
+      "model_hi": 23.3,
+      "sbs": 18.7,
+      "odchylka": 0.0
+     },
+     "poznamka": "fakt SBS uvnitř pásma"
+    },
+    {
+     "popis": "Podíl třídy 250 a více osob na přidané hodnotě (%)",
+     "typ": "polozka",
+     "hodnoty": {
+      "model_lo": 14.5,
+      "model_hi": 19.1,
+      "sbs": 15.8,
+      "odchylka": 0.0
+     },
+     "poznamka": "fakt SBS uvnitř pásma"
+    },
+    {
+     "popis": "Obrat sekce celkem (mil. Kč)",
+     "typ": "polozka",
+     "hodnoty": {
+      "model_lo": 1762447,
+      "model_hi": 1783878,
+      "sbs": 1299398,
+      "odchylka": 35.6
+     },
+     "poznamka": "model nadhodnocuje (% od bližší meze)"
+    },
+    {
+     "popis": "Přidaná hodnota sekce celkem (mil. Kč)",
+     "typ": "polozka",
+     "hodnoty": {
+      "model_lo": 409647,
+      "model_hi": 409647,
+      "sbs": 300901,
+      "odchylka": 36.1
+     },
+     "poznamka": "vstup modelu (národní účty) proti SBS, rozdíl v %; příčina nadhodnocení obratu"
+    }
+   ],
+   "zverejneno": true,
+   "duvod": null,
+   "rok": 2024,
+   "model": true,
+   "poznamky": [
+    "Model se stejnými vstupy, ale za celou ČR (RES ČR, podíl se zjištěnou aktivitou za ČR, přidaná hodnota sekce v ČR z regionálních účtů), porovnaný s celostátními hodnotami SBS. Odchylky ukazují, jak přesný model je i tam, kde fakt známe.",
+    "Rok: ekonomika (regionální účty a SBS) 2024; struktura subjektů z RES ke dni snímku. Spojení různých let je součástí modelu."
+   ]
   },
   {
    "kod": "T20_mzdy_obor",
