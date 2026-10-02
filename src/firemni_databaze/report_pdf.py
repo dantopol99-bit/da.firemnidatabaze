@@ -229,6 +229,21 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         obsah.append(tabulka(v.tab["T22_ekonomika"], s.pismeno_tab("T22"), zdroj_eu))
     if v.t("T23_nahrady"):
         obsah.append(tabulka(v.tab["T23_nahrady"], s.pismeno_tab("T23"), zdroj_eu))
+    # pododdíl Modelové odhady (Blok 8) – odhady, ne fakta; nevstupují do detektoru zjištění
+    zdroj_model = ("Modelový odhad: RES (stav ke dni snímku), ČSÚ RES02QT1, Eurostat nama_10r_3gva a sbs_sc_ovw; "
+                   "vlastní výpočet – upraveno, za úpravy Eurostat neodpovídá.")
+    obsah.append({"typ": "nadpis", "text": "Modelové odhady"})
+    obsah.append({"typ": "odstavec", "text":
+                  "Hodnoty v tomto pododdílu jsou modelové odhady, ne statistika. Kombinují velikostní strukturu "
+                  "subjektů v kraji (RES), krajskou přidanou hodnotu (Eurostat, regionální účty) a celostátní poměry "
+                  "podle velikosti podniků (Eurostat, statistika podniků). Uvádějí se jako pásmo (dolní a horní mez "
+                  "podle zařazení subjektů s neuvedeným počtem zaměstnanců) a nevstupují do zjištění detektoru."})
+    obsah.append({"typ": "vyklad", "klic": "modelove_odhady", "bloky": []})
+    for kod in ("T24_model_velikost", "T25_model_koncentrace", "T26_sbs_cr", "T27_model_kontrola"):
+        if v.t(kod):
+            obsah.append(tabulka(v.tab[kod], s.pismeno_tab(kod[:3]),
+                                 zdroj_eu.replace("regionální účty (nama_10r_3gva, nama_10r_3empers, nama_10r_2coe)",
+                                                  "sbs_sc_ovw, ert_bil_eur_a") if kod == "T26_sbs_cr" else zdroj_model))
     kapitoly.append({"nadpis": "Ekonomický profil", "klic": "ekonomicky_profil", "obsah": obsah,
                      "pododdil": POD_ODDIL_KONCENTRACE})
 
@@ -311,7 +326,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
 
     # --- výklad (po přidělení písmen) --------------------------------------------------
     L = {k: s.L.get(k, "příloha") for k in
-         [f"T{i:02d}" for i in range(1, 24)]
+         [f"T{i:02d}" for i in range(1, 28)]
          + ["g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
     for k in kapitoly:
         k["nedostupne"] = None
@@ -322,6 +337,11 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
             k["vyklad"].append(vy._blok("proč", "Výklad analytika zatím chybí."))
         else:
             k["vyklad"] += vyklad_analytika.get(k["klic"], [])
+        for o in k["obsah"]:                       # výklad pododdílu (Modelové odhady)
+            if o["typ"] == "vyklad":
+                o["bloky"] = vy.modelove_odhady(v, L) + (
+                    vyklad_analytika.get(o["klic"], []) if vyklad_analytika is not None
+                    else [vy._blok("proč", "Výklad analytika zatím chybí.")])
 
     # --- pevné kapitoly bez dat, seřazení podle osnovy ----------------------------------
     odchylky.append(f"Pododdíl {POD_ODDIL_KONCENTRACE['nadpis']} (kapitola Ekonomický profil): zatím nedostupné – "

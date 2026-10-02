@@ -312,6 +312,56 @@ náhrady 10. 2. 2026):
 - Import: `python -m firemni_databaze.res_import eurostat` (i součást `agregaty`), tabulka
   `res.eu_regionalni_ucty`, každá sada ve vlastní dávce `dev.import_davka` (zdroj `EUROSTAT`).
 
+## Modelové odhady ekonomického profilu (Blok 8, T24–T27)
+
+**Nejsou to fakta.** Kombinují zdroje modelem, uvádějí se jen jako pásmo s označením „modelový odhad“
+a **nevstupují do detektoru zjištění** (ten pracuje jen s fakty; test to hlídá).
+
+**Zdroj podnikových poměrů – Eurostat SBS** (`sbs_sc_ovw`, aktualizace 30. 9. 2026; robots.txt a licence
+jako u regionálních účtů). Pro ČR publikuje sekce i oddíly CZ-NACE (pro F: F, 41, 42, 43) × velikostní
+třídy podle **počtu zaměstnaných osob** (včetně majitelů), roky **2021–2024**:
+
+| ukazatel | třídy |
+|---|---|
+| podniky, zaměstnané osoby | 0–1, 2–9, 0–9, 10–19, 20–49, 50–249, 250+, celkem |
+| přidaná hodnota, čistý obrat, hrubý provozní přebytek, mzdy aj. | jen 0–9, 10–19, 20–49, 50–249, 250+, celkem |
+
+Peněžní údaje jsou **jen v mil. EUR**; převod ročním průměrným kurzem (`ert_bil_eur_a`, 2024: 25,12 Kč/EUR).
+Pro sekci F ani oddíly 41–43 nejsou žádné buňky skryté jako důvěrné (2021–2024); rozdělení 0–1 a 2–9 osob
+se u peněžních údajů nepublikuje vůbec. Regionální (krajské) SBS podle velikosti Eurostat nemá.
+
+**Postup** (poslední společný rok regionálních účtů a SBS, nyní 2024; struktura subjektů z RES ke dni
+snímku – spojení různých let je součástí modelu a je uvedeno u každé tabulky):
+1. Počty subjektů oboru v kraji podle tříd SBS z KATPO (110–130 → 0–9, 210 → 10–19, 220–230 → 20–49,
+   240–320 → 50–249, ostatní → 250+), zúžené jednotným podílem se zjištěnou aktivitou (ČSÚ, sekce × kraj;
+   struktura se tím nemění, protože ČSÚ podíl podle velikosti nepublikuje). „Neuvedeno“ (KATPO 000):
+   základní varianta – PO do nejmenší třídy, FO do „bez zaměstnanců“ (obojí 0–9); alternativní varianta –
+   poměrně podle známé struktury FO, resp. PO. Obě varianty dávají dolní a horní mez pásma.
+2. Krajská přidaná hodnota skupiny (regionální účty, mil. Kč) se rozpočítá mezi třídy podle počtu subjektů
+   × celostátní přidané hodnoty **na podnik** třídy (v kraji známe jen počty subjektů, ne osoby).
+   Součet tříd = krajský celek přesně (výpočet to ověřuje).
+3. Obrat třídy = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě.
+4. Typický obrat podniku třídy = celostátní obrat / počet podniků (průměr, ne medián) – fakt za ČR;
+   pásmo = minimum–maximum mezi oddíly sekce.
+5. Koncentrace = podíl přidané hodnoty a obratu tříd s 10+ a 50+ osobami.
+6. Marže (hrubý provozní přebytek / obrat) – fakt za ČR, ne odhad za kraj.
+
+**Ochrana malých buněk:** třída s méně než 10 subjekty v kraji (RES, v obou variantách) se sloučí s vyšší;
+podíl nad hranicí (10+, 50+) se nezveřejní, pokud by hranice rozdělila sloučenou skupinu.
+
+**Kontrola konzistence (T27):** model se stejnými vstupy za celou ČR proti celostátním hodnotám SBS.
+Pilot (F, 2024): celostátní podíl každé z pěti tříd na přidané hodnotě leží **uvnitř pásma modelu**;
+obrat sekce model **nadhodnocuje o 35,6 %** (od bližší meze), protože přidaná hodnota národních účtů
+(409 647 mil. Kč) je o 36,1 % vyšší než přidaná hodnota SBS (300 901 mil. Kč) – národní účty zahrnují
+i neregistrovanou ekonomiku a oceňují jinak. **Absolutní obrat je proto nespolehlivý**, podíly tříd
+a koncentrace spolehlivější. Model na vlastních celostátních počtech podniků SBS vrací přesně hodnoty
+SBS (jednotkový test).
+
+**Omezení:** jen obor zadaný jako celá sekce, která je samostatnou skupinou A*10 (A, C, F, J, L; K a
+některé další sekce SBS nepokrývá); KATPO (zaměstnanci) ≠ třídy SBS (zaměstnané osoby) na hranicích
+tříd; podíl aktivních jen souhrnně za sekci a kraj; celostátní poměry platí pro kraj jen za předpokladu,
+že se podniky téže třídy v kraji neliší od průměru ČR.
+
 ## Ukazatele, které nelze (plně) naplnit
 
 | ukazatel | proč |

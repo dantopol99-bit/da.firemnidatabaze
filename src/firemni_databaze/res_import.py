@@ -482,6 +482,32 @@ def nacti_eurostat(conn) -> list[int]:
     return davky
 
 
+def nacti_sbs(conn) -> list[int]:
+    """Statistika podniků podle velikostních tříd (sbs_sc_ovw, ČR) a kurz CZK/EUR – každá sada ve vlastní dávce."""
+    import time
+    davky = []
+    for i, (sada, url, prevod) in enumerate((("sbs_sc_ovw", z.url_sbs(), z.radky_sbs),
+                                            ("ert_bil_eur_a", z.url_kurz(), z.radky_kurz))):
+        if i:
+            time.sleep(z.EUROSTAT_PAUZA_S)
+
+        def prace(davka: int, sada=sada, url=url, prevod=prevod):
+            radky = prevod(z.stahni_text(url, timeout=300))
+            if not radky:
+                raise ValueError(f"{sada}: žádné hodnoty")
+            for r in radky:
+                r.update(url=url, import_davka_id=davka)
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM res.eu_sbs WHERE sada = %s", (sada,))
+                vloz(cur, "eu_sbs", radky)
+            conn.commit()
+            print(f"  {sada}: {len(radky)} hodnot, roky {min(r['rok'] for r in radky)}–{max(r['rok'] for r in radky)}")
+            return len(radky), f"Eurostat {sada}, aktualizace {radky[0]['aktualizace']}"
+
+        davky.append(v_davce(conn, "EUROSTAT", url, prace))
+    return davky
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="prikaz", required=True)
@@ -491,7 +517,7 @@ def main() -> int:
     p_sn.add_argument("--adresar", type=Path, help="adresář s dříve staženými res_data.csv, res_pf_nace.csv a *-metadata.json")
     sub.add_parser("agregaty", help="načte agregáty ČSÚ z DataStatu (RES02QT1, OBY02A, RES05, RESDP00, mzdy)")
     sub.add_parser("mzdy", help="načte zaměstnance a průměrné mzdy z DataStatu (MZDCRR, MZDR)")
-    sub.add_parser("eurostat", help="načte regionální účty Eurostatu (HPH, zaměstnanost, náhrady zaměstnancům)")
+    sub.add_parser("eurostat", help="načte regionální účty Eurostatu a statistiku podniků podle velikosti (SBS) s kurzem")
     p_vse = sub.add_parser("vse", help="číselníky + snímek + agregáty")
     p_vse.add_argument("--adresar", type=Path)
     sub.add_parser("prehled", help="vypíše kvalitu, srovnání s ČSÚ, kontrolu jádra a pilot")
@@ -520,7 +546,7 @@ def main() -> int:
                 print(f"  dávka {davka} OK")
         if args.prikaz in ("agregaty", "eurostat", "vse"):
             print("Regionální účty Eurostatu:")
-            for davka in nacti_eurostat(conn):
+            for davka in nacti_eurostat(conn) + nacti_sbs(conn):
                 print(f"  dávka {davka} OK")
         if args.prikaz in ("agregaty", "mzdy", "vse"):
             print("Zaměstnanci a mzdy ČSÚ:")

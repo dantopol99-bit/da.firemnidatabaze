@@ -190,7 +190,11 @@
   #if k.nedostupne != none { nedostupne_box(k.nedostupne) }
   #vyklad(k.vyklad)
   #for o in k.obsah {
-    if o.typ == "tabulka" { tabulka(o) } else { graf(o) }
+    if o.typ == "tabulka" { tabulka(o) }
+    else if o.typ == "graf" { graf(o) }
+    else if o.typ == "nadpis" { heading(level: 2, o.text) }
+    else if o.typ == "odstavec" { block(width: 100%, inset: 8pt, radius: 3pt, fill: podklad, text(size: 8.5pt, o.text)) }
+    else if o.typ == "vyklad" { vyklad(o.bloky) }
   }
   #if k.pododdil != none [
     == #k.pododdil.nadpis

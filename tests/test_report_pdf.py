@@ -20,7 +20,7 @@ from tests.test_res_import_db import CONN, SNIMKY
 KOREN = Path(__file__).resolve().parents[1]
 VZOR = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-09-15"
 TYPST = shutil.which("typst")
-L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 24)} | {
+L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 28)} | {
     k: "graf A" for k in ("g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po",
                           "g_zanik")}
 VYKLAD_HOTOVY = """# Výklad analytika
@@ -56,6 +56,16 @@ Text.
 Text.
 
 ## Ekonomický profil
+
+### Proč to tak může být
+
+Text.
+
+### Co z toho plyne
+
+Text.
+
+## Modelové odhady
 
 ### Proč to tak může být
 
@@ -105,8 +115,8 @@ class TestBezDatabaze(unittest.TestCase):
         v = Vstup(json.loads((VZOR / "vysledek.json").read_text(encoding="utf-8")))
         texty = report_vyklad.zjisteni_priloha(v, L)
         bloky = []
-        for f in (report_vyklad.postaveni, report_vyklad.struktura, report_vyklad.ekonomika, report_vyklad.zamestnanost,
-                  report_vyklad.dynamika):
+        for f in (report_vyklad.postaveni, report_vyklad.struktura, report_vyklad.ekonomika,
+                  report_vyklad.modelove_odhady, report_vyklad.zamestnanost, report_vyklad.dynamika):
             bloky += f(v, L)
         return texty + [b["text"] for b in bloky], bloky
 
@@ -180,16 +190,17 @@ class TestBezDatabaze(unittest.TestCase):
                              encoding="utf-8")
             self.assertEqual(report_vyklad.nacti_vyklad_analytika(cesta)[0], "zastupny")
 
-    def test_pilotni_vyklad_je_hotovy(self):
-        """Pilot má text analytika ve všech oddílech a žádný zástupný text (lze ho vysázet jako schválený)."""
+    def test_pilotni_vyklad_ceka_jen_na_modelove_odhady(self):
+        """Text analytika je hotový ve všech oddílech kromě nového pododdílu Modelové odhady (zástupný text)."""
         soubor = KOREN / "reporty" / "vyklad" / "F__CZ051__2026-09-15.md"
         stav, bloky = report_vyklad.nacti_vyklad_analytika(soubor)
-        self.assertEqual(stav, "hotovy")
-        self.assertEqual(set(bloky), {"shrnuti", "postaveni", "struktura", "ekonomicky_profil", "zamestnanost",
-                                      "dynamika"})
+        self.assertEqual(stav, "zastupny")
+        self.assertEqual(set(bloky), {"shrnuti", "postaveni", "struktura", "ekonomicky_profil", "modelove_odhady",
+                                      "zamestnanost", "dynamika"})
         for oddil, b in bloky.items():
             self.assertTrue(b, oddil)
-            self.assertFalse(any(report_vyklad.ZASTUPNY_TEXT in x["text"] for x in b), oddil)
+            zastupny = any(report_vyklad.ZASTUPNY_TEXT in x["text"] for x in b)
+            self.assertEqual(zastupny, oddil == "modelove_odhady", oddil)
 
 
 @unittest.skipIf(TYPST is None, "typst není v PATH")

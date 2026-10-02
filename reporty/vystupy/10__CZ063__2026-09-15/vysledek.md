@@ -259,6 +259,22 @@ Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku
 > Nejbližší publikovaná úroveň: region soudržnosti (NUTS 2) – náhrady zaměstnancům Eurostat za kraje nepublikuje. Region zahrnuje více krajů; srovnávací kraj ze stejného regionu má stejné hodnoty.
 > Podíl náhrad zaměstnancům na HPH ukazuje, jaká část přidané hodnoty připadá na mzdy a pojistné zaměstnanců; zbytek tvoří hlavně hrubý provozní přebytek a smíšený důchod (příjem podnikatelů).
 
+## T24_model_velikost: Modelový odhad: přidaná hodnota a obrat oboru podle velikosti subjektů
+
+_Nezveřejněno: model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně._
+
+## T25_model_koncentrace: Modelový odhad: koncentrace – podíl subjektů s 10+ a 50+ zaměstnanými osobami
+
+_Nezveřejněno: model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně._
+
+## T26_sbs_cr: Statistika podniků za ČR podle velikosti: typický obrat a marže (fakt za ČR, Eurostat SBS)
+
+_Nezveřejněno: model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně._
+
+## T27_model_kontrola: Kontrola konzistence: model použitý na celou ČR proti statistice podniků (SBS)
+
+_Nezveřejněno: model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně._
+
 ## T20_mzdy_obor: Zaměstnanci a průměrné mzdy v oboru – kraje a ČR (ČSÚ, roční zjišťování) – sekce C
 
 | Položka | Zaměstnanci v oboru (tis., přepočtené) | Podíl na zaměstnancích oboru v ČR (%) | Podíl oboru na zaměstnancích území (%) | Průměrná mzda v oboru (Kč) | Mzda proti oboru v ČR (ČR = 100) | Mzda proti všem odvětvím území (= 100) | Poznámka |

@@ -42,13 +42,14 @@
    "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
    "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
    "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy",
-   "Eurostat, regionální účty: nama_10r_3gva, nama_10r_3empers, nama_10r_2coe (https://ec.europa.eu/eurostat/databrowser/view/<kód sady>/default/table), staženo 2026-10-01; upraveno (výběr, podíly, poměry, řetězení objemových změn) – za úpravy Eurostat neodpovídá."
+   "Eurostat, regionální účty: nama_10r_3gva, nama_10r_3empers, nama_10r_2coe (https://ec.europa.eu/eurostat/databrowser/view/<kód sady>/default/table), staženo 2026-10-01; upraveno (výběr, podíly, poměry, řetězení objemových změn) – za úpravy Eurostat neodpovídá.",
+   "Eurostat, statistika podniků podle velikosti (sbs_sc_ovw) a kurz CZK/EUR (ert_bil_eur_a), staženo 2026-10-02; použito pro modelové odhady – upraveno, za úpravy Eurostat neodpovídá."
   ],
   "licence": {
    "nazev": "CC BY 4.0",
    "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
   },
-  "vygenerovano": "2026-10-01T20:14:53+00:00",
+  "vygenerovano": "2026-10-02T06:51:30+00:00",
   "ukazatele": [
    {
     "kod": "REG_POCET",
@@ -2992,6 +2993,146 @@
     "Podíl náhrad zaměstnancům na HPH ukazuje, jaká část přidané hodnoty připadá na mzdy a pojistné zaměstnanců; zbytek tvoří hlavně hrubý provozní přebytek a smíšený důchod (příjem podnikatelů)."
    ],
    "skupina": "C"
+  },
+  {
+   "kod": "T24_model_velikost",
+   "nazev": "Modelový odhad: přidaná hodnota a obrat oboru podle velikosti subjektů",
+   "sloupce": [
+    {
+     "kod": "hph_lo",
+     "nazev": "Přidaná hodnota – dolní mez (mil. Kč)",
+     "ukazatel": "MODEL_HPH"
+    },
+    {
+     "kod": "hph_hi",
+     "nazev": "Přidaná hodnota – horní mez (mil. Kč)",
+     "ukazatel": "MODEL_HPH"
+    },
+    {
+     "kod": "podil_lo",
+     "nazev": "Podíl na přidané hodnotě – dolní (%)",
+     "ukazatel": "MODEL_HPH_PODIL"
+    },
+    {
+     "kod": "podil_hi",
+     "nazev": "Podíl na přidané hodnotě – horní (%)",
+     "ukazatel": "MODEL_HPH_PODIL"
+    },
+    {
+     "kod": "obrat_lo",
+     "nazev": "Obrat – dolní mez (mil. Kč)",
+     "ukazatel": "MODEL_OBRAT"
+    },
+    {
+     "kod": "obrat_hi",
+     "nazev": "Obrat – horní mez (mil. Kč)",
+     "ukazatel": "MODEL_OBRAT"
+    }
+   ],
+   "radky": [],
+   "zverejneno": false,
+   "duvod": "model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně",
+   "poznamky": []
+  },
+  {
+   "kod": "T25_model_koncentrace",
+   "nazev": "Modelový odhad: koncentrace – podíl subjektů s 10+ a 50+ zaměstnanými osobami",
+   "sloupce": [
+    {
+     "kod": "hph_lo",
+     "nazev": "Podíl na přidané hodnotě – dolní (%)",
+     "ukazatel": "MODEL_KONCENTRACE"
+    },
+    {
+     "kod": "hph_hi",
+     "nazev": "Podíl na přidané hodnotě – horní (%)",
+     "ukazatel": "MODEL_KONCENTRACE"
+    },
+    {
+     "kod": "obrat_lo",
+     "nazev": "Podíl na obratu – dolní (%)",
+     "ukazatel": "MODEL_KONCENTRACE"
+    },
+    {
+     "kod": "obrat_hi",
+     "nazev": "Podíl na obratu – horní (%)",
+     "ukazatel": "MODEL_KONCENTRACE"
+    }
+   ],
+   "radky": [],
+   "zverejneno": false,
+   "duvod": "model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně",
+   "poznamky": []
+  },
+  {
+   "kod": "T26_sbs_cr",
+   "nazev": "Statistika podniků za ČR podle velikosti: typický obrat a marže (fakt za ČR, Eurostat SBS)",
+   "sloupce": [
+    {
+     "kod": "podniky",
+     "nazev": "Podniky",
+     "ukazatel": "SBS_PODNIKY"
+    },
+    {
+     "kod": "osoby",
+     "nazev": "Zaměstnané osoby",
+     "ukazatel": "SBS_OSOBY"
+    },
+    {
+     "kod": "obrat_podnik",
+     "nazev": "Obrat na podnik (mil. Kč)",
+     "ukazatel": "SBS_OBRAT_PODNIK"
+    },
+    {
+     "kod": "obrat_podnik_lo",
+     "nazev": "Obrat na podnik, oddíly – min. (mil. Kč)",
+     "ukazatel": "SBS_OBRAT_PODNIK"
+    },
+    {
+     "kod": "obrat_podnik_hi",
+     "nazev": "Obrat na podnik, oddíly – max. (mil. Kč)",
+     "ukazatel": "SBS_OBRAT_PODNIK"
+    },
+    {
+     "kod": "marze",
+     "nazev": "Hrubý provozní přebytek / obrat (%)",
+     "ukazatel": "SBS_MARZE"
+    }
+   ],
+   "radky": [],
+   "zverejneno": false,
+   "duvod": "model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně",
+   "poznamky": []
+  },
+  {
+   "kod": "T27_model_kontrola",
+   "nazev": "Kontrola konzistence: model použitý na celou ČR proti statistice podniků (SBS)",
+   "sloupce": [
+    {
+     "kod": "model_lo",
+     "nazev": "Model – dolní",
+     "ukazatel": "MODEL_KONTROLA"
+    },
+    {
+     "kod": "model_hi",
+     "nazev": "Model – horní",
+     "ukazatel": "MODEL_KONTROLA"
+    },
+    {
+     "kod": "sbs",
+     "nazev": "SBS (fakt)",
+     "ukazatel": "MODEL_KONTROLA"
+    },
+    {
+     "kod": "odchylka",
+     "nazev": "Vzdálenost faktu od pásma (p. b. nebo %)",
+     "ukazatel": "MODEL_KONTROLA"
+    }
+   ],
+   "radky": [],
+   "zverejneno": false,
+   "duvod": "model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně",
+   "poznamky": []
   },
   {
    "kod": "T20_mzdy_obor",

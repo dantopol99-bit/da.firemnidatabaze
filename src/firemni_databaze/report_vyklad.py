@@ -27,6 +27,7 @@ KOREN = Path(__file__).resolve().parents[2]
 VYKLAD = KOREN / "reporty" / "vyklad"
 ZASTUPNY_TEXT = "ZÁSTUPNÝ TEXT"
 KAPITOLY = {"postaveni": "Postavení území", "struktura": "Struktura", "ekonomicky_profil": "Ekonomický profil",
+            "modelove_odhady": "Modelové odhady",
             "zamestnanost": "Zaměstnanost a mzdy",
             "dynamika": "Dynamika území a kontext ČR"}
 ODDILY = {"shrnuti": "Shrnutí", **KAPITOLY}     # oddíly souboru analytika (shrnutí = body strany 2)
@@ -333,6 +334,42 @@ def ekonomika(v: Vstup, L: dict) -> list[dict]:
     if not casti:
         return [_blok("vidět", f"Regionální účty pro toto území nejsou k dispozici ({L['T22']}).")]
     return [_blok("vidět", " ".join(casti))] + zjisteni_kapitoly(v, "ekonomicky_profil", L)
+
+
+# ---------------------------------------------------------------------------
+# Co je vidět: modelové odhady (pododdíl Ekonomického profilu) – NE fakta
+# ---------------------------------------------------------------------------
+
+def modelove_odhady(v: Vstup, L: dict) -> list[dict]:
+    t24, t25, t27 = v.t("T24_model_velikost"), v.t("T25_model_koncentrace"), v.t("T27_model_kontrola")
+    if not t24:
+        duvod = (v.tab.get("T24_model_velikost") or {}).get("duvod") or "vstupy nejsou k dispozici"
+        return [_blok("vidět", f"Modelové odhady pro tento obor nelze sestavit: {duvod} ({L['T24']}).")]
+    rok = t24.get("rok")
+    kraj = v.uzemi["kraj"] or "CZ"
+    v_kraji = lokativ(kraj)
+    casti = [f"Modelový odhad (ne statistika), rok {rok}:"]
+    cel = next((r for r in t24["radky"] if r["typ"] == "celkem"), None)
+    if cel:
+        h = cel["hodnoty"]
+        casti.append(f"obrat oboru {v_kraji} vychází odhadem na {cz(h['obrat_lo'])}–{cz(h['obrat_hi'])} mil. Kč "
+                     f"({L['T24']}).")
+    if t25:
+        for r in t25["radky"]:
+            h = r["hodnoty"]
+            casti.append(f"{r['popis']} nesou odhadem {cz(h['hph_lo'])}–{cz(h['hph_hi'])} % přidané hodnoty a "
+                         f"{cz(h['obrat_lo'])}–{cz(h['obrat_hi'])} % obratu oboru ({L['T25']}).")
+    if t27:
+        tridy = [r for r in t27["radky"] if r["popis"].startswith("Podíl třídy")]
+        uvnitr = sum(1 for r in tridy if r["hodnoty"]["odchylka"] == 0)
+        obrat = next((r for r in t27["radky"] if r["popis"].startswith("Obrat")), None)
+        veta = (f"Kontrola na celé ČR: celostátní podíl tříd na přidané hodnotě (SBS) leží uvnitř pásma modelu "
+                f"u {cz(uvnitr)} z {cz(len(tridy))} tříd")
+        if obrat and obrat["hodnoty"]["odchylka"]:
+            veta += (f"; obrat model nadhodnocuje o {cz(obrat['hodnoty']['odchylka'])} %, protože přidaná hodnota "
+                     f"národních účtů je vyšší než v SBS")
+        casti.append(veta + f" ({L['T27']}).")
+    return [_blok("vidět", " ".join(casti))]
 
 
 # ---------------------------------------------------------------------------

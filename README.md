@@ -25,6 +25,7 @@ dělat analýzy a reporty.
 │   ├── report_vyklad.py    # výklad: „co je vidět“ (stroj) + načtení výkladu analytika
 │   ├── report_zjisteni.py  # detektor zjištění (síla, odkazy na tabulky, věcný popis)
 │   ├── report_cestina.py   # názvy území v 6. pádě z ručně psané tabulky
+│   ├── report_model.py     # modelové odhady ekonomického profilu (pásma, ne fakta)
 │   └── report_pdf.py       # sazba PDF v Typstu z výstupu JSON
 ├── sql/init/               # SQL skripty spouštěné při prvním startu databáze
 ├── sql/dev/                # identitní jádro – tabulky ve schématu dev
@@ -137,6 +138,7 @@ Zdroj, mapování sloupců, kvalita, srovnání s ČSÚ a omezení: [`docs/res_z
 | `06_report_zdroje.sql` | `res.csu_obyvatelstvo` (OBY02A), `res.csu_vznik_zanik` (RES05), `res.csu_demografie` (RESDP00) |
 | `07_mzdy.sql` | `res.csu_mzdy` – zaměstnanci a průměrné mzdy (MZDCRR, MZDR) |
 | `08_eurostat.sql` | `res.eu_regionalni_ucty` – regionální účty Eurostatu (HPH, zaměstnanost, náhrady zaměstnancům) |
+| `09_eurostat_sbs.sql` | `res.eu_sbs` – statistika podniků podle velikosti (sbs_sc_ovw) a kurz CZK/EUR – vstupy modelových odhadů |
 
 ```bash
 python -m firemni_databaze.nasad_sql dev            # res používá dev.import_davka
