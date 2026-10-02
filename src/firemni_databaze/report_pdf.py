@@ -239,7 +239,8 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
                   "podle velikosti podniků (Eurostat, statistika podniků). Uvádějí se jako pásmo (dolní a horní mez "
                   "podle zařazení subjektů s neuvedeným počtem zaměstnanců) a nevstupují do zjištění detektoru."})
     obsah.append({"typ": "vyklad", "klic": "modelove_odhady", "bloky": []})
-    for kod in ("T24_model_velikost", "T25_model_koncentrace", "T26_sbs_cr", "T27_model_kontrola"):
+    for kod in ("T28_model_prepocet", "T24_model_velikost", "T25_model_koncentrace", "T26_sbs_cr",
+                "T27_model_kontrola"):
         if v.t(kod):
             obsah.append(tabulka(v.tab[kod], s.pismeno_tab(kod[:3]),
                                  zdroj_eu.replace("regionální účty (nama_10r_3gva, nama_10r_3empers, nama_10r_2coe)",
@@ -326,7 +327,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
 
     # --- výklad (po přidělení písmen) --------------------------------------------------
     L = {k: s.L.get(k, "příloha") for k in
-         [f"T{i:02d}" for i in range(1, 28)]
+         [f"T{i:02d}" for i in range(1, 29)]
          + ["g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
     for k in kapitoly:
         k["nedostupne"] = None

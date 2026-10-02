@@ -20,7 +20,7 @@ from tests.test_res_import_db import CONN, SNIMKY
 KOREN = Path(__file__).resolve().parents[1]
 VZOR = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-09-15"
 TYPST = shutil.which("typst")
-L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 28)} | {
+L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 29)} | {
     k: "graf A" for k in ("g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po",
                           "g_zanik")}
 VYKLAD_HOTOVY = """# Výklad analytika

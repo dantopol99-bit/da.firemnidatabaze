@@ -49,7 +49,7 @@
    "nazev": "CC BY 4.0",
    "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
   },
-  "vygenerovano": "2026-10-02T06:51:30+00:00",
+  "vygenerovano": "2026-10-02T07:13:46+00:00",
   "ukazatele": [
    {
     "kod": "REG_POCET",
@@ -2995,17 +2995,32 @@
    "skupina": "C"
   },
   {
+   "kod": "T28_model_prepocet",
+   "nazev": "Přepočet přidané hodnoty na úroveň statistiky podniků (vstup modelu)",
+   "sloupce": [
+    {
+     "kod": "hodnota",
+     "nazev": "Hodnota",
+     "ukazatel": null
+    }
+   ],
+   "radky": [],
+   "zverejneno": false,
+   "duvod": "model je zatím jen pro obor zadaný jako celá sekce CZ-NACE: krajská přidaná hodnota existuje jen za skupiny A*10 a podnikové poměry SBS za sekce a oddíly – pro užší obor by se míchaly úrovně",
+   "poznamky": []
+  },
+  {
    "kod": "T24_model_velikost",
    "nazev": "Modelový odhad: přidaná hodnota a obrat oboru podle velikosti subjektů",
    "sloupce": [
     {
      "kod": "hph_lo",
-     "nazev": "Přidaná hodnota – dolní mez (mil. Kč)",
+     "nazev": "Přidaná hodnota na úrovni SBS – dolní (mil. Kč)",
      "ukazatel": "MODEL_HPH"
     },
     {
      "kod": "hph_hi",
-     "nazev": "Přidaná hodnota – horní mez (mil. Kč)",
+     "nazev": "Přidaná hodnota na úrovni SBS – horní (mil. Kč)",
      "ukazatel": "MODEL_HPH"
     },
     {

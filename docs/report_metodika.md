@@ -69,6 +69,13 @@ nebo 50 za minutu, CAPTCHA) se automaticky nepoužívá. Firemní účetní úda
 dohodě s Ministerstvem spravedlnosti. Webové služby ISIR (port 8443) z cloudového prostředí nejsou
 dostupné; obcházet přes webové rozhraní se nebudou.
 
+**Rozhodnutí 14 (2. 10. 2026): modelové odhady jsou standardní součástí reportu** pro obory, kde model
+funguje – obor zadaný jako celá sekce CZ-NACE, která je v regionálních účtech samostatnou skupinou A*10
+(A, C, F, J, L). Před výpočtem obratu se krajská přidaná hodnota přepočte na úroveň statistiky podniků
+(SBS) poměrem přidané hodnoty SBS a národních účtů za ČR pro týž obor a rok (T28). Kontrola konzistence
+na ČR: celostátní obrat SBS musí ležet v pásmu modelu a obě meze se od něj smějí lišit nejvýš o ±1 %;
+přesná shoda se vyžaduje jen u modelu s počty podniků ze SBS (jednotkový test).
+
 **Upřesnění k rozhodnutí 1:** kontrola zakázaných slov povoluje jen sousloví **„aktivní podnik(y)“**.
 Je to oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10), ne označení
 registrovaných subjektů.
@@ -349,13 +356,21 @@ snímku – spojení různých let je součástí modelu a je uvedeno u každé 
 **Ochrana malých buněk:** třída s méně než 10 subjekty v kraji (RES, v obou variantách) se sloučí s vyšší;
 podíl nad hranicí (10+, 50+) se nezveřejní, pokud by hranice rozdělila sloučenou skupinu.
 
+**Přepočet na úroveň SBS (rozhodnutí 14, T28):** přidaná hodnota národních účtů zahrnuje
+i neregistrovanou ekonomiku a oceňuje jinak než SBS (pro F 2024: 409 647 proti 300 901 mil. Kč, o 36,1 %
+více). Bez přepočtu model nadhodnocoval obrat o 35,6 %. Proto se krajská přidaná hodnota před výpočtem
+obratu násobí poměrem SBS / národní účty za ČR pro týž obor a rok (F 2024: 0,7345; pilot: 12 598 →
+9 254 mil. Kč). **Předpoklad:** podíl neregistrované ekonomiky a rozdílů v ocenění je v kraji stejný jako
+v ČR. Je to jen měřítko – podíly tříd a koncentrace se nemění (ověřeno na pilotu i jednotkovým testem).
+V reportu je fakt (národní účty, kapitola Ekonomický profil) a vstup modelu (na úrovni SBS) odlišen
+tabulkou přepočtu T28 a názvy sloupců T24 („na úrovni SBS“).
+
 **Kontrola konzistence (T27):** model se stejnými vstupy za celou ČR proti celostátním hodnotám SBS.
 Pilot (F, 2024): celostátní podíl každé z pěti tříd na přidané hodnotě leží **uvnitř pásma modelu**;
-obrat sekce model **nadhodnocuje o 35,6 %** (od bližší meze), protože přidaná hodnota národních účtů
-(409 647 mil. Kč) je o 36,1 % vyšší než přidaná hodnota SBS (300 901 mil. Kč) – národní účty zahrnují
-i neregistrovanou ekonomiku a oceňují jinak. **Absolutní obrat je proto nespolehlivý**, podíly tříd
-a koncentrace spolehlivější. Model na vlastních celostátních počtech podniků SBS vrací přesně hodnoty
-SBS (jednotkový test).
+celostátní obrat SBS 1 299 398 mil. Kč leží v pásmu modelu 1 294 582–1 310 324 mil. Kč (meze −0,37 %
+a +0,84 %) – kritérium ±1 % je splněno. Přesně model obrat SBS nevrací, protože velikostní struktura
+z RES se liší od struktury podniků SBS a poměr obrat / přidaná hodnota se mezi třídami liší (0–9: 4,14;
+250+: 5,08). Model na vlastních celostátních počtech podniků SBS vrací přesně hodnoty SBS (jednotkový test).
 
 **Omezení:** jen obor zadaný jako celá sekce, která je samostatnou skupinou A*10 (A, C, F, J, L; K a
 některé další sekce SBS nepokrývá); KATPO (zaměstnanci) ≠ třídy SBS (zaměstnané osoby) na hranicích
