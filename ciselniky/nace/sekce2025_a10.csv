@@ -1,0 +1,23 @@
+sekce_2025,a10_rev2,sekce_rev2,poznamka
+A,A,A,
+B,B-E,B,
+C,C,C,"C je v A*10 samostatně a zároveň součástí B-E"
+D,B-E,D,
+E,B-E,E,
+F,F,F,
+G,G-I,G,
+H,G-I,H,
+I,G-I,I,
+J,J,J,
+K,J,J,"sekce K 2025 (telekomunikace, programování, informační činnosti) je v Rev. 2 součástí sekce J"
+L,K,K,
+M,L,L,
+N,M_N,M,
+O,M_N,N,
+P,O-Q,O,
+Q,O-Q,P,
+R,O-Q,Q,
+S,R-U,R,
+T,R-U,S,
+U,R-U,T,
+V,R-U,U,

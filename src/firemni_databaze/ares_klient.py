@@ -1,8 +1,10 @@
 """Stahování dat z veřejného REST API ARES.
 
-Pro každé IČO se stahují dvě odpovědi:
+Pro každé IČO se stahují tři odpovědi:
   * ekonomicke-subjekty     – základní záznam (aktuální stav ze všech registrů),
-  * ekonomicke-subjekty-vr  – výpis z veřejného (obchodního) rejstříku s historií.
+  * ekonomicke-subjekty-vr  – výpis z veřejného (obchodního) rejstříku s historií,
+  * ekonomicke-subjekty-res – záznam z Registru ekonomických subjektů ČSÚ: převažující činnost
+                              podle CZ-NACE 2025 i 2008 (czNacePrevazujici, czNacePrevazujici2008).
 """
 
 import json
@@ -14,7 +16,8 @@ from dataclasses import dataclass
 ARES_URL = "https://ares.gov.cz/ekonomicke-subjekty-v-be/rest"
 ENDPOINT_ZAKLAD = "ekonomicke-subjekty"
 ENDPOINT_VR = "ekonomicke-subjekty-vr"
-ENDPOINTY = (ENDPOINT_ZAKLAD, ENDPOINT_VR)
+ENDPOINT_RES = "ekonomicke-subjekty-res"
+ENDPOINTY = (ENDPOINT_ZAKLAD, ENDPOINT_VR, ENDPOINT_RES)
 
 
 @dataclass

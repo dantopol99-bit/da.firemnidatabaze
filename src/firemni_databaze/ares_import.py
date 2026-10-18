@@ -6,7 +6,7 @@ Spuštění:
     python -m firemni_databaze.ares_import --adresar data/ares_vzorek   # offline: <adresar>/<endpoint>/<ico>.json
 
 Postup pro každé IČO:
-  1. stáhne (nebo načte) obě odpovědi ARES a VŽDY je uloží do import_surova_data,
+  1. stáhne (nebo načte) odpovědi ARES (základní, VR, RES) a VŽDY je uloží do import_surova_data,
   2. převede je na řádky jádra (ares_mapovani),
   3. zapíše je s historizací: aktuálně evidované verze, které se nezměnily
      (stejný hash_obsahu), zůstanou; zmizelé se uzavřou (zaznamenano_do);
@@ -28,6 +28,7 @@ from psycopg2.extras import Json
 
 from firemni_databaze import ares_klient
 from firemni_databaze.ares_mapovani import MapovanySubjekt, mapuj, normalizuj
+from firemni_databaze.nace_firmy import zapis_ares
 from firemni_databaze.db import get_engine
 
 SLOUPCE_VERZE = (
@@ -237,9 +238,18 @@ def nejnovejsi_udaje_osob(mapovane: list[MapovanySubjekt]) -> dict:
 # Běh dávky
 # ---------------------------------------------------------------------------
 
+def res_zaznam(odpoved: ares_klient.Odpoved | None) -> dict | None:
+    """Primární záznam z endpointu ekonomicke-subjekty-res (nebo None, když chybí)."""
+    if odpoved is None or not odpoved.nalezeno:
+        return None
+    zaznamy = odpoved.data.get("zaznamy") or []
+    return next((z for z in zaznamy if z.get("primarniZaznam")), zaznamy[0] if zaznamy else None)
+
+
 def nacti_z_adresare(adresar: Path, ico: str) -> dict[str, ares_klient.Odpoved]:
     vysledek = {}
-    for endpoint, podadresar in ((ares_klient.ENDPOINT_ZAKLAD, "zakl"), (ares_klient.ENDPOINT_VR, "vr")):
+    for endpoint, podadresar in ((ares_klient.ENDPOINT_ZAKLAD, "zakl"), (ares_klient.ENDPOINT_VR, "vr"),
+                                 (ares_klient.ENDPOINT_RES, "res")):
         soubor = adresar / podadresar / f"{ico}.json"
         data = json.loads(soubor.read_text(encoding="utf-8")) if soubor.exists() else {"kod": "NENALEZENO"}
         vysledek[endpoint] = ares_klient.Odpoved(endpoint, 404 if "kod" in data else 200, data)
@@ -263,6 +273,7 @@ def importuj(ica: list[str], zdroj_popis: str, nacti) -> tuple[int, Counter, lis
 
         # 1) stažení + uložení surových dat (vždy), 2) převod
         mapovane: list[MapovanySubjekt] = []
+        res_zaznamy: dict[str, dict | None] = {}
         for ico in ica:
             try:
                 odpovedi = nacti(ico)
@@ -275,18 +286,24 @@ def importuj(ica: list[str], zdroj_popis: str, nacti) -> tuple[int, Counter, lis
                     raise ValueError(f"ARES subjekt nenašel ({zakl.data.get('kod')})")
                 m = mapuj(zakl.data, odpovedi[ares_klient.ENDPOINT_VR].data)
                 mapovane.append(m)
+                res_zaznamy[ico] = res_zaznam(odpovedi.get(ares_klient.ENDPOINT_RES))
                 preskoceno += [(ico, d, x) for d, x in m.preskoceno]
                 stat["varovani"] += len(m.varovani)
             except Exception as exc:  # noqa: BLE001 – chyba jednoho subjektu nezastaví dávku
                 conn.rollback()
                 chyby.append((ico, f"{type(exc).__name__}: {exc}"))
 
-        # 3) zápis do jádra, každý subjekt ve vlastní transakci
+        # 3) zápis do jádra, každý subjekt ve vlastní transakci; kódy CZ-NACE obou verzí do obor.firma_nace
         osoby = nejnovejsi_udaje_osob(mapovane)
+        with conn.cursor() as cur:
+            cur.execute("SELECT to_regclass('obor.firma_nace') IS NOT NULL")
+            je_obor = cur.fetchone()[0]
         for m in mapovane:
             try:
                 with conn.cursor() as cur:
                     uloz_subjekt(cur, m, osoby, davka, stat)
+                    if je_obor:
+                        stat["nace_kody"] += zapis_ares(cur, m.ico, res_zaznamy.get(m.ico), davka)
                 conn.commit()
                 stat["subjekty_zpracovane"] += 1
             except Exception as exc:  # noqa: BLE001

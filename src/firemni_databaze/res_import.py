@@ -102,7 +102,8 @@ def nacti_ciselniky(conn, k_datu: date) -> int:
 
         p = {k: v[3] for k, v in stazene.items()}
         tabulky = {
-            "cis_nace": z.radky_nace(p["CZ_NACE_RES"], 80004) + z.radky_nace(p["CZ_NACE_RES2025"], 80143),
+            "cis_nace": (z.radky_nace(z.s_pseudokody(p["CZ_NACE_RES"]), 80004)
+                         + z.radky_nace(z.s_pseudokody(p["CZ_NACE_RES2025"]), 80143)),
             "cis_kraj": z.radky_kraj(p["100"]),
             "cis_okres": z.radky_okres(p["109"], p["109-108"]),
             "cis_pravni_forma": z.radky_pravni_forma(p["56"], 56) + z.radky_pravni_forma(p["149"], 149),
@@ -130,7 +131,7 @@ def nacti_ciselniky(conn, k_datu: date) -> int:
         conn.commit()
         return sum(len(r) for r in tabulky.values()), f"číselníky ČSÚ k {k_datu:%d.%m.%Y}"
 
-    return v_davce(conn, "CSU-CISELNIKY", "apl2.czso.cz/iSMS + vdb.czso.cz", prace)
+    return v_davce(conn, "CSU-CISELNIKY", "apl2.czso.cz/iSMS", prace)
 
 
 # ---------------------------------------------------------------------------
