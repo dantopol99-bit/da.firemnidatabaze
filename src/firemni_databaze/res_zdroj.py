@@ -147,7 +147,9 @@ def over_strukturu(soubor: str, hlavicka: list[str], metadata: dict) -> None:
 # ---------------------------------------------------------------------------
 
 ISMS_EXPORT = "https://apl2.czso.cz/iSMS/do_cis_export"
-VDB_CISELNIK = "https://vdb.czso.cz/opendata/ciselniky/polozky?kod="
+# vdb.czso.cz (dřívější zdroj CZ_NACE_RES a CZ_NACE_RES2025) má od října 2026 v robots.txt
+# „User-agent: * / Disallow: /“ – nepoužívá se (rozhodnutí 13). CZ-NACE se bere z iSMS
+# (klasifikace 80004 a 80143) a doplňují se pseudokódy RES (nace_ciselniky.PSEUDOKODY).
 
 
 def url_ciselniku(kodcis: int, k_datu: date, vazba: str | None = None) -> str:
@@ -171,17 +173,14 @@ class Ciselnik:
     tabulka: str         # cílová tabulka res.cis_*
     kodcis: int | None = None
     vazba: str | None = None
-    vdb_kod: str | None = None
 
     def url(self, k_datu: date) -> str:
-        if self.vdb_kod:
-            return VDB_CISELNIK + self.vdb_kod
         return url_ciselniku(self.kodcis, k_datu, self.vazba)
 
 
 CISELNIKY = (
-    Ciselnik("CZ_NACE_RES", "CZ-NACE pro RES (klasifikace 80004)", "cis_nace", vdb_kod="CZ_NACE_RES"),
-    Ciselnik("CZ_NACE_RES2025", "CZ-NACE 2025 pro RES (klasifikace 80143)", "cis_nace", vdb_kod="CZ_NACE_RES2025"),
+    Ciselnik("CZ_NACE_RES", "CZ-NACE (klasifikace 80004) + pseudokódy RES", "cis_nace", kodcis=80004),
+    Ciselnik("CZ_NACE_RES2025", "CZ-NACE 2025 (klasifikace 80143) + pseudokódy RES", "cis_nace", kodcis=80143),
     Ciselnik("100", "Kraj (CZ-NUTS 3 a kód RÚIAN)", "cis_kraj", kodcis=100),
     Ciselnik("109", "Okres (OKRES_LAU)", "cis_okres", kodcis=109),
     Ciselnik("109-108", "Vazba okres → kraj (109 → 108)", "cis_okres", kodcis=109, vazba="108_210"),
@@ -194,13 +193,26 @@ CISELNIKY = (
 
 
 def nacti_csv(obsah: bytes) -> list[dict]:
-    """CSV z ČSÚ → seznam slovníků s malými názvy sloupců (VDB je má velkými)."""
+    """CSV z ČSÚ → seznam slovníků s malými názvy sloupců."""
     text = obsah.decode("utf-8-sig")
     return [{k.lower(): (v if v != "" else None) for k, v in r.items()} for r in csv.DictReader(io.StringIO(text))]
 
 
 def _datum(hodnota: str | None) -> date | None:
     return date.fromisoformat(hodnota) if hodnota else None
+
+
+def s_pseudokody(polozky: list[dict]) -> list[dict]:
+    """Export iSMS + pseudokódy RES (X/04 nezjištěno, Y/00 neuvedeno v přílohách ŽZ),
+    které v oficiální klasifikaci nejsou, ale RES je v obou verzích používá."""
+    from firemni_databaze.nace_ciselniky import PSEUDOKODY
+
+    kody = {p["chodnota"] for p in polozky}
+    return polozky + [
+        {"chodnota": kod, "uroven": str(uroven), "nadvaz": nadrazeny, "text": nazev, "zkrtext": nazev,
+         "admplod": None, "admnepo": None}
+        for kod, uroven, nadrazeny, nazev in PSEUDOKODY if kod not in kody
+    ]
 
 
 def radky_nace(polozky: list[dict], klasifikace: int) -> list[dict]:

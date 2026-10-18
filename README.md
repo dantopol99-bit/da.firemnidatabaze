@@ -17,6 +17,8 @@ dělat analýzy a reporty.
 │   ├── ares_import.py      # import z ARES do dev (historizace + import_davka)
 │   ├── res_zdroj.py        # RES (ČSÚ): stažení, otisk, kontrola struktury, číselníky (bez DB)
 │   ├── res_import.py       # hromadný import RES do schématu res (COPY + import_davka)
+│   ├── nace_ciselniky.py   # číselníky CZ-NACE 2008/2025 a převodník (ČSÚ) → ciselniky/nace, schéma obor
+│   ├── nace_firmy.py       # kódy NACE firem v čase, matice přechodů 2008 → 2025, odvození, kontroly
 │   ├── report.py           # výpočet Oborově-regionálního reportu (obor × území × snímek)
 │   ├── report_potlaceni.py # práh 10, slučování do „ostatní“, kontrola dopočtu
 │   ├── report_xlsx.py      # datová příloha XLSX
@@ -30,6 +32,8 @@ dělat analýzy a reporty.
 ├── sql/init/               # SQL skripty spouštěné při prvním startu databáze
 ├── sql/dev/                # identitní jádro – tabulky ve schématu dev
 ├── sql/res/                # Registr ekonomických subjektů ČSÚ – schéma res
+├── sql/obor/               # klasifikace odvětví CZ-NACE 2008/2025 – schéma obor (rozhraní pro produkty)
+├── ciselniky/nace/         # číselníky CZ-NACE 2008 a 2025, převodník, sekce 2025 → A*10 (CSV z ČSÚ)
 ├── docs/                   # návrhy a rozhodnutí (mapování ARES, zdroj RES, metodika reportu)
 ├── reporty/                # katalog ukazatelů a vzorové výstupy reportu
 ├── tests/                  # testy (unittest)
@@ -46,6 +50,7 @@ dělat analýzy a reporty.
 |--------|------|
 | `dev`  | vývoj a pokusy (identitní jádro z ARES) |
 | `res`  | snímky Registru ekonomických subjektů ČSÚ (podklad Oborově-regionálního reportu) |
+| `obor` | klasifikace odvětví: CZ-NACE 2025 (primární) a 2008 s platností v čase, rozhraní `obor.v_firma_obor_aktualni` |
 | `test` | testování načítání dat |
 | `prod` | ověřená data |
 
@@ -154,6 +159,22 @@ se přeskočí, jiný soubor ke stejnému datu import odmítne. Chybí-li NACE s
 
 Testy nad načtenými daty (`tests/test_res_import_db.py`) potřebují databázi se snímkem, jinak se
 přeskočí. S `RES_ADRESAR=<adresář se soubory>` ověří počty řádků i proti samotným souborům.
+
+## Klasifikace odvětví CZ-NACE 2025 (schéma `obor`)
+
+Primární verze ve všech výstupech je CZ-NACE 2025, CZ-NACE 2008 je historický atribut. Kódy firem
+z RES (otevřená data i ARES) se ukládají s platností v čase do `obor.firma_nace`; firmám bez kódu 2025
+se kód odvodí z empirické matice přechodů. Rozhraní pro ostatní produkty (spojení přes oddíl 2025):
+`obor.v_firma_obor_aktualni`. Zdroje, pravidla a čísla: [`docs/cz-nace-2025.md`](docs/cz-nace-2025.md).
+
+```bash
+python -m firemni_databaze.nasad_sql obor            # po dev a res
+python -m firemni_databaze.nace_ciselniky nahraj     # číselníky z ciselniky/nace/*.csv
+python -m firemni_databaze.nace_firmy vse            # snímek RES → firma_nace, matice, odvození, kontroly
+```
+
+`ares_import` od této změny stahuje i endpoint `ekonomicke-subjekty-res` a kódy obou verzí zapisuje do
+`obor.firma_nace` (je-li schéma `obor` nasazené).
 
 ## Oborově-regionální report – výpočetní vrstva
 

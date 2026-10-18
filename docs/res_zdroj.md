@@ -66,7 +66,7 @@ a délka kódu NACE nesou význam. Klíč `(ico, datum_snimku)` je unikátní a 
 
 | otázka | sloupec | číselník ČSÚ | jak ho používáme |
 |---|---|---|---|
-| **převažující činnost** | `NACE` = „Převažující činnost (statistická)“ | klasifikace **80004** (CZ-NACE Rev. 2), rozšířená pro RES: [`CZ_NACE_RES`](https://vdb.czso.cz/opendata/ciselniky/polozky?kod=CZ_NACE_RES) | sekce/oddíl/skupina/třída z hierarchie číselníku (`res.cis_nace`) |
+| **převažující činnost** | `NACE` = „Převažující činnost (statistická)“ | klasifikace **80004** (CZ-NACE Rev. 2), rozšířená pro RES (`CZ_NACE_RES`); od 18. 10. 2026 z iSMS + pseudokódy RES, protože `vdb.czso.cz` robots.txt blokuje (viz [`cz-nace-2025.md`](cz-nace-2025.md)) | sekce/oddíl/skupina/třída z hierarchie číselníku (`res.cis_nace`) |
 | | `NACE2025` | klasifikace **80143** (CZ-NACE 2025): `CZ_NACE_RES2025` | totéž, `klasifikace = 80143` |
 | **kategorie počtu pracovníků** | `KATPO` | **579** (KATPOECD): 000 Neuvedeno, 110 Bez zaměstnanců, 120 1–5, 130 6–9, 210 10–19, 220 20–24, 230 25–49, 240 50–99, 310 100–199 … 510 10 000+ | `res.cis_katpo` |
 | **územní kód sídla** | `OKRESLAU` = kód okresu sídla (CZ-NUTS/LAU 1, např. `CZ0513` Liberec) | **109** (OKRES_LAU) | `res.cis_okres` |
