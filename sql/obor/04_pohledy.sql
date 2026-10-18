@@ -14,7 +14,10 @@
 -- nejpodrobnější úroveň, kterou se podařilo určit.
 -- Spojení s parlamentní a aktérskou analytikou: sloupec oddil (2 místa, CZ-NACE 2025).
 -- ---------------------------------------------------------------------
-CREATE OR REPLACE VIEW obor.v_firma_obor_aktualni AS
+-- DROP + CREATE: pohled nedrží data a CREATE OR REPLACE nezmění typ sloupce
+-- (první verze měla kandidati omylem jako text místo text[]).
+DROP VIEW IF EXISTS obor.v_firma_obor_aktualni;
+CREATE VIEW obor.v_firma_obor_aktualni AS
 WITH res25 AS (
     SELECT DISTINCT ON (ico) ico, kod, platnost_od, platnost_do
     FROM obor.firma_nace
@@ -28,10 +31,11 @@ res08 AS (
     ORDER BY ico, platnost_od DESC NULLS LAST, id DESC
 ),
 odv_posledni AS (
-    SELECT DISTINCT ON (ico) ico, platnost_od, odvozeno_z
+    -- řádek nejpodrobnější odvozené úrovně (= úroveň zdrojového kódu 2008) posledního stavu
+    SELECT DISTINCT ON (ico) ico, platnost_od, odvozeno_z, priznak, kandidati
     FROM obor.firma_nace
     WHERE verze = 2025 AND typ = 'hlavni' AND zdroj = 'odvozeno'
-    ORDER BY ico, platnost_od DESC NULLS LAST, id DESC
+    ORDER BY ico, platnost_od DESC NULLS LAST, uroven DESC, id DESC
 ),
 odv AS (
     SELECT
@@ -43,14 +47,13 @@ odv AS (
         max(f.kod) FILTER (WHERE f.uroven = 5)     AS podtrida,
         max(f.jistota) FILTER (WHERE f.uroven = 1) AS jistota_sekce,
         max(f.jistota) FILTER (WHERE f.uroven = 2) AS jistota_oddil,
-        -- nejpodrobnější odvozená úroveň = úroveň zdrojového kódu 2008
-        (array_agg(f.kandidati ORDER BY f.uroven DESC))[1]                     AS kandidati_zdroje,
-        coalesce((array_agg(f.priznak ORDER BY f.uroven DESC))[1] = 'nejednoznacne', false) AS nejednoznacne,
+        p.kandidati                                AS kandidati_zdroje,
+        coalesce(p.priznak = 'nejednoznacne', false) AS nejednoznacne,
         jsonb_object_agg(f.uroven, f.jistota)       AS jistoty
     FROM obor.firma_nace f
     JOIN odv_posledni p ON p.ico = f.ico AND p.platnost_od IS NOT DISTINCT FROM f.platnost_od
     WHERE f.verze = 2025 AND f.typ = 'hlavni' AND f.zdroj = 'odvozeno'
-    GROUP BY f.ico, f.odvozeno_z
+    GROUP BY f.ico, f.odvozeno_z, p.kandidati, p.priznak
 ),
 icos AS (
     SELECT ico FROM res25 UNION SELECT ico FROM res08 UNION SELECT ico FROM odv
