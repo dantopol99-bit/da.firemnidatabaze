@@ -157,15 +157,15 @@ def pary_5mist(list_2008: list[tuple], list_2025: list[tuple]) -> list[Par]:
     return list(pary.values())
 
 
-def pary_tridy_na_podtridy(pary4: list[Par], pary5: list[Par], l5_2008: set[str], l5_2025: set[str]) -> list[Par]:
+def pary_tridy_na_podtridy(pary4: list[Par], l5_2008: set[str], l5_2025: set[str]) -> list[Par]:
     """Podtřídy „xxxx0“ (třída se národně nečlení) v obou verzích: převod podle převodníku tříd.
-    Jen pro kódy, které převodník 5místných položek nepokrývá ani na jedné straně."""
-    pokryte_2008 = {p.kod_2008 for p in pary5}
-    pokryte_2025 = {p.kod_2025 for p in pary5}
+    Kód „xxxx0“ existuje právě tehdy, když se třída nečlení (národní podtřídy nulou nekončí), takže
+    pár se přidá vždy, když oba kódy existují. Převodník ČSÚ pro 5místné položky k nim přidá jen
+    páry s podtřídami, které se národně člení (kód „xxxx0“ tam bývá jen dílčím zdrojem nebo cílem)."""
     vysledek = []
     for p in pary4:
         a, b = p.kod_2008 + "0", p.kod_2025 + "0"
-        if a in l5_2008 and b in l5_2025 and a not in pokryte_2008 and b not in pokryte_2025:
+        if a in l5_2008 and b in l5_2025:
             vysledek.append(Par(a, b, 5, p.castecne, "odvozeno z převodníku tříd (podtřída se národně nečlení)"))
     return vysledek
 
@@ -241,7 +241,7 @@ def sestav(adresar: Path, cil: Path = ADRESAR) -> tuple[list[dict], list[dict]]:
                        _xlsx_list(adresar / "cz_5mist.xlsx", LIST_5MIST_2025))
     l5 = {v: {r["kod"] for r in ciselnik if r["verze"] == v and r["uroven"] == 5} for v in (2008, 2025)}
     pary_tridy = [p for p in pary4 if p.uroven == 4]
-    prevodnik = typy_vazby(pary4 + pary5 + pary_tridy_na_podtridy(pary_tridy, pary5, l5[2008], l5[2025]))
+    prevodnik = typy_vazby(pary4 + pary5 + pary_tridy_na_podtridy(pary_tridy, l5[2008], l5[2025]))
     chyby = over_prevodnik(prevodnik, ciselnik)
     if chyby:
         raise ValueError("převodník neodpovídá číselníkům: " + "; ".join(chyby[:10]))

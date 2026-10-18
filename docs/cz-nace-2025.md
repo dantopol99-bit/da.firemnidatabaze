@@ -6,7 +6,7 @@ jako historický atribut. Obě verze se ukládají s platností v čase a verze 
 (některé kódy CZ-NACE 2008 mají v CZ-NACE 2025 jiný obsah, např. oddíly 58–63, sekce J–U).
 
 Stav: schéma `obor` (migrace, číselníky, kódy firem z RES a ARES, matice přechodů, odvození, rozhraní
-`obor.v_firma_obor_aktualni`, kontroly). Oborově-regionální report zatím počítá podle CZ-NACE 2008
+`obor.v_firma_obor_aktualni`, kontroly) je nasazené a ověřené na snímku RES k 15. 10. 2026 (kap. 6). Oborově-regionální report zatím počítá podle CZ-NACE 2008
 (rozhodnutí 5 metodiky), přepnutí je v [dalších krocích](#9-další-kroky).
 
 ## 1. Schválená rozhodnutí
@@ -84,7 +84,7 @@ python -m firemni_databaze.nace_ciselniky sestav     # (jen při nové verzi zdr
 
 Číselníky v repozitáři (`ciselniky/nace/`): `nace_ciselnik.csv` (3 488 položek: 2008 – 23 sekcí vč. X/Y,
 90 oddílů, 272 skupin, 615 tříd, 721 podtříd; 2025 – 24 / 89 / 287 / 651 / 716), `nace_prevodnik.csv`
-(2 543 párů), `sekce2025_a10.csv`.
+(2 728 párů), `sekce2025_a10.csv`.
 
 **Převodník** sestavuje `nace_ciselniky.sestav`: úrovně 1–4 z obou směrů převodníku Eurostatu (CZ-NACE
 2008/2025 = NACE Rev. 2/2.1 až po třídu), podtřídy, které se národně člení, z převodníku ČSÚ pro 5místné
@@ -127,7 +127,106 @@ Odvozuje se pro každý stav hlavní činnosti 2008 z RES, ke kterému neexistuj
 stav – dnes zaniklé subjekty, které zanikly před dvojím kódováním, v budoucnu i starší stavy z archivu
 snímků.
 
-KONTROLY_ZDE
+## 6. Kontroly a dopad (krok 6)
+
+Snímek RES k **15. 10. 2026** (3 531 342 subjektů, 22 349 555 řádků činností), matice k témuž dni.
+Výpočet: `python -m firemni_databaze.nace_firmy vse`. Počty pod 10 se uvádějí jako „< 10“ (rozhodnutí 3).
+
+**Obsah `obor.firma_nace`:** 21 995 785 kódů. CZ-NACE 2008: 3 038 940 hlavních + 7 952 994 vedlejších,
+CZ-NACE 2025: 2 993 853 hlavních + 7 839 168 vedlejších, odvozených 170 904 řádků (IČO × úroveň).
+
+### Pokrytí (hlavní činnost CZ-NACE 2025)
+
+| subjekty | celkem | kód 2025 z RES | odvozený kód | z toho nejednoznačný na úrovni kódu | odvozený oddíl | bez kódu |
+|---|---:|---:|---:|---:|---:|---:|
+| bez zániku | 2 954 228 | 2 954 228 (100,00 %) | 0 | 0 | 0 | 0 |
+| zaniklé (v souboru 4 roky) | 577 114 | 39 625 (6,87 %) | 45 087 (7,81 %) | 71 | 44 944 | 492 402 (85,32 %) |
+| **celkem** | 3 531 342 | 2 993 853 (84,78 %) | 45 087 (1,28 %) | 71 | 44 944 | 492 402 (13,94 %) |
+
+- Všechny subjekty bez zániku mají kód 2025 přímo z RES. Odvozuje se jen u **zaniklých PO**, které
+  zanikly před dvojím kódováním (mají jen kód 2008).
+- „Bez kódu“ jsou zaniklé FO: v otevřených datech mají jen IČO a datum zániku (GDPR), kód nemají
+  v žádné verzi.
+- Z 45 087 odvozených má 44 944 určený oddíl. Jen 71 je nejednoznačných na úrovni svého kódu
+  (většinou podtřída) a dostali kandidáty z převodníku.
+
+### Základ empirické matice
+
+**2 993 853 subjektů** má v RES oba kódy hlavní činnosti (tentýž stav záznamu). Matice má 10 827 párů.
+
+| cílová úroveň 2025 | kódů 2008 v matici | z toho se základem ≥ 20 firem |
+|---|---:|---:|
+| sekce | 1 649 | 1 305 |
+| oddíl | 1 628 | 1 284 |
+| skupina | 1 541 | 1 198 |
+| třída | 1 275 | 957 |
+| podtřída | 677 | 480 |
+
+### Odvozené kódy podle úrovně a metody (subjektů, průměrná jistota)
+
+| úroveň | `prevodnik_1:1` | `prevodnik_jediny_cil` | `empiricky` | `nejednoznacne` |
+|---|---:|---:|---:|---:|
+| sekce | 14 255 (1) | 18 537 (1) | 12 294 (0,9974) | < 10 |
+| oddíl | 14 988 (1) | 15 574 (1) | 14 382 (0,9979) | < 10 |
+| skupina | 16 719 (1) | 5 811 (1) | 15 755 (0,9863) | 10 |
+| třída | 11 246 (1) | 2 457 (1) | 14 176 (0,9905) | 26 |
+| podtřída | 6 309 (1) | 2 247 (1) | 6 046 (0,9747) | 70 |
+
+**Převodník proti empirii:** u pravidel se základem ≥ 20 firem dává `prevodnik_jediny_cil` stejný cíl
+jako nejčastější empirický přechod ve **všech 1 627 případech**. U `prevodnik_1:1` je to 2 617 z 2 620.
+Jediný rozpor je **96.09 → 96.99** („ostatní osobní služby j. n.“): podle převodníku Eurostatu jde
+o vazbu 1:1, ČSÚ ale v RES zařadil 99,9 % z 14 383 subjektů do **96.91** („osobní služby
+v domácnostech“). Odvození se tu řídí převodníkem (pravidlo 1), což je v rozporu s praxí ČSÚ (kap. 10).
+
+### Změna oddílu a sekce (subjekty bez zániku s oběma kódy z RES)
+
+- **jiný kód oddílu:** 69 420 z 2 895 807 subjektů zařazených aspoň na oddíl (**2,40 %**);
+- **jiná sekce obsahově** (sekce 2025 neodpovídá sekci 2008 podle `obor.nace_sekce_a10`): 64 828 (**2,19 %**);
+- jiné písmeno sekce: 1 337 547 (45,28 %). Toto číslo nic neznamená, písmena se mezi verzemi posunula
+  (např. J 2008 → J + K 2025, K 2008 → L 2025, P 2008 → Q 2025).
+
+| hlavní přechody oddílů | subjektů | | hlavní přechody sekcí | subjektů |
+|---|---:|---|---|---:|
+| 45 → 95 (opravy motorových vozidel) | 61 384 | | G → T (opravy vozidel do „ostatních činností“) | 61 442 |
+| 45 → 47 | 2 683 | | F → M (developerská činnost 41.1 → 68.12) | 1 008 |
+| 45 → 46 | 1 045 | | G → M | 648 |
+| 63 → 60 (zpravodajské agentury) | 610 | | J → G | 494 |
+| 41 → 68 | 609 | | J → N | 140 |
+| 46 → 68 | 570 | | G → N | 126 |
+| 43 → 68 | 399 | | G → H | 101 |
+
+Změna je soustředěná: 88 % změn oddílu tvoří přesun oprav motorových vozidel (45.2, 45.4) do
+oddílu 95 v sekci T.
+
+### Pilot: stavebnictví × Liberecký kraj (CZ051), subjekty bez zániku
+
+- sekce F podle CZ-NACE 2008: **14 817**, podle CZ-NACE 2025: **14 799**, v obou: 14 797;
+- **ubylo 20** (2008 F, 2025 jinde), všechny do oddílu **68** (činnosti v oblasti nemovitostí,
+  z oddílů 41 a 43, hlavně developerská činnost 41.1 → 68.12);
+- **přibylo < 10** (z oddílu 45 do oddílu 43);
+- rozdíl −18 (−0,12 %). Pro report o stavebnictví v kraji je změna verze zanedbatelná.
+
+## 7. Fakta, odhady a co nejde
+
+| | obsah |
+|---|---|
+| **fakta** | kódy 2008 a 2025 z RES (oficiální přidělení ČSÚ, ne nutně skutečná činnost); číselníky a převodníky ČSÚ/Eurostatu; matice přechodů (počty z dvojího kódování) |
+| **odhady** | odvozené kódy 2025 (`zdroj = 'odvozeno'`) s metodou `empiricky` – jistota = podíl v matici, tj. pravděpodobnost za předpokladu, že se zaniklé firmy překódovaly jako dnešní; `prevodnik_*` jsou logicky jisté jen vzhledem k převodníku |
+| **nejde** | kód zaniklých FO (otevřená data ho neuvádějí); historie kódů před prvním načteným snímkem (ČSÚ zveřejňuje jen poslední snímek); ověření, že kód odpovídá skutečné činnosti; ekonomické údaje Eurostatu přesně podle sekcí 2025 (jen přes převodní tabulku A*10) |
+
+**Kontrola číselníku:** všech 21 995 785 kódů ve `firma_nace` je v číselníku své verze. Pseudokódy X/04
+a Y/00 doplněné místo VDB stačí, žádný kód RES mimo ně se nevyskytuje.
+
+**Idempotence:** opakovaný běh `nace_firmy res` nad týmž snímkem nevloží ani neuzavře žádný kód
+(ověřeno 18. 10. 2026: 0 vložených a 0 uzavřených ve všech čtyřech kombinacích verze × typ, 3 min). Při načtení snímku se nezdvojily ani kódy tří IČO, které předtím zapsal loader ARES
+(3 038 940 hlavních kódů 2008 v RES, z toho 3 už byly v tabulce).
+
+### Oprava převodníku (po sloučení PR #19)
+
+První verze `nace_prevodnik.csv` přiřazovala podtřídám 2008 „xxxx0“, které převodník ČSÚ pro 5místné
+položky uvádí jen jako **dílčí zdroj** nové podtřídy 2025, pouze tento dílčí cíl. Hlavní převod podle
+převodníku tříd se ztratil, např. 16.29.0 → jen 15.20.9 místo 16.26–16.28 + 15.20.9. Chybu odhalilo
+srovnání s empirickou maticí. Po opravě má převodník 2 728 párů místo 2 543 a regresi hlídá test.
 
 ## 8. Rozhraní pro ostatní produkty
 
@@ -212,3 +311,8 @@ tabulka sekce 2025 → A*10 a náhrada blokovaného zdroje číselníků. Zbýv�
    (zpětné zařazení stavu), nebo ořezat na 1. 1. 2025?
 6. **Kontrola ARES**: `ares_import` nově posílá 3 dotazy na IČO místo 2 (navíc `ekonomicke-subjekty-res`).
    Pro hromadné běhy hlídat limity provozovatele ARES.
+7. **96.09 → 96.99 vs. 96.91** (kap. 6): převodník Eurostatu má vazbu 1:1 na 96.99, ČSÚ ale v RES dal
+   99,9 % subjektů do 96.91. Má mít u odvození přednost převodník (dnešní stav podle pravidla 1), nebo
+   empirie? Obecně: má empirie přebít vazbu 1:1, když jí odporuje nad nějaký práh (např. podíl cíle < 50 %)?
+8. **Konec dvojího kódování (31. 12. 2028)** (kap. 9, bod 3): uzavřít otevřené kódy 2008, nebo je nechat
+   jako „poslední známý“?

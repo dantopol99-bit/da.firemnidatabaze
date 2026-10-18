@@ -80,6 +80,16 @@ class TestPrevodnik(unittest.TestCase):
         self.assertEqual(tridy08 - {r["kod_2008"] for r in prevodnik if r["uroven"] == 4}, set())
         self.assertEqual(tridy25 - {r["kod_2025"] for r in prevodnik if r["uroven"] == 4}, {"4689"})
 
+    def test_podtridy_bez_narodniho_cleneni_maji_prevod_trid(self):
+        # regrese: 16.29.0 (2008) býval jen dílčím zdrojem 15.20.9 (2025) a přišel o převod na 16.26–16.28
+        ciselnik = nacti(nc.SOUBOR_CISELNIK)
+        l5 = {v: {r["kod"] for r in ciselnik if r["verze"] == v and r["uroven"] == "5"} for v in ("2008", "2025")}
+        pary = {(r["kod_2008"], r["kod_2025"]) for r in nacti(nc.SOUBOR_PREVODNIK)}
+        for r in nacti(nc.SOUBOR_PREVODNIK):
+            if r["uroven"] == "4" and r["kod_2008"] + "0" in l5["2008"] and r["kod_2025"] + "0" in l5["2025"]:
+                self.assertIn((r["kod_2008"] + "0", r["kod_2025"] + "0"), pary, r)
+        self.assertTrue({("16290", "16280"), ("16290", "15209")} <= pary)
+
     def test_a10(self):
         from firemni_databaze.report import SKUPINY_A10
 
@@ -149,7 +159,11 @@ class TestSqlObor(unittest.TestCase):
         self.assertGreater(len(self.soubory), 0)
         for nazev, sql in self.sql.items():
             self.assertRegex(nazev, r"^\d{2}_[a-z_]+\.sql$")
-            for prikaz in re.findall(r"\bcreate\s+(?!or\s+replace)(?!temp)(\w+(?:\s+\w+)?)", sql):
+            for prikaz in re.findall(r"\bcreate\s+(?!or\s+replace)(?!temp)(\w+(?:\s+[\w.]+)?)", sql):
+                if prikaz.startswith("view "):
+                    # pohled bez OR REPLACE jen po DROP VIEW IF EXISTS téhož pohledu (nedrží data)
+                    self.assertIn(f"drop view if exists {prikaz[5:]};", sql, nazev)
+                    continue
                 self.assertRegex(prikaz, r"^(schema|table|unique index|index)", nazev)
             self.assertNotRegex(sql, r"\bcreate\s+(schema|table|unique\s+index|index)\s+(?!if\s+not\s+exists)", nazev)
 
