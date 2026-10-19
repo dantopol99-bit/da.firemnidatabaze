@@ -286,7 +286,7 @@ Stav k 2026-10-15. Populace: registrované ekonomické subjekty bez data zániku
 | 10–19 osob | 793 | 1 110 | 8,6 | 12 | 3 453 | 4 832 | modelový odhad |
 | 20–49 osob | 1 096 | 1 532 | 11,8 | 16,6 | 4 557 | 6 373 | modelový odhad |
 | 50 a více osob | 1 537 | 2 147 | 16,6 | 23,2 | 6 958 | 9 720 | modelový odhad |
-| **celkem (Liberecký kraj)** | 9 254 | 9 254 | 100 | 100 | 39 082 | 39 396 | přidaná hodnota na úrovni SBS (vstup modelu, tab. přepočtu); obrat = modelový odhad |
+| **celkem (Liberecký kraj)** | 9 254 | 9 254 | 100 | 100 | 39 082 | 39 396 | přidaná hodnota na úrovni SBS (vstup modelu, viz tabulka přepočtu); obrat = modelový odhad |
 
 > Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je přepočtena na úroveň statistiky podniků (SBS) a rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.
 > Rok: ekonomika (regionální účty a SBS) 2024; struktura subjektů z RES ke dni snímku. Spojení různých let je součástí modelu.

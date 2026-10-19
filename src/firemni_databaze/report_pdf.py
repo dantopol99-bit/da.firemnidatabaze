@@ -21,6 +21,7 @@ Dokud výklad neschválí člověk (--vyklad-schvalen), nese zápatí „KONCEPT
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -87,7 +88,7 @@ def _datum_cz(iso: str) -> str:
 # Tabulky a grafy z JSON
 # ---------------------------------------------------------------------------
 
-def tabulka(t: dict, pismeno: str, zdroj: str, sloupce: list[str] | None = None) -> dict:
+def tabulka(t: dict, cislo: str, zdroj: str, sloupce: list[str] | None = None) -> dict:
     """Tabulka z JSON beze změny hodnot; jen formát čísel a výběr sloupců."""
     sl = [s for s in t["sloupce"] if sloupce is None or s["kod"] in sloupce]
     ma_poznamku = any(r.get("poznamka") for r in t["radky"])
@@ -98,7 +99,7 @@ def tabulka(t: dict, pismeno: str, zdroj: str, sloupce: list[str] | None = None)
             bunky.append(r.get("poznamka") or "")
         radky.append({"bunky": bunky, "zvyrazneni": r["typ"] in ("celkem", "mezisoucet")})
     return {
-        "typ": "tabulka", "pismeno": pismeno, "nazev": t["nazev"],
+        "typ": "tabulka", "cislo": cislo, "nazev": t["nazev"],
         "zahlavi": ["Položka"] + [s["nazev"] for s in sl] + (["Poznámka"] if ma_poznamku else []),
         "radky": radky, "poznamky": t["poznamky"], "zdroj": zdroj,
         "cisel": len(sl),
@@ -110,24 +111,23 @@ def _role(popis: str, uzemi: str, srovnani: set[str]) -> str:
 
 
 class Sestava:
-    """Přiděluje písmena tabulkám a grafům v pořadí osnovy."""
+    """Čísluje tabulky a grafy (každý typ zvlášť, 1, 2, …) průběžně v pořadí, v jakém jsou v PDF.
+    Dřív písmena A–Z – za Z vznikl odkaz „tab. [“."""
 
     def __init__(self, adresar_grafu: Path):
         self.adresar = adresar_grafu
         self.tab, self.graf = 0, 0
         self.L: dict[str, str] = {}
 
-    def pismeno_tab(self, klic: str) -> str:
-        p = chr(ord("A") + self.tab)
+    def cislo_tab(self, klic: str) -> str:
         self.tab += 1
-        self.L[klic] = f"tab. {p}"
-        return p
+        self.L[klic] = f"tab. {self.tab}"
+        return str(self.tab)
 
-    def pismeno_graf(self, klic: str) -> str:
-        p = chr(ord("A") + self.graf)
+    def cislo_graf(self, klic: str) -> str:
         self.graf += 1
-        self.L[klic] = f"graf {p}"
-        return p
+        self.L[klic] = f"graf {self.graf}"
+        return str(self.graf)
 
 
 def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: dict | None = None) -> dict:
@@ -148,44 +148,44 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
 
     # --- Postavení území ------------------------------------------------------------
     obsah = []
-    obsah.append(tabulka(v.tab["T01_zakladni"], s.pismeno_tab("T01"), zdroj_res))
-    obsah.append(tabulka(v.tab["T02_srovnani"], s.pismeno_tab("T02"), zdroj_res))
+    obsah.append(tabulka(v.tab["T01_zakladni"], s.cislo_tab("T01"), zdroj_res))
+    obsah.append(tabulka(v.tab["T02_srovnani"], s.cislo_tab("T02"), zdroj_res))
     kraje = v.radky("T03_kraje")
     celkem_cr = next((r for r in v.radky("T03_kraje", "celkem")), None)
     if kraje and celkem_cr:
-        p = s.pismeno_graf("g_hustota")
+        p = s.cislo_graf("g_hustota")
         polozky = [{"popis": r["popis"], "hodnota": r["hodnoty"]["hustota"], "role": _role(r["popis"], kraj_uz, srov)}
                    for r in sorted(kraje, key=lambda r: -r["hodnoty"]["hustota"])]
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.poradi(
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.poradi(
             polozky, adresar / "g_hustota.svg", "Registrované subjekty oboru na 1 000 obyvatel",
             referencni=("Česko", celkem_cr["hodnoty"]["hustota"]), mista=1)),
             "nazev": "Kraje podle hustoty registrovaných subjektů oboru na 1 000 obyvatel", "zdroj": zdroj_res})
-        p = s.pismeno_graf("g_lq")
+        p = s.cislo_graf("g_lq")
         polozky = [{"popis": r["popis"], "hodnota": r["hodnoty"]["lq"], "role": _role(r["popis"], kraj_uz, srov)}
                    for r in sorted(kraje, key=lambda r: -r["hodnoty"]["lq"])]
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.index_srovnani(
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.index_srovnani(
             polozky, adresar / "g_lq.svg", "Lokalizační koeficient (1 = průměr ČR)")),
             "nazev": "Kraje podle lokalizačního koeficientu oboru", "zdroj": zdroj_res})
     if v.t("T03_kraje"):
-        obsah.append(tabulka(v.tab["T03_kraje"], s.pismeno_tab("T03"), zdroj_res))
+        obsah.append(tabulka(v.tab["T03_kraje"], s.cislo_tab("T03"), zdroj_res))
     if v.t("T04_okresy"):
-        obsah.append(tabulka(v.tab["T04_okresy"], s.pismeno_tab("T04"), zdroj_res))
+        obsah.append(tabulka(v.tab["T04_okresy"], s.cislo_tab("T04"), zdroj_res))
     kapitoly.append({"nadpis": "Postavení území", "klic": "postaveni", "obsah": obsah, "pododdil": None})
 
     # --- Struktura ------------------------------------------------------------------
     obsah = []
     if v.t("T05_fo_po"):
         casti = [{"popis": r["popis"], "podil": r["hodnoty"]["podil"]} for r in v.radky("T05_fo_po")]
-        p = s.pismeno_graf("g_fopo")
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.skladba(casti, adresar / "g_fopo.svg")),
+        p = s.cislo_graf("g_fopo")
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.skladba(casti, adresar / "g_fopo.svg")),
                       "nazev": "Registrované subjekty oboru podle typu osoby", "zdroj": zdroj_res, "maly": True})
-        obsah.append(tabulka(v.tab["T05_fo_po"], s.pismeno_tab("T05"), zdroj_res))
+        obsah.append(tabulka(v.tab["T05_fo_po"], s.cislo_tab("T05"), zdroj_res))
     if v.t("T13_bench_fo_po"):
-        obsah.append(tabulka(v.tab["T13_bench_fo_po"], s.pismeno_tab("T13"), zdroj_res))
+        obsah.append(tabulka(v.tab["T13_bench_fo_po"], s.cislo_tab("T13"), zdroj_res))
     if v.t("T06_pravni_forma"):
-        obsah.append(tabulka(v.tab["T06_pravni_forma"], s.pismeno_tab("T06"), zdroj_res))
+        obsah.append(tabulka(v.tab["T06_pravni_forma"], s.cislo_tab("T06"), zdroj_res))
     if v.t("T14_bench_pravni_forma"):
-        obsah.append(tabulka(v.tab["T14_bench_pravni_forma"], s.pismeno_tab("T14"), zdroj_res))
+        obsah.append(tabulka(v.tab["T14_bench_pravni_forma"], s.cislo_tab("T14"), zdroj_res))
     for kod, klic, nazev, kod_b in (
             ("T07_velikost_fo", "g_vel_fo", "Velikostní profil fyzických osob (podíl, %)", "T15_bench_velikost_fo"),
             ("T08_velikost_po", "g_vel_po", "Velikostní profil právnických osob (podíl, %)", "T16_bench_velikost_po")):
@@ -193,21 +193,21 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
             kat = [{"popis": r["popis"], "podil": r["hodnoty"]["podil"],
                     "zvlastni": r["popis"] == "Neuvedeno" or r["typ"] == "ostatni"}
                    for r in v.radky(kod, None) if r["typ"] in ("polozka", "ostatni")]
-            p = s.pismeno_graf(klic)
-            obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.rozlozeni(kat, adresar / f"{klic}.svg")),
+            p = s.cislo_graf(klic)
+            obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.rozlozeni(kat, adresar / f"{klic}.svg")),
                           "nazev": nazev + " – „Neuvedeno“ a „ostatní“ šrafovaně", "zdroj": zdroj_res})
-            obsah.append(tabulka(v.tab[kod], s.pismeno_tab(kod[:3]), zdroj_res))
+            obsah.append(tabulka(v.tab[kod], s.cislo_tab(kod[:3]), zdroj_res))
         if v.t(kod_b):
-            obsah.append(tabulka(v.tab[kod_b], s.pismeno_tab(kod_b[:3]), zdroj_res))
+            obsah.append(tabulka(v.tab[kod_b], s.cislo_tab(kod_b[:3]), zdroj_res))
     if v.t("T09_vekova_struktura"):
         kat = [{"popis": r["popis"], "podil": r["hodnoty"]["podil"], "zvlastni": r["typ"] == "ostatni"}
                for r in v.radky("T09_vekova_struktura", None) if r["typ"] in ("polozka", "ostatni")]
-        p = s.pismeno_graf("g_vek")
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.rozlozeni(kat, adresar / "g_vek.svg")),
+        p = s.cislo_graf("g_vek")
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.rozlozeni(kat, adresar / "g_vek.svg")),
                       "nazev": "Věková struktura existujících subjektů (podíl, %)", "zdroj": zdroj_res})
-        obsah.append(tabulka(v.tab["T09_vekova_struktura"], s.pismeno_tab("T09"), zdroj_res))
+        obsah.append(tabulka(v.tab["T09_vekova_struktura"], s.cislo_tab("T09"), zdroj_res))
     if v.t("T17_bench_vekova_struktura"):
-        obsah.append(tabulka(v.tab["T17_bench_vekova_struktura"], s.pismeno_tab("T17"), zdroj_res))
+        obsah.append(tabulka(v.tab["T17_bench_vekova_struktura"], s.cislo_tab("T17"), zdroj_res))
     kapitoly.append({"nadpis": "Struktura", "klic": "struktura", "obsah": obsah, "pododdil": None})
 
     # --- Ekonomický profil (Eurostat, regionální účty) ---------------------------------
@@ -221,14 +221,14 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         rady = [{"popis": next(r["popis"] for r in t22 if r["uzemi"] == k).rsplit(" – ", 1)[0],
                  "role": "uzemi" if k == kraj22 else "cr" if k == "CZ" else "srovnani",
                  "body": [(r["rok"], r["hodnoty"]["produktivita"]) for r in t22 if r["uzemi"] == k]} for k in uz22]
-        p = s.pismeno_graf("g_ekon")
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.miry_v_case(
+        p = s.cislo_graf("g_ekon")
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.miry_v_case(
             [{"nazev": "HPH na zaměstnaného (tis. Kč, běžné ceny)", "rady": rady}], adresar / "g_ekon.svg", "tis. Kč")),
             "nazev": f"Hrubá přidaná hodnota na zaměstnaného – {v.tab['T22_ekonomika'].get('skupina_nazev', '')}",
             "zdroj": zdroj_eu})
-        obsah.append(tabulka(v.tab["T22_ekonomika"], s.pismeno_tab("T22"), zdroj_eu))
+        obsah.append(tabulka(v.tab["T22_ekonomika"], s.cislo_tab("T22"), zdroj_eu))
     if v.t("T23_nahrady"):
-        obsah.append(tabulka(v.tab["T23_nahrady"], s.pismeno_tab("T23"), zdroj_eu))
+        obsah.append(tabulka(v.tab["T23_nahrady"], s.cislo_tab("T23"), zdroj_eu))
     # pododdíl Modelové odhady (Blok 8) – odhady, ne fakta; nevstupují do detektoru zjištění
     zdroj_model = ("Modelový odhad: RES (stav ke dni snímku), ČSÚ RES02QNACET1, Eurostat nama_10r_3gva a sbs_sc_ovw; "
                    "vlastní výpočet – upraveno, za úpravy Eurostat neodpovídá.")
@@ -242,7 +242,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
     for kod in ("T28_model_prepocet", "T24_model_velikost", "T25_model_koncentrace", "T26_sbs_cr",
                 "T27_model_kontrola"):
         if v.t(kod):
-            obsah.append(tabulka(v.tab[kod], s.pismeno_tab(kod[:3]),
+            obsah.append(tabulka(v.tab[kod], s.cislo_tab(kod[:3]),
                                  zdroj_eu.replace("regionální účty (nama_10r_3gva, nama_10r_3empers, nama_10r_2coe)",
                                                   "sbs_sc_ovw, ert_bil_eur_a") if kod == "T26_sbs_cr" else zdroj_model))
     kapitoly.append({"nadpis": "Ekonomický profil", "klic": "ekonomicky_profil", "obsah": obsah,
@@ -259,13 +259,13 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
                  "role": "uzemi" if k == kraj_t20 else "cr" if k == "CZ" else "srovnani",
                  "body": [(r["rok"], r["hodnoty"]["mzda"]) for r in t20 if r["uzemi"] == k]} for k in uzemi_t20]
         sekce = v.tab["T20_mzdy_obor"].get("sekce", "")
-        p = s.pismeno_graf("g_mzdy")
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.miry_v_case(
+        p = s.cislo_graf("g_mzdy")
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.miry_v_case(
             [{"nazev": f"Průměrná hrubá měsíční mzda v sekci {sekce}", "rady": rady}], adresar / "g_mzdy.svg", "Kč")),
             "nazev": f"Průměrná hrubá měsíční mzda v sekci {sekce} – kraj, ČR a srovnávací kraje", "zdroj": zdroj_mzdy})
-        obsah.append(tabulka(v.tab["T20_mzdy_obor"], s.pismeno_tab("T20"), zdroj_mzdy))
+        obsah.append(tabulka(v.tab["T20_mzdy_obor"], s.cislo_tab("T20"), zdroj_mzdy))
     if v.t("T21_mzdy_aktualni"):
-        obsah.append(tabulka(v.tab["T21_mzdy_aktualni"], s.pismeno_tab("T21"),
+        obsah.append(tabulka(v.tab["T21_mzdy_aktualni"], s.cislo_tab("T21"),
                              "Zdroj: ČSÚ, DataStat (MZDR – čtvrtletní zjišťování, kumulace za rok)."))
     kapitoly.append({"nadpis": "Zaměstnanost a mzdy", "klic": "zamestnanost", "obsah": obsah, "pododdil": None})
 
@@ -280,13 +280,13 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
             roky.setdefault(rok, {"rok": rok})[druh] = r["hodnoty"]["celkem"]
             roky[rok]["neuplny"] = roky[rok].get("neuplny") or poz.split(";")[0].endswith(" čtvrtletí")
             roky[rok]["mimoradny_zanik"] = roky[rok].get("mimoradny_zanik") or "mimořádný" in poz
-        p = s.pismeno_graf("g_dyn")
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.vznik_zanik(list(roky.values()), adresar / "g_dyn.svg")),
+        p = s.cislo_graf("g_dyn")
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.vznik_zanik(list(roky.values()), adresar / "g_dyn.svg")),
                       "nazev": f"Vzniklé a zaniklé ekonomické subjekty {v.v_uzemi} – všechny obory",
                       "zdroj": "Zdroj: ČSÚ, DataStat, RES05; " + f"RES stav k {datum}."})
-        obsah.append(tabulka(v.tab["T11_dynamika_csu"], s.pismeno_tab("T11"), "Zdroj: ČSÚ, DataStat, RES05."))
+        obsah.append(tabulka(v.tab["T11_dynamika_csu"], s.cislo_tab("T11"), "Zdroj: ČSÚ, DataStat, RES05."))
     if v.t("T10_zaniky_po"):
-        obsah.append(tabulka(v.tab["T10_zaniky_po"], s.pismeno_tab("T10"), zdroj_res))
+        obsah.append(tabulka(v.tab["T10_zaniky_po"], s.cislo_tab("T10"), zdroj_res))
     t18 = v.radky("T18_mira_zaniku_po")
     if t18:
         uzemi_t18 = list(dict.fromkeys(r["uzemi"] for r in t18))
@@ -299,12 +299,12 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         panely = [{"nazev": "Za celý rok", "rady": [rada(k, "mira", roky[:-1]) for k in uzemi_t18]},
                   {"nazev": f"Za období {v.tab['T18_mira_zaniku_po']['obdobi']}",
                    "rady": [rada(k, "mira_obd", roky) for k in uzemi_t18]}]
-        p = s.pismeno_graf("g_zanik")
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.miry_v_case(panely, adresar / "g_zanik.svg",
+        p = s.cislo_graf("g_zanik")
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.miry_v_case(panely, adresar / "g_zanik.svg",
                                                                              "Míra zániku PO (%)")),
                       "nazev": "Míra zániku právnických osob v oboru – zkoumané území, ČR a srovnávací kraje",
                       "zdroj": zdroj_res + " Chybějící bod = pod prahem."})
-        obsah.append(tabulka(v.tab["T18_mira_zaniku_po"], s.pismeno_tab("T18"), zdroj_res))
+        obsah.append(tabulka(v.tab["T18_mira_zaniku_po"], s.cislo_tab("T18"), zdroj_res))
     t12 = v.radky("T12_demografie_cr")
     if t12:
         panely = []
@@ -317,11 +317,11 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
             rady.append({"popis": "všechna odvětví", "hlavni": False,
                          "body": [(r["popis"].split(" – ")[0], r["hodnoty"]["cr_mira_vzniku"]) for r in radky]})
             panely.append({"nazev": nazev, "rady": rady})
-        p = s.pismeno_graf("g_miry")
-        obsah.append({"typ": "graf", "pismeno": p, "soubor": str(g.miry_v_case(panely, adresar / "g_miry.svg", "Míra vzniků (%)")),
+        p = s.cislo_graf("g_miry")
+        obsah.append({"typ": "graf", "cislo": p, "soubor": str(g.miry_v_case(panely, adresar / "g_miry.svg", "Míra vzniků (%)")),
                       "nazev": "Míra vzniků podniků v ČR – kontext (jednotka podnik, ne registrovaný subjekt)",
                       "zdroj": "Zdroj: ČSÚ, DataStat, RESDP00 (demografie podniků)."})
-        obsah.append(tabulka(v.tab["T12_demografie_cr"], s.pismeno_tab("T12"), "Zdroj: ČSÚ, DataStat, RESDP00."))
+        obsah.append(tabulka(v.tab["T12_demografie_cr"], s.cislo_tab("T12"), "Zdroj: ČSÚ, DataStat, RESDP00."))
     kapitoly.append({"nadpis": "Dynamika území a kontext ČR", "klic": "dynamika", "obsah": obsah, "pododdil": None})
 
 
@@ -443,11 +443,34 @@ def texty_dat(data: dict):
         yield data
     elif isinstance(data, dict):
         for k, v in data.items():
-            if k not in ("soubor", "fonty", "koncept", "pismeno", "cisel", "zvyrazneni", "klic", "typ", "hypoteza", "druh"):
+            if k not in ("soubor", "fonty", "koncept", "cislo", "cisel", "zvyrazneni", "klic", "typ", "hypoteza", "druh"):
                 yield from texty_dat(v)
     elif isinstance(data, list):
         for v in data:
             yield from texty_dat(v)
+
+
+# Odkaz na tabulku nebo graf v textu: „tab. 3“, „graf 2“; zachytí i prázdný a nedokončený odkaz („tab. [“).
+_ODKAZ = re.compile(r"\b(tab\.|graf)(?=[\s)\],;.]|$)[ \u00a0]*([^\s,;)]*)")
+
+
+def kontrola_odkazu(data: dict) -> list[str]:
+    """Odkazy na tabulky a grafy ve všech textech sazby: každý musí být „tab. N“ / „graf N“ a N musí
+    být číslo tabulky nebo grafu, který v PDF je. Vrací seznam chyb (prázdný = v pořádku)."""
+    cisla = {"tab.": set(), "graf": set()}
+    for k in data["kapitoly"]:
+        for o in k["obsah"]:
+            if o.get("typ") in ("tabulka", "graf"):
+                cisla["tab." if o["typ"] == "tabulka" else "graf"].add(o["cislo"])
+    chyby = []
+    for text in texty_dat(data):
+        for druh, cislo in _ODKAZ.findall(text):
+            cislo = cislo.rstrip(".")
+            if not cislo.isdigit():
+                chyby.append(f"nedokončený odkaz „{druh} {cislo}“: …{text[:80]}…")
+            elif cislo not in cisla[druh]:
+                chyby.append(f"odkaz „{druh} {cislo}“ míří na neexistující {'tabulku' if druh == 'tab.' else 'graf'}")
+    return chyby
 
 
 # ---------------------------------------------------------------------------
@@ -482,6 +505,9 @@ def vysazej(adresar_vysledku: Path, cil: Path, koncept: bool = True, adresar_vyk
         spatne = sorted({c for t in texty_dat(data) for c in cisla_v_textu(t)} - povolena)
         if spatne:
             raise ChybaSazby(f"čísla v textu reportu, která nejsou v JSON a XLSX: {spatne}")
+        odkazy = kontrola_odkazu(data)
+        if odkazy:
+            raise ChybaSazby("chybné odkazy na tabulky nebo grafy: " + "; ".join(odkazy))
         (tmp / "data.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
         prikaz = ["typst", "compile", "--root", "/", "--font-path", str(FONTY), "--ignore-system-fonts",
                   "--input", f"data={tmp / 'data.json'}", str(SABLONA), str(pdf)]
