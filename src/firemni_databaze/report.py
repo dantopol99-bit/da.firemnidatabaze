@@ -6,7 +6,8 @@ Spuštění:
     python -m firemni_databaze.report --obor 62 --uzemi CZ0714 --datum 2026-09-15
     python -m firemni_databaze.report --obor 41,42,43 --uzemi CZ
 
-Obor = kódy CZ-NACE Rev. 2 (sekce, oddíl, skupina nebo třída, i seznam).
+Obor = kódy CZ-NACE 2025 (sekce, oddíl, skupina nebo třída, i seznam) – rozhodnutí 15.
+Zařazení firem bere z rozhraní obor.v_firma_obor_aktualni (docs/cz-nace-2025.md).
 Území = ČR (CZ), kraj (CZ-NUTS 3 nebo název) nebo okres (kód z číselníku 109
 nebo název). Srovnávací kraje zadává člověk (--srovnani); automaticky se
 srovnává jen s ČR a pořadím mezi všemi kraji.
@@ -36,7 +37,8 @@ KOREN = Path(__file__).resolve().parents[2]
 KATALOG = KOREN / "reporty" / "katalog_ukazatelu.yaml"
 VYSTUPY = KOREN / "reporty" / "vystupy"
 
-KLASIFIKACE = 80004                      # rozhodnutí 5: v0 = CZ-NACE Rev. 2 (sloupec NACE)
+KLASIFIKACE = 2025                       # rozhodnutí 15: CZ-NACE 2025 (nahrazuje rozhodnutí 5, Rev. 2)
+VYBER_AKTIVITA = "RES02QNACET1"          # ČSÚ: subjekty a aktivita podle CZ-NACE 2025 (dřív RES02QT1, Rev. 2)
 FO_FORMY = frozenset({"101", "102", "103", "104", "105", "106", "107", "108", "424", "425"})
 PASMA_VEKU = (            # (od, do (bez), kód, název)
     (0, 3, "0-2", "méně než 3 roky"),
@@ -57,7 +59,7 @@ PASMA_VELIKOSTI = (       # (kód, název, kódy KATPO 579)
 ZANIKY_OD_ROKU = 2023     # rozhodnutí 4
 MIN_ROZSAH = 100          # rozhodnutí 8: pod 100 registrovanými subjekty se report nevydá
 PRAH_SPOLEHLIVOSTI = 25.0 # rozhodnutí 9: podíl „jen do sekce“ nad 25 % = varování
-ODVETVI_DEMOGRAFIE = {    # sekce CZ-NACE → položka RESDP00 (jen kde existuje)
+ODVETVI_DEMOGRAFIE = {    # sekce NACE Rev. 2 → položka RESDP00 (jen kde existuje); obor se mapuje přes sekce_rev2
     **{k: k for k in "BCDEFGHIJLMNPQR"}, "K": "64660002", "S": "95960001",
 }
 DEMOGRAFIE_CELKEM = "05960003"
@@ -136,28 +138,94 @@ def urci_uzemi(text: str, kraje: dict, okresy: dict) -> Uzemi:
 
 
 def urci_obor(cur, kody: list[str]) -> list[dict]:
-    """Kódy CZ-NACE Rev. 2 → položky číselníku s úrovní a předky."""
+    """Kódy CZ-NACE 2025 → položky číselníku s úrovní, předky a odpovídající sekcí NACE Rev. 2
+    (sekce_rev2 – pro zdroje publikované jen v Rev. 2: mzdy, demografie podniků, Eurostat)."""
     obor = []
     for kod in kody:
         cur.execute(
-            "SELECT kod, uroven, nazev, sekce, oddil, skupina, trida, je_pseudokod FROM res.cis_nace "
-            "WHERE klasifikace = %s AND kod = %s", (KLASIFIKACE, kod.strip().upper()))
+            "SELECT c.kod, c.uroven, c.nazev, c.sekce, c.oddil, c.skupina, c.trida, c.je_pseudokod, a.sekce_rev2 "
+            "FROM obor.nace_ciselnik c LEFT JOIN obor.nace_sekce_a10 a ON a.sekce_2025 = c.sekce "
+            "WHERE c.verze = %s AND c.kod = %s", (KLASIFIKACE, kod.strip().upper()))
         r = cur.fetchone()
         if r is None:
-            raise ValueError(f"kód {kod!r} není v CZ-NACE Rev. 2 (CZ_NACE_RES)")
-        k, uroven, nazev, sekce, oddil, skupina, trida, pseudo = r
+            raise ValueError(f"kód {kod!r} není v CZ-NACE 2025")
+        k, uroven, nazev, sekce, oddil, skupina, trida, pseudo, sekce_rev2 = r
         if pseudo:
             raise ValueError(f"{k} je pseudokód RES, ne obor")
         if uroven > 4:
             raise ValueError(f"{k}: obor lze zadat do úrovně třídy (4 číslice), ne podtřídy")
         predci = [p for p in (sekce, oddil, skupina, trida)[:uroven - 1] if p]
-        obor.append({"kod": k, "uroven": uroven, "nazev": nazev, "sekce": sekce, "predci": predci})
+        obor.append({"kod": k, "uroven": uroven, "nazev": nazev, "sekce": sekce, "predci": predci,
+                     "sekce_rev2": sekce_rev2})
     kody_oboru = {o["kod"] for o in obor}
     for o in obor:
         prekryv = kody_oboru & set(o["predci"])
         if prekryv:
             raise ValueError(f"obor {o['kod']} je už obsažen v {sorted(prekryv)} – zadej jen jeden z nich")
     return obor
+
+
+# Obor ve smyslu rozhraní obor.v_firma_obor_aktualni (alias n): bez pseudokódů a jen s automatickým
+# spojením (kód z RES, nebo odvozený s jistotou oddílu ≥ 0,8 – rozhodnutí 5 v docs/cz-nace-2025.md).
+PODMINKA_OBORU = ("n.automaticke_spojeni AND NOT n.je_pseudokod AND (n.sekce = ANY(%(s1)s) OR n.oddil = ANY(%(s2)s) "
+                  "OR n.skupina = ANY(%(s3)s) OR n.trida = ANY(%(s4)s))")
+POZNAMKA_A10 = ("Zdroje publikované jen podle NACE Rev. 2 (CZ-NACE 2008) – skupiny A*10 regionálních účtů Eurostatu, "
+                "statistika podniků SBS, mzdy ČSÚ a demografie podniků – jsou k oboru podle CZ-NACE 2025 přiřazeny "
+                "převodní tabulkou na úrovni sekcí (obor.nace_sekce_a10); jde o spojení dvou verzí klasifikace, "
+                "obsah sekcí se mezi verzemi částečně liší.")
+
+
+def zmena_klasifikace(cur, obor: list[dict], uz: "Uzemi", datum: date, prah: int) -> dict:
+    """Kolik subjektů území by obor měl podle CZ-NACE 2008 a kolik jich přibylo a ubylo přechodem na 2025.
+    Jen pro obor zadaný celými sekcemi (sekce 2008 = sekce_rev2); kódy nižších úrovní mají mezi verzemi
+    jiný obsah. Počty pod prahem se neuvádějí. Vrací i počet zaniklých subjektů bez kódu v obou verzích."""
+    cur.execute("SELECT count(*) FROM res.subjekt WHERE datum_snimku = %s AND ddatzan IS NOT NULL "
+                "AND nace IS NULL AND nace2025 IS NULL", (datum,))
+    out = {"zanikle_bez_kodu": cur.fetchone()[0], "text": None}
+    if any(o["uroven"] != 1 or not o["sekce_rev2"] for o in obor):
+        return out
+    s25 = [o["sekce"] for o in obor]
+    s08 = sorted({o["sekce_rev2"] for o in obor})
+    cur.execute(
+        "SELECT n.oddil_2008, n.oddil, (n.sekce_2008 = ANY(%(s08)s)) AS v08, "
+        "(n.sekce = ANY(%(s25)s) AND n.automaticke_spojeni) AS v25, count(*) "
+        "FROM res.subjekt s JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+        "JOIN res.cis_okres o ON o.kod = s.okreslau "
+        "WHERE s.datum_snimku = %(d)s AND s.ddatzan IS NULL "
+        "AND (n.sekce_2008 = ANY(%(s08)s) OR n.sekce = ANY(%(s25)s)) "
+        "AND (%(typ)s = 'CR' OR (%(typ)s = 'KRAJ' AND o.kraj_kod = %(kod)s) OR (%(typ)s = 'OKRES' AND o.kod = %(kod)s)) "
+        "GROUP BY 1, 2, 3, 4",
+        {"s08": s08, "s25": s25, "d": datum, "typ": uz.typ, "kod": uz.kod})
+    radky = cur.fetchall()
+    n08 = sum(r[4] for r in radky if r[2])
+    n25 = sum(r[4] for r in radky if r[3])
+    ubylo = sum(r[4] for r in radky if r[2] and not r[3])
+    pribylo = sum(r[4] for r in radky if r[3] and not r[2])
+
+    def pocet(n: int) -> str:
+        return f"{n:,}".replace(",", "\u00a0") if n >= prah else f"méně než {prah}"
+
+    def oddily(index: int, vybrane) -> str:
+        kody = sorted({r[index] for r in vybrane if r[index]})
+        return ", ".join(kody) if kody else "–"
+
+    odesle = [r for r in radky if r[2] and not r[3]]
+    prisle = [r for r in radky if r[3] and not r[2]]
+    sekce_txt = ", ".join(s25)
+    text = (f"Změna klasifikace: podle CZ-NACE 2008 (sekce {', '.join(s08)}) by obor měl {pocet(n08)} subjektů, "
+            f"podle CZ-NACE 2025 (sekce {sekce_txt}) jich má {pocet(n25)}, změna {f'{n25 - n08:+d}'.replace('-', '−')}"
+            + f". Odešlo {pocet(ubylo)} subjektů (do oddílů 2025: {oddily(1, odesle)}), přibylo {pocet(pribylo)} "
+              f"(z oddílů 2008: {oddily(0, prisle)}).")
+    out.update(text=text, pocet_2008=n08, pocet_2025=n25, zmena=n25 - n08,
+               ubylo=ubylo if ubylo >= prah else None, pribylo=pribylo if pribylo >= prah else None)
+    return out
+
+
+def poznamka_zaniklych(zmena: dict) -> str:
+    n = f"{zmena['zanikle_bez_kodu']:,}".replace(",", "\u00a0")
+    return (f"{n} zaniklých subjektů (fyzických osob) nemá v otevřených datech RES kód činnosti v žádné verzi "
+            "klasifikace (jen IČO a datum zániku); historické řady vzniků a zániků podle oboru proto zahrnují jen "
+            "subjekty s kódem.")
 
 
 def popis_oboru(obor: list[dict]) -> str:
@@ -171,38 +239,38 @@ def popis_oboru(obor: list[dict]) -> str:
 def nacti_data(cur, obor: list[dict], datum: date) -> dict:
     podle_urovne = {u: [o["kod"] for o in obor if o["uroven"] == u] for u in (1, 2, 3, 4)}
     parametry = {"d": datum, "s1": podle_urovne[1], "s2": podle_urovne[2], "s3": podle_urovne[3], "s4": podle_urovne[4]}
-    podminka = ("NOT n.je_pseudokod AND (n.sekce = ANY(%(s1)s) OR n.oddil = ANY(%(s2)s) "
-                "OR n.skupina = ANY(%(s3)s) OR n.trida = ANY(%(s4)s))")
     cur.execute(
         "SELECT s.okreslau, s.forma, s.katpo, s.ddatvzn FROM res.subjekt s "
-        "JOIN res.cis_nace n ON n.klasifikace = 80004 AND n.kod = s.nace "
-        f"WHERE s.datum_snimku = %(d)s AND s.ddatzan IS NULL AND {podminka}", parametry)
+        "JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+        f"WHERE s.datum_snimku = %(d)s AND s.ddatzan IS NULL AND {PODMINKA_OBORU}", parametry)
     subjekty = cur.fetchall()
     cur.execute(
         "SELECT s.okreslau, s.ddatvzn, s.ddatzan FROM res.subjekt s "
-        "JOIN res.cis_nace n ON n.klasifikace = 80004 AND n.kod = s.nace "
+        "JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
         f"WHERE s.datum_snimku = %(d)s AND s.ddatzan >= make_date({ZANIKY_OD_ROKU}, 1, 1) "
-        f"AND s.forma IS NOT NULL AND NOT (s.forma = ANY(%(fo)s)) AND {podminka}",
+        f"AND s.forma IS NOT NULL AND NOT (s.forma = ANY(%(fo)s)) AND {PODMINKA_OBORU}",
         {**parametry, "fo": sorted(FO_FORMY)})
     zaniky_po = cur.fetchall()
     cur.execute("SELECT okreslau, count(*) FROM res.subjekt WHERE datum_snimku = %s AND ddatzan IS NULL "
                 "GROUP BY okreslau", (datum,))
     vse_okres = dict(cur.fetchall())
     predci = sorted({p for o in obor for p in o["predci"]})
-    cur.execute("SELECT nace, okreslau, count(*) FROM res.subjekt WHERE datum_snimku = %s AND ddatzan IS NULL "
-                "AND nace = ANY(%s) GROUP BY nace, okreslau", (datum, predci + ["00"]))
+    cur.execute("SELECT n.kod_2025, s.okreslau, count(*) FROM res.subjekt s "
+                "JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+                "WHERE s.datum_snimku = %s AND s.ddatzan IS NULL AND n.automaticke_spojeni "
+                "AND n.kod_2025 = ANY(%s) GROUP BY n.kod_2025, s.okreslau", (datum, predci + ["00"]))
     doplnky = cur.fetchall()
-    cur.execute("SELECT kod, nazev FROM res.cis_nace WHERE klasifikace = 80004 AND kod = ANY(%s)", (predci,))
+    cur.execute("SELECT kod, nazev FROM obor.nace_ciselnik WHERE verze = %s AND kod = ANY(%s)", (KLASIFIKACE, predci))
     nazvy_predku = dict(cur.fetchall())
     cur.execute("SELECT kod, nazev FROM res.cis_pravni_forma WHERE ciselnik = 56")
     formy = dict(cur.fetchall())
     cur.execute("SELECT uzemi_kod, hodnota, rok FROM res.csu_obyvatelstvo WHERE ukazatel_kod = '2406K2' "
                 "AND rok = (SELECT max(rok) FROM res.csu_obyvatelstvo WHERE ukazatel_kod = '2406K2')")
     obyv = cur.fetchall()
-    cur.execute("SELECT max(obdobi) FROM res.csu_agregat WHERE vyber = 'RES02QT1'")
+    cur.execute("SELECT max(obdobi) FROM res.csu_agregat WHERE vyber = %s", (VYBER_AKTIVITA,))
     obdobi_akt = cur.fetchone()[0]
     cur.execute("SELECT uzemi_kod, nace_kod, ukazatel_kod, hodnota FROM res.csu_agregat "
-                "WHERE vyber = 'RES02QT1' AND obdobi = %s", (obdobi_akt,))
+                "WHERE vyber = %s AND obdobi = %s", (VYBER_AKTIVITA, obdobi_akt))
     aktivita = {}
     for u, n, k, h in cur.fetchall():
         aktivita.setdefault((u, n), {})[k] = float(h)
@@ -218,10 +286,9 @@ def pocet_oboru(cur, obor: list[dict], uz: "Uzemi", datum: date) -> int:
     """Počet registrovaných subjektů oboru v území (pro návrhy vyšší úrovně)."""
     podle_urovne = {u: [o["kod"] for o in obor if o["uroven"] == u] for u in (1, 2, 3, 4)}
     cur.execute(
-        "SELECT count(*) FROM res.subjekt s JOIN res.cis_nace n ON n.klasifikace = 80004 AND n.kod = s.nace "
+        "SELECT count(*) FROM res.subjekt s JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
         "JOIN res.cis_okres o ON o.kod = s.okreslau "
-        "WHERE s.datum_snimku = %(d)s AND s.ddatzan IS NULL AND NOT n.je_pseudokod "
-        "AND (n.sekce = ANY(%(s1)s) OR n.oddil = ANY(%(s2)s) OR n.skupina = ANY(%(s3)s) OR n.trida = ANY(%(s4)s)) "
+        f"WHERE s.datum_snimku = %(d)s AND s.ddatzan IS NULL AND {PODMINKA_OBORU} "
         "AND (%(typ)s = 'CR' OR (%(typ)s = 'KRAJ' AND o.kraj_kod = %(kod)s) OR (%(typ)s = 'OKRES' AND o.kod = %(kod)s))",
         {"d": datum, "s1": podle_urovne[1], "s2": podle_urovne[2], "s3": podle_urovne[3], "s4": podle_urovne[4],
          "typ": uz.typ, "kod": uz.kod})
@@ -277,8 +344,9 @@ def tabulky_mzdy(uz: "Uzemi", srovnani: list["Uzemi"], obor: list[dict], kraje: 
     """T20 obor × kraj (roční zjišťování MZDCRR) a T21 nejbližší publikované úrovně pro novější roky (MZDR).
 
     Jen publikovaná čísla ČSÚ a poměry mezi nimi; nic se nedopočítává z jiných úrovní. Zaměstnanci
-    v tis. osob (přepočtené počty) na 1 desetinné místo, mzda v Kč na celé koruny (jako ČSÚ publikuje)."""
-    sekce = {o["sekce"] for o in obor}
+    v tis. osob (přepočtené počty) na 1 desetinné místo, mzda v Kč na celé koruny (jako ČSÚ publikuje).
+    ČSÚ publikuje mzdy podle sekcí NACE Rev. 2 – obor (CZ-NACE 2025) se připojuje přes sekce_rev2."""
+    sekce = {o["sekce_rev2"] for o in obor}
     sl20 = [{"kod": "zam", "nazev": "Zaměstnanci v oboru (tis., přepočtené)", "ukazatel": "MZDY_ZAM_OBOR"},
             {"kod": "zam_podil_cr", "nazev": "Podíl na zaměstnancích oboru v ČR (%)", "ukazatel": "MZDY_ZAM_PODIL_CR"},
             {"kod": "zam_podil_uzemi", "nazev": "Podíl oboru na zaměstnancích území (%)", "ukazatel": "MZDY_ZAM_PODIL_UZEMI"},
@@ -407,8 +475,9 @@ def tabulky_ekonomika(uz: "Uzemi", srovnani: list["Uzemi"], obor: list[dict], kr
     """T22 HPH, zaměstnanost a produktivita (kraje, ČR) a T23 náhrady zaměstnancům (regiony soudržnosti).
 
     Jen publikovaná čísla Eurostatu a poměry mezi nimi v témže roce a území; nic se nedopočítává
-    z jiných úrovní. Objemový vývoj = řetězení meziročních změn z HPH v cenách předchozího roku."""
-    sekce = {o["sekce"] for o in obor}
+    z jiných úrovní. Objemový vývoj = řetězení meziročních změn z HPH v cenách předchozího roku.
+    Skupiny A*10 jsou podle NACE Rev. 2 – obor (CZ-NACE 2025) se připojuje přes sekce_rev2."""
+    sekce = {o["sekce_rev2"] for o in obor}
     skupiny = {SKUPINY_A10[s] for s in sekce if s in SKUPINY_A10}
     sl22 = [{"kod": "hph", "nazev": "HPH skupiny (mil. Kč, běžné ceny)", "ukazatel": "EKON_HPH"},
             {"kod": "hph_podil_uzemi", "nazev": "Podíl na HPH území (%)", "ukazatel": "EKON_HPH_PODIL_UZEMI"},
@@ -567,8 +636,9 @@ def tabulky_model(uz: "Uzemi", obor: list[dict], kraje: dict, subjekty_uzemi: li
     n27 = "Kontrola konzistence: model použitý na celou ČR proti statistice podniků (SBS)"
     vse = [(n28, "T28_model_prepocet", sl28), (n24, "T24_model_velikost", sl24), (n25, "T25_model_koncentrace", sl25),
            (n26, "T26_sbs_cr", sl26), (n27, "T27_model_kontrola", sl27)]
-    sekce = {o["sekce"] for o in obor}
+    sekce = {o["sekce_rev2"] for o in obor}             # Eurostat (A*10, SBS) je v NACE Rev. 2
     s = next(iter(sekce)) if len(sekce) == 1 else None
+    s25 = obor[0]["sekce"] if len({o["sekce"] for o in obor}) == 1 else None   # ČSÚ aktivita je v CZ-NACE 2025
     duvod = None
     if not ek or not sbs:
         duvod = "vstupy modelu nejsou načtené (res_import eurostat)"
@@ -590,9 +660,9 @@ def tabulky_model(uz: "Uzemi", obor: list[dict], kraje: dict, subjekty_uzemi: li
     kraj = uz.kraj_kod or "CZ"
     geo = "CZ" if uz.typ == "CR" else kraj
     subj = subjekty_uzemi
-    a = aktivita.get((kraj, s), {})
+    a = aktivita.get((kraj, s25), {})
     podil_akt = a["4958_akt"] / a["4958_reg"] if a.get("4958_reg") else None
-    a_cr = aktivita.get(("CZ", s), {})
+    a_cr = aktivita.get(("CZ", s25), {})
     podil_akt_cr = a_cr["4958_akt"] / a_cr["4958_reg"] if a_cr.get("4958_reg") else None
     if podil_akt is None or podil_akt_cr is None:
         return [tabulka_nezverejnena(kod, n, "ČSÚ nepublikuje podíl se zjištěnou aktivitou pro sekci a kraj", sl)
@@ -872,13 +942,15 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
         obor = urci_obor(cur, zadani.obor)
         d = nacti_data(cur, obor, datum)
         dynamika = nacti_dynamiku(cur, uz.kod)
-        _sekce = {o["sekce"] for o in obor}
+        # zdroje publikované jen v NACE Rev. 2 se k oboru (CZ-NACE 2025) připojují přes sekci (sekce_rev2)
+        _sekce = {o["sekce_rev2"] for o in obor}
+        _jedna = next(iter(_sekce)) if len(_sekce) == 1 else None
         _skupiny = {SKUPINY_A10[s][0] for s in _sekce if s in SKUPINY_A10}
         ekonomika = nacti_ekonomiku(cur, next(iter(_skupiny)) if len(_skupiny) == 1 else None)
-        sbs = nacti_sbs(cur, next(iter(_sekce)) if len(_sekce) == 1 else None)
-        mzdy = nacti_mzdy(cur, next(iter({o["sekce"] for o in obor})) if len({o["sekce"] for o in obor}) == 1 else None)
-        sekce_oboru = {o["sekce"] for o in obor}
-        demografie = nacti_demografii(cur, next(iter(sekce_oboru)) if len(sekce_oboru) == 1 else None)
+        sbs = nacti_sbs(cur, _jedna)
+        mzdy = nacti_mzdy(cur, _jedna)
+        demografie = nacti_demografii(cur, _jedna)
+        zmena_klas = zmena_klasifikace(cur, obor, uz, datum, zadani.prah)
         n_zadani = pocet_oboru(cur, obor, uz, datum)
         if n_zadani < zadani.min_rozsah:
             raise MalyRozsah(f"{popis_oboru(obor)} × {uz.nazev}", n_zadani, zadani.min_rozsah,
@@ -1639,14 +1711,18 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
         "varovani": varovani,
         "obor": [{"kod": o["kod"], "nazev": o["nazev"], "uroven": o["uroven"]} for o in obor],
         "obor_popis": popis_oboru(obor),
-        "klasifikace": "CZ-NACE Rev. 2 (klasifikace ČSÚ 80004, sloupec NACE)",
+        "klasifikace": "CZ-NACE 2025 (klasifikace ČSÚ 80143, atribut NACE2025 z RES; u zaniklých subjektů bez "
+                       "kódu 2025 kód odvozený z CZ-NACE 2008 s jistotou oddílu aspoň 0,8)",
+        "klasifikace_poznamky": [POZNAMKA_A10, poznamka_zaniklych(zmena_klas)],
+        "zmena_klasifikace": zmena_klas,
         "uzemi": {"typ": uz.typ, "kod": uz.kod, "nazev": uz.nazev, "kraj": uz.kraj_kod},
         "populace": "registrované ekonomické subjekty bez data zániku (sídlo v území, převažující činnost v oboru)",
         "citace": citace(datum),
         "oznaceni": OZNACENI,
         "dalsi_zdroje": [
             f"ČSÚ, DataStat, sada OBY02A – počet obyvatel k 31. 12. {d['rok_obyvatel']}",
-            f"ČSÚ, DataStat, výběr RES02QT1 – podíl subjektů se zjištěnou aktivitou, {d['obdobi_aktivity']}",
+            f"ČSÚ, DataStat, výběr {VYBER_AKTIVITA} – podíl subjektů se zjištěnou aktivitou (CZ-NACE 2025), "
+            f"{d['obdobi_aktivity']}",
             "ČSÚ, DataStat, sada RES05 – vznik a zánik ekonomických subjektů",
             "ČSÚ, DataStat, sada RESDP00 – demografie podniků (jednotka podnik, jen ČR)",
             "ČSÚ, DataStat, výběry MZDCRRT1, MZDCRRT2, MZDRT2, MZDRT5 – zaměstnanci a průměrné hrubé měsíční mzdy",
@@ -1691,7 +1767,10 @@ def markdown(vysledek: dict) -> str:
     m = vysledek["meta"]
     out = [f"# {m['obor_popis']} × {m['uzemi']['nazev']}", "",
            f"Stav k {m['zadani']['datum_snimku']}. Populace: {m['populace']}. Klasifikace: {m['klasifikace']}. "
-           f"Práh zveřejnění: {m['zadani']['prah']} subjektů.", "", f"*{m['citace']}* **{m['oznaceni']}**", ""]
+           f"Práh zveřejnění: {m['zadani']['prah']} subjektů.", ""] \
+        + [f"- {z}" for z in m.get("klasifikace_poznamky", [])] \
+        + ([f"- {m['zmena_klasifikace']['text']}"] if (m.get("zmena_klasifikace") or {}).get("text") else []) \
+        + ["", f"*{m['citace']}* **{m['oznaceni']}**", ""]
     for t in vysledek["tabulky"]:
         out += [f"## {t['kod']}: {t['nazev']}", ""]
         if not t["zverejneno"]:

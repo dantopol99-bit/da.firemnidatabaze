@@ -2,7 +2,7 @@
 
 Vstupy:
   * RES: subjekty oboru v území podle KATPO (kategorie počtu zaměstnanců) a FO/PO,
-  * ČSÚ: podíl subjektů se zjištěnou aktivitou v sekci a kraji (RES02QT1),
+  * ČSÚ: podíl subjektů se zjištěnou aktivitou v sekci a kraji (RES02QNACET1, CZ-NACE 2025),
   * Eurostat, regionální účty: hrubá přidaná hodnota skupiny A*10 v území (mil. Kč, běžné ceny),
   * Eurostat, SBS (sbs_sc_ovw): za ČR podle velikostních tříd – podniky, přidaná hodnota, čistý obrat,
     hrubý provozní přebytek (mil. EUR) a kurz CZK/EUR (ert_bil_eur_a).

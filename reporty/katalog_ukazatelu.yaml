@@ -6,7 +6,7 @@
 # Společné pro všechny ukazatele z RES:
 #   populace  = registrované ekonomické subjekty BEZ data zániku ve snímku RES
 #               (definice ČSÚ „počet ekonomických subjektů“), NE „firmy“ ani „aktivní“
-#   obor      = převažující činnost CZ-NACE Rev. 2 (sloupec NACE, klasifikace 80004)
+#   obor      = převažující činnost CZ-NACE 2025 (rozhraní obor.v_firma_obor_aktualni, rozhodnutí 15)
 #               na úrovni sekce / oddílu / skupiny / třídy, případně jejich seznam
 #   území     = sídlo subjektu: okres (OKRESLAU, číselník 109) → kraj (vazba 109 → 108)
 #   práh      = 10 subjektů; buňky pod prahem se slučují do „ostatní“ (docs/report_metodika.md)
@@ -292,8 +292,8 @@ ukazatele:
     nazev: Podíl subjektů se zjištěnou aktivitou v kraji podle ČSÚ (%, všechny obory)
     typ: kontext
     definice: Počet ekonomických subjektů se zjištěnou aktivitou / počet ekonomických subjektů celkem, kraj (u okresu jeho kraj), všechny obory, poslední čtvrtletí.
-    vzorec: "100 × 4958_akt / 4958_reg (RES02QT1, NACE celkem)"
-    zdroj: ČSÚ, DataStat, výběr RES02QT1
+    vzorec: "100 × 4958_akt / 4958_reg (RES02QNACET1, NACE celkem)"
+    zdroj: ČSÚ, DataStat, výběr RES02QNACET1 (CZ-NACE 2025)
     uroven: [CR, kraj]
     chybejici_hodnoty: Za okres ČSÚ podíl v členění podle převažující činnosti nepublikuje; uvádí se krajský.
     vyklad: Jen kontext. Aktivitu po subjektech nedopočítáváme; počty v reportu jsou registrované subjekty.
@@ -303,8 +303,8 @@ ukazatele:
     nazev: Podíl subjektů se zjištěnou aktivitou v sekci a kraji podle ČSÚ (%)
     typ: kontext
     definice: Jako AKTIVNI_PODIL_KRAJ, ale jen pro sekci CZ-NACE zkoumaného oboru.
-    vzorec: "100 × 4958_akt / 4958_reg (RES02QT1, sekce)"
-    zdroj: ČSÚ, DataStat, výběr RES02QT1
+    vzorec: "100 × 4958_akt / 4958_reg (RES02QNACET1, sekce CZ-NACE 2025)"
+    zdroj: ČSÚ, DataStat, výběr RES02QNACET1 (CZ-NACE 2025)
     uroven: [CR, kraj]
     chybejici_hodnoty: "Jen je-li obor přesně jedna sekce, kterou ČSÚ publikuje samostatně (ne B, C, D, E – ty jen jako B–E); jinak nelze naplnit."
     vyklad: Jen kontext.
@@ -742,7 +742,7 @@ ukazatele:
     typ: odhad
     definice: Krajská přidaná hodnota skupiny (Eurostat, regionální účty) přepočtená na úroveň statistiky podniků (MODEL_POMER_SBS) a rozpočítaná mezi třídy podle počtu subjektů (RES, KATPO, podíl se zjištěnou aktivitou podle ČSÚ) × celostátní přidané hodnoty na podnik třídy (Eurostat SBS).
     vzorec: "HPH_kraj × MODEL_POMER_SBS × n(c)·AV(c)/ENT(c) / Σ n·AV/ENT; pásmo podle zařazení KATPO „Neuvedeno“"
-    zdroj: modelový odhad (RES, ČSÚ RES02QT1, Eurostat nama_10r_3gva, sbs_sc_ovw)
+    zdroj: modelový odhad (RES, ČSÚ RES02QNACET1, Eurostat nama_10r_3gva, sbs_sc_ovw přes sekce Rev. 2)
     uroven: [CR, kraj]
     chybejici_hodnoty: Jen obor = celá sekce, která je samostatnou skupinou A*10; třídy pod prahem 10 subjektů sloučeny.
     vyklad: Modelový odhad, ne statistika. Součet tříd = krajský fakt.

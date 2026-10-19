@@ -44,8 +44,8 @@ class TestReport(unittest.TestCase):
         # území pod prahem: třída s 1–9 subjekty v okrese
         with CONN.cursor() as cur:
             cur.execute(
-                "SELECT n.trida, s.okreslau FROM res.subjekt s JOIN res.cis_nace n "
-                "ON n.klasifikace = 80004 AND n.kod = s.nace WHERE s.ddatzan IS NULL AND n.trida IS NOT NULL "
+                "SELECT n.trida, s.okreslau FROM res.subjekt s JOIN obor.v_firma_obor_aktualni n "
+                "ON n.ico = s.ico WHERE s.ddatzan IS NULL AND n.trida IS NOT NULL AND n.automaticke_spojeni "
                 "AND s.datum_snimku = res.posledni_snimek() GROUP BY 1, 2 HAVING count(*) BETWEEN 2 AND 9 LIMIT 1")
             trida, okres = cur.fetchone()
         CONN.rollback()
@@ -64,11 +64,22 @@ class TestReport(unittest.TestCase):
     def test_pocet_odpovida_databazi(self):
         vysledek, _, _ = self.vystupy["F_LBK"]
         with CONN.cursor() as cur:
+            # rozhodnutí 15: obor podle CZ-NACE 2025 z rozhraní obor.v_firma_obor_aktualni
+            cur.execute("SELECT count(*) FROM res.v_subjekt s JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+                        "WHERE s.datum_snimku = res.posledni_snimek() AND NOT s.je_zanikly AND s.kraj_kod = 'CZ051' "
+                        "AND n.sekce = 'F' AND n.automaticke_spojeni AND NOT n.je_pseudokod")
+            ocekavano = cur.fetchone()[0]
             cur.execute("SELECT count(*) FROM res.v_subjekt WHERE datum_snimku = res.posledni_snimek() "
                         "AND NOT je_zanikly AND kraj_kod = 'CZ051' AND nace_sekce = 'F'")
-            ocekavano = cur.fetchone()[0]
+            podle_2008 = cur.fetchone()[0]
         CONN.rollback()
         self.assertEqual(radek_t01(vysledek, "REG_POCET")["hodnoty"]["hodnota"], ocekavano)
+        zmena = vysledek["meta"]["zmena_klasifikace"]
+        self.assertEqual((zmena["pocet_2025"], zmena["pocet_2008"]), (ocekavano, podle_2008))
+        self.assertEqual(zmena["zmena"], ocekavano - podle_2008)
+        self.assertIn("Změna klasifikace", zmena["text"])
+        self.assertTrue(any("úrovni sekcí" in p for p in vysledek["meta"]["klasifikace_poznamky"]))
+        self.assertTrue(any("zaniklých subjektů" in p for p in vysledek["meta"]["klasifikace_poznamky"]))
 
     def test_uzemi_pod_prahem_nic_nezverejni(self):
         vysledek, interni, _ = self.vystupy["MALE"]
@@ -149,7 +160,7 @@ class TestReport(unittest.TestCase):
         self.assertLess(e.pocet, 100)
         popisy = [n["popis"] for n in e.navrhy]
         self.assertTrue(any("Olomoucký kraj" in p and p.startswith("62") for p in popisy), popisy)
-        self.assertTrue(any(p.startswith("J ") for p in popisy), popisy)
+        self.assertTrue(any(p.startswith("K ") for p in popisy), popisy)   # oddíl 62 je v CZ-NACE 2025 v sekci K
         self.assertTrue(all(isinstance(n["pocet"], int) for n in e.navrhy))
         self.assertIn("Návrh vyšší úrovně", e.vypis())
 
@@ -164,8 +175,10 @@ class TestReport(unittest.TestCase):
     def test_benchmark_cr_odpovida_databazi(self):
         vysledek, _, _ = self.vystupy["F_LBK"]
         with CONN.cursor() as cur:
-            cur.execute("SELECT round(100.0 * count(*) FILTER (WHERE forma = ANY(%s)) / count(*), 1) FROM res.v_subjekt "
-                        "WHERE datum_snimku = res.posledni_snimek() AND NOT je_zanikly AND nace_sekce = 'F'",
+            cur.execute("SELECT round(100.0 * count(*) FILTER (WHERE s.forma = ANY(%s)) / count(*), 1) "
+                        "FROM res.v_subjekt s JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+                        "WHERE s.datum_snimku = res.posledni_snimek() AND NOT s.je_zanikly AND n.sekce = 'F' "
+                        "AND n.automaticke_spojeni AND NOT n.je_pseudokod",
                         (sorted(FO_FORMY),))
             podil_fo_cr = float(cur.fetchone()[0])
         CONN.rollback()
@@ -215,8 +228,8 @@ class TestReport(unittest.TestCase):
                 self.assertIsNone(h["mira"])      # neúplný rok: jen srovnatelné období
         # nezávislá rekonstrukce stavu PO v ČR k 1. 1. 2024 přímo v SQL
         with CONN.cursor() as cur:
-            cur.execute("SELECT count(*) FROM res.subjekt s JOIN res.cis_nace n ON n.klasifikace = 80004 "
-                        "AND n.kod = s.nace WHERE s.datum_snimku = res.posledni_snimek() AND n.sekce = 'F' "
+            cur.execute("SELECT count(*) FROM res.subjekt s JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+                        "WHERE s.datum_snimku = res.posledni_snimek() AND n.sekce = 'F' AND n.automaticke_spojeni "
                         "AND NOT n.je_pseudokod AND NOT (coalesce(s.forma, '') = ANY(%s)) "
                         "AND s.ddatvzn < '2024-01-01' AND (s.ddatzan IS NULL OR s.ddatzan >= '2024-01-01') "
                         "AND (s.ddatzan IS NULL OR s.forma IS NOT NULL)", (sorted(FO_FORMY),))

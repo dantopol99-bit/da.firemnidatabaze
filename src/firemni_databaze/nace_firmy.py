@@ -5,6 +5,7 @@ Spuštění (po nasad_sql obor a nace_ciselniky nahraj):
     python -m firemni_databaze.nace_firmy res [--datum D] [--bez-vedlejsich]   # snímek RES → firma_nace
     python -m firemni_databaze.nace_firmy matice                               # matice + pravidla + odvození
     python -m firemni_databaze.nace_firmy kontroly [--vystup soubor.md]        # krok 6: pokrytí, změny, pilot
+    python -m firemni_databaze.nace_firmy obnov                                # jen obnoví obor.v_firma_obor_aktualni
     python -m firemni_databaze.nace_firmy vse
 
 Všechny kroky jsou idempotentní: opakované spuštění se stejnými daty nic nezmění.
@@ -21,6 +22,12 @@ from datetime import date
 from pathlib import Path
 
 MIN_ZAKLAD = 20          # méně firem v matici → kandidáti z převodníku, kód NULL
+PRAH_ROZPORU = 0.9       # rozhodnutí 2: empirický cíl s podílem ≥ 0,9 přebije jediný cíl převodníku
+ZACATEK_2025 = date(2025, 1, 1)               # rozhodnutí 6: kód 2025 platí nejdřív od 1. 1. 2025
+KONEC_DVOJIHO_KODOVANI = date(2028, 12, 31)   # rozhodnutí 7: poslední den kódů 2008 v RES
+DUVOD_ZANIK = "zánik subjektu"
+DUVOD_NEUVADI = "zdroj kód už neuvádí"
+DUVOD_KONEC_2008 = "konec dvojího kódování"
 PRAH_ZVEREJNENI = 10     # rozhodnutí 3: počty pod 10 se ve výstupech nevypisují
 VERZE = (2008, 2025)
 
@@ -48,27 +55,29 @@ def _zapis_res(cur, zdroj_sql: str, subjekty_sql: str, verze: int, typ: str, zdr
     cur.execute(
         """
         WITH uzavrit AS (
-            SELECT f.id, CASE WHEN s.ico IS NULL THEN sn.konec_snimku ELSE s.platnost_do END AS konec
+            SELECT f.id, CASE WHEN s.ico IS NULL THEN sn.konec_snimku ELSE s.platnost_do END AS konec,
+                   CASE WHEN s.ico IS NULL THEN %(neuvadi)s ELSE %(zanik)s END AS duvod
             FROM obor.firma_nace f
             JOIN stg_sn sn ON sn.ico = f.ico
             LEFT JOIN stg_fn s ON s.ico = f.ico AND s.kod = f.kod
             WHERE f.zdroj = 'RES' AND f.verze = %(verze)s AND f.typ = %(typ)s AND f.platnost_do IS NULL
         )
         UPDATE obor.firma_nace f
-        SET platnost_do = greatest(u.konec, f.platnost_od)
+        SET platnost_do = greatest(u.konec, f.platnost_od), duvod_uzavreni = u.duvod
         FROM uzavrit u
         WHERE f.id = u.id AND u.konec IS NOT NULL
         """,
-        {"verze": verze, "typ": typ},
+        {"verze": verze, "typ": typ, "zanik": DUVOD_ZANIK, "neuvadi": DUVOD_NEUVADI},
     )
     uzavreno = cur.rowcount
     # 2) vložit kódy, které nejsou otevřené (ani uzavřené ke stejnému datu zániku)
     cur.execute(
         f"""
         INSERT INTO obor.firma_nace (ico, verze, kod, uroven, typ, zdroj, zdroj_detail, jistota,
-                                     platnost_od, platnost_do, import_davka_id)
+                                     platnost_od, platnost_do, duvod_uzavreni, import_davka_id)
         SELECT s.ico, %(verze)s, s.kod, coalesce(c.uroven, {UROVEN_KODU.format(k='s.kod')}), %(typ)s, 'RES',
-               %(detail)s, 1, s.platnost_od, s.platnost_do, %(davka)s
+               %(detail)s, 1, s.platnost_od, s.platnost_do,
+               CASE WHEN s.platnost_do IS NOT NULL THEN %(zanik)s END, %(davka)s
         FROM stg_fn s
         LEFT JOIN obor.nace_ciselnik c ON c.verze = %(verze)s AND c.kod = s.kod
         WHERE NOT EXISTS (
@@ -78,7 +87,7 @@ def _zapis_res(cur, zdroj_sql: str, subjekty_sql: str, verze: int, typ: str, zdr
         )
         ON CONFLICT DO NOTHING
         """,
-        {"verze": verze, "typ": typ, "detail": zdroj_detail, "davka": davka},
+        {"verze": verze, "typ": typ, "detail": zdroj_detail, "davka": davka, "zanik": DUVOD_ZANIK},
     )
     vlozeno = cur.rowcount
     cur.execute("DROP TABLE stg_fn, stg_sn")
@@ -106,16 +115,27 @@ def nacti_res(conn, datum: date | None = None, vedlejsi: bool = True) -> dict:
             subjekty = f"""
                 SELECT ico, coalesce(ddatzan, ddatpakt, datum_snimku) AS konec_snimku
                 FROM res.subjekt WHERE datum_snimku = '{datum}'"""
+            cur.execute(f"SELECT count(nace) FROM res.subjekt WHERE datum_snimku = '{datum}'")
+            konec_2008 = je_konec_dvojiho_kodovani(datum, cur.fetchone()[0])
             for verze, sloupec, kodcis in ((2008, "nace", "80004"), (2025, "nace2025", "80143")):
+                if verze == 2008 and konec_2008:
+                    vysledek[(2008, "konec")] = (uzavri_kody_2008(cur), 0)
+                    print(f"  CZ-NACE 2008: konec dvojího kódování – uzavřeno {vysledek[(2008, 'konec')][0]} kódů")
+                    conn.commit()
+                    continue
+                # rozhodnutí 6: kód 2025 platí nejdřív od 1. 1. 2025 (u zaniklých dřív je interval prázdný)
+                od = "least(coalesce({p}ddatpakt, {p}datum_snimku), {p}ddatzan)"
+                do = "{p}ddatzan"
+                if verze == 2025:
+                    od, do = f"obor.zacatek_2025({od})", f"obor.konec_2025({do})"
                 hlavni = f"""
-                    SELECT ico, {sloupec} AS kod, least(coalesce(ddatpakt, datum_snimku), ddatzan) AS platnost_od,
-                           ddatzan AS platnost_do
+                    SELECT ico, {sloupec} AS kod, {od.format(p='')} AS platnost_od, {do.format(p='')} AS platnost_do
                     FROM res.subjekt WHERE datum_snimku = '{datum}' AND {sloupec} IS NOT NULL"""
                 vysledek[(verze, "hlavni")] = _zapis_res(cur, hlavni, subjekty, verze, "hlavni", detail, davka)
                 if vedlejsi:
                     ved = f"""
-                        SELECT DISTINCT p.ico, p.hodn AS kod, least(coalesce(s.ddatpakt, s.datum_snimku), s.ddatzan) AS platnost_od,
-                               s.ddatzan AS platnost_do
+                        SELECT DISTINCT p.ico, p.hodn AS kod, {od.format(p='s.')} AS platnost_od,
+                               {do.format(p='s.')} AS platnost_do
                         FROM res.pf_nace p
                         JOIN res.subjekt s ON s.ico = p.ico AND s.datum_snimku = p.datum_snimku
                         WHERE p.datum_snimku = '{datum}' AND p.kodcis = '{kodcis}' AND p.hodn IS NOT NULL
@@ -135,44 +155,86 @@ def nacti_res(conn, datum: date | None = None, vedlejsi: bool = True) -> dict:
     return vysledek
 
 
-def zapis_ares(cur, ico: str, res_zaznam: dict | None, davka: int | None) -> int:
+def je_konec_dvojiho_kodovani(datum_stavu: date, pocet_kodu_2008: int) -> bool:
+    """Rozhodnutí 7: dvojí kódování končí po 31. 12. 2028, nebo jakmile zdroj přestane kódy 2008 dodávat."""
+    return datum_stavu > KONEC_DVOJIHO_KODOVANI or pocet_kodu_2008 == 0
+
+
+def uzavri_kody_2008(cur, ico: str | None = None) -> int:
+    """Uzavře všechny otevřené kódy CZ-NACE 2008 z RES (celé populace, nebo jednoho IČO)
+    k 31. 12. 2028 s důvodem „konec dvojího kódování“. Opakované volání nic nezmění."""
+    cur.execute(
+        "UPDATE obor.firma_nace SET platnost_do = greatest(%s::date, platnost_od), duvod_uzavreni = %s "
+        "WHERE zdroj = 'RES' AND verze = 2008 AND platnost_do IS NULL AND (%s::text IS NULL OR ico = %s)",
+        (KONEC_DVOJIHO_KODOVANI, DUVOD_KONEC_2008, ico, ico),
+    )
+    return cur.rowcount
+
+
+def obnov_rozhrani(conn) -> None:
+    """Obnoví materializované rozhraní obor.v_firma_obor_aktualni (~2 min)."""
+    with conn.cursor() as cur:
+        cur.execute("REFRESH MATERIALIZED VIEW obor.v_firma_obor_aktualni")
+        cur.execute("ANALYZE obor.v_firma_obor_aktualni")
+    conn.commit()
+    print("  obor.v_firma_obor_aktualni obnoveno")
+
+
+def zapis_ares(cur, ico: str, res_zaznam: dict | None, davka: int | None, dnes: date | None = None) -> int:
     """Záznam z ARES (endpoint ekonomicke-subjekty-res) → obor.firma_nace, obě verze.
     czNacePrevazujici / czNacePrevazujici2008 = hlavní, ostatní kódy z czNace / czNace2008 = vedlejší.
     Platnost od = datumAktualizace (stejný význam jako DDATPAKT v otevřených datech RES)."""
     if not res_zaznam:
         return 0
+    dnes = dnes or date.today()
     platnost_do = res_zaznam.get("datumZaniku")
     platnost_od = min(filter(None, (res_zaznam.get("datumAktualizace"), platnost_do)), default=None)
+    meze = {2008: (platnost_od, platnost_do),
+            2025: (_nejdriv_2025(platnost_od), _nejdriv_2025(platnost_do))}   # rozhodnutí 6
+    # rozhodnutí 7: u jednoho IČO rozhoduje jen datum – chybějící kód 2008 u jedné firmy
+    # neznamená, že ho zdroj přestal dodávat (to pozná až nacti_res na celém snímku)
+    konec_2008 = dnes > KONEC_DVOJIHO_KODOVANI
     radky = []
     for verze, pole_hlavni, pole_vse in ((2008, "czNacePrevazujici2008", "czNace2008"),
                                         (2025, "czNacePrevazujici", "czNace")):
+        if verze == 2008 and konec_2008:
+            continue
         hlavni = res_zaznam.get(pole_hlavni)
         if hlavni:
             radky.append((verze, hlavni, "hlavni"))
         for kod in sorted(set(res_zaznam.get(pole_vse) or []) - {hlavni}):
             radky.append((verze, kod, "vedlejsi"))
-    vlozeno = sum(_zapis_jeden(cur, ico, verze, kod, typ, platnost_od, platnost_do, davka)
-                  for verze, kod, typ in radky)
+    vlozeno = sum(_zapis_jeden(cur, ico, verze, kod, typ, *meze[verze], davka) for verze, kod, typ in radky)
+    if konec_2008:
+        uzavri_kody_2008(cur, ico)
     # kódy, které ARES už neuvádí, se uzavřou ke dni aktualizace (nebo zániku)
     for verze in VERZE:
         for typ in ("hlavni", "vedlejsi"):
             aktualni = [k for v, k, t in radky if v == verze and t == typ]
+            od, do = meze[verze]
             cur.execute(
-                "UPDATE obor.firma_nace SET platnost_do = greatest(coalesce(%s::date, current_date), platnost_od) "
+                "UPDATE obor.firma_nace SET platnost_do = greatest(coalesce(%s::date, current_date), platnost_od), "
+                "duvod_uzavreni = %s "
                 "WHERE ico = %s AND verze = %s AND typ = %s AND zdroj = 'RES' AND platnost_do IS NULL "
                 "AND NOT (kod = ANY(%s))",
-                (platnost_do or platnost_od, ico, verze, typ, aktualni),
+                (do or od, DUVOD_ZANIK if do else DUVOD_NEUVADI, ico, verze, typ, aktualni),
             )
     return vlozeno
+
+
+def _nejdriv_2025(d: str | None) -> str | None:
+    """Datum ISO nejdřív 1. 1. 2025 (začátek i konec platnosti kódu 2025, viz obor.zacatek_2025)."""
+    return max(d, ZACATEK_2025.isoformat()) if d else None
 
 
 def _zapis_jeden(cur, ico, verze, kod, typ, platnost_od, platnost_do, davka) -> int:
     cur.execute(
         f"""
         INSERT INTO obor.firma_nace (ico, verze, kod, uroven, typ, zdroj, zdroj_detail, jistota,
-                                     platnost_od, platnost_do, import_davka_id)
+                                     platnost_od, platnost_do, duvod_uzavreni, import_davka_id)
         SELECT %(ico)s, %(verze)s, %(kod)s, coalesce(c.uroven, {UROVEN_KODU.format(k='%(kod)s')}), %(typ)s, 'RES',
-               'ARES, endpoint ekonomicke-subjekty-res', 1, %(od)s, %(do)s, %(davka)s
+               'ARES, endpoint ekonomicke-subjekty-res', 1, %(od)s, %(do)s,
+               CASE WHEN %(do)s::date IS NOT NULL THEN %(zanik)s END, %(davka)s
         FROM (SELECT 1) x
         LEFT JOIN obor.nace_ciselnik c ON c.verze = %(verze)s AND c.kod = %(kod)s
         WHERE NOT EXISTS (
@@ -181,7 +243,8 @@ def _zapis_jeden(cur, ico, verze, kod, typ, platnost_od, platnost_do, davka) -> 
               AND f.kod = %(kod)s AND (f.platnost_do IS NULL OR f.platnost_od = %(od)s::date))
         ON CONFLICT DO NOTHING
         """,
-        {"ico": ico, "verze": verze, "kod": kod, "typ": typ, "od": platnost_od, "do": platnost_do, "davka": davka},
+        {"ico": ico, "verze": verze, "kod": kod, "typ": typ, "od": platnost_od, "do": platnost_do, "davka": davka,
+         "zanik": DUVOD_ZANIK},
     )
     return cur.rowcount
 
@@ -203,7 +266,7 @@ WITH h08 AS (
     FROM h08 JOIN h25 USING (ico)
     JOIN obor.nace_ciselnik c08 ON c08.verze = 2008 AND c08.kod = h08.kod
     JOIN obor.nace_ciselnik c25 ON c25.verze = 2025 AND c25.kod = h25.kod
-    WHERE h08.platnost_od IS NOT DISTINCT FROM h25.platnost_od      -- tentýž stav záznamu RES
+    WHERE h25.platnost_od IS NOT DISTINCT FROM obor.zacatek_2025(h08.platnost_od)   -- tentýž stav záznamu RES
 ), rozpad AS (
     SELECT z.kod AS kod_2008, z.u AS uroven_2008, t.u AS uroven, t.kod AS kod_2025
     FROM par
@@ -227,6 +290,7 @@ class Pravidlo:
     metoda: str
     zaklad: int
     kandidati: tuple[str, ...] | None
+    cil_prevodnik: str | None = None     # u 'empiricky_rozpor': jediný cíl podle převodníku, který empirie přebila
 
 
 def predek(ciselnik: dict, verze: int, kod: str, uroven: int) -> str | None:
@@ -241,6 +305,15 @@ def pravidlo(kod: str, uroven: int, ciselnik: dict, prevodnik: dict, matice: dic
     """Pravidlo odvození kódu 2025 na cílové úrovni pro kód 2008 (viz sql/obor/03_prechod.sql).
     prevodnik: (kod_2008) → [(kod_2025, typ_vazby)] na úrovni kódu; matice: (kod_2008, uroven) → (cíl, počet, základ)."""
     zaklad = matice.get((kod, uroven), (None, 0, 0))[2]
+
+    def podle_prevodniku(cil: str, metoda: str) -> Pravidlo:
+        # rozhodnutí 2: jiný empirický cíl s podílem ≥ 0,9 při základu ≥ 20 přebije převodník
+        if zaklad >= MIN_ZAKLAD:
+            cil_e, pocet, _ = matice[(kod, uroven)]
+            if cil_e != cil and pocet / zaklad >= PRAH_ROZPORU:
+                return Pravidlo(cil_e, round(pocet / zaklad, 4), "empiricky_rozpor", zaklad, None, cil)
+        return Pravidlo(cil, 1.0, metoda, zaklad, None)
+
     # 1) vazba 1:1 – u kódu samotného, nebo u jeho předka na cílové úrovni
     for k in (kod, predek(ciselnik, 2008, kod, uroven)):
         if k is None:
@@ -249,11 +322,11 @@ def pravidlo(kod: str, uroven: int, ciselnik: dict, prevodnik: dict, matice: dic
         if len(pary) == 1 and pary[0][1] == "1:1":
             cil = predek(ciselnik, 2025, pary[0][0], uroven)
             if cil is not None:
-                return Pravidlo(cil, 1.0, "prevodnik_1:1", zaklad, None)
-    # 2) převodník dává na cílové úrovni jediného kandidáta
+                return podle_prevodniku(cil, "prevodnik_1:1")
+    # 2) rozhodnutí 1: převodník dává na cílové úrovni jediného kandidáta (vč. vazby N:1) → jistota 1
     kandidati = tuple(sorted({p for b, _ in prevodnik.get(kod, []) if (p := predek(ciselnik, 2025, b, uroven))}))
     if len(kandidati) == 1:
-        return Pravidlo(kandidati[0], 1.0, "prevodnik_jediny_cil", zaklad, None)
+        return podle_prevodniku(kandidati[0], "prevodnik_jediny_cil")
     # 3) empirická matice
     if zaklad >= MIN_ZAKLAD:
         cil, pocet, zaklad = matice[(kod, uroven)]
@@ -294,12 +367,17 @@ def spocti_matici(conn, zaklad_k: date | None = None) -> date:
             for uroven in range(1, c["uroven"] + 1):
                 p = pravidlo(kod, uroven, ciselnik, prevodnik, matice)
                 radky.append((zaklad_k, kod, uroven, p.kod_2025, p.jistota, p.metoda, p.zaklad,
-                              list(p.kandidati) if p.kandidati is not None else None))
+                              list(p.kandidati) if p.kandidati is not None else None, p.cil_prevodnik))
         cur.execute("DELETE FROM obor.nace_odvozeni WHERE zaklad_k = %s", (zaklad_k,))
         cur.executemany(
             "INSERT INTO obor.nace_odvozeni (zaklad_k, kod_2008, uroven, kod_2025, jistota, metoda, zaklad, kandidati) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", radky)
-        print(f"  pravidla odvození: {len(radky)} (kód 2008 × cílová úroveň)")
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", [r[:8] for r in radky])
+        cur.execute("DELETE FROM obor.nace_rozpory_prevodnik WHERE zaklad_k = %s", (zaklad_k,))
+        rozpory = [(r[0], r[1], r[2], r[8], r[3], r[4], r[6]) for r in radky if r[5] == "empiricky_rozpor"]
+        cur.executemany(
+            "INSERT INTO obor.nace_rozpory_prevodnik (zaklad_k, kod_2008, uroven, cil_prevodnik, cil_empirie, podil, "
+            "zaklad) VALUES (%s, %s, %s, %s, %s, %s, %s)", rozpory)
+        print(f"  pravidla odvození: {len(radky)} (kód 2008 × cílová úroveň), rozporů s převodníkem: {len(rozpory)}")
     conn.commit()
     return zaklad_k
 
@@ -324,7 +402,7 @@ def odvod_firmy(conn, zaklad_k: date) -> int:
               AND NOT EXISTS (
                   SELECT 1 FROM obor.firma_nace g
                   WHERE g.ico = f.ico AND g.verze = 2025 AND g.typ = 'hlavni' AND g.zdroj = 'RES'
-                    AND g.platnost_od IS NOT DISTINCT FROM f.platnost_od)
+                    AND g.platnost_od IS NOT DISTINCT FROM obor.zacatek_2025(f.platnost_od))
             """,
             (zaklad_k,),
         )
@@ -426,6 +504,31 @@ def kontroly(conn, kraj: str = "CZ051", sekce_2008: str = "F", sekce_2025: str =
             md.append(f"| {u} | {m} | {_pocet(n)} | {str(j).replace('.', ',') if j is not None else '–'} |")
         md.append("")
 
+        # --- rozpory převodníku s empirií (rozhodnutí 2)
+        cur.execute(
+            "SELECT kod_2008, uroven, cil_prevodnik, cil_empirie, podil, zaklad FROM obor.nace_rozpory_prevodnik "
+            "WHERE zaklad_k = %s ORDER BY zaklad DESC, kod_2008, uroven", (zaklad_k,))
+        rozpory = cur.fetchall()
+        md.append("### Rozpory převodníku s empirií (rozhoduje empirie)\n")
+        md.append(f"Pravidel: **{len(rozpory)}** (základ ≥ {MIN_ZAKLAD}, podíl empirického cíle ≥ "
+                  f"{str(PRAH_ROZPORU).replace('.', ',')}).\n")
+        if rozpory:
+            md.append("| kód 2008 | cílová úroveň | cíl převodníku | cíl empirie | podíl | základ |")
+            md.append("|---|---:|---|---|---:|---:|")
+            for k, u, cp, ce, podil, zaklad in rozpory:
+                md.append(f"| {k} | {u} | {cp} | {ce} | {str(podil).replace('.', ',')} | {_pocet(zaklad)} |")
+        md.append("")
+
+        # --- stav zařazení v rozhraní (rozhodnutí 5)
+        cur.execute("SELECT coalesce(stav_zarazeni, 'bez kódu 2025'), count(*) FROM obor.v_firma_obor_aktualni "
+                    "GROUP BY 1 ORDER BY 2 DESC")
+        md.append("### Stav zařazení v rozhraní `v_firma_obor_aktualni`\n")
+        md.append("| stav | IČO |")
+        md.append("|---|---:|")
+        for stav, n in cur.fetchall():
+            md.append(f"| {stav} | {_pocet(n)} |")
+        md.append("")
+
         # --- změna oddílu a sekce
         cur.execute(
             """
@@ -504,6 +607,7 @@ def main() -> int:
     sub.add_parser("matice", help="matice přechodů, pravidla a odvozené kódy")
     k = sub.add_parser("kontroly", help="pokrytí, změny, pilot, číselník (Markdown)")
     k.add_argument("--vystup", type=Path)
+    sub.add_parser("obnov", help="obnoví materializované rozhraní obor.v_firma_obor_aktualni")
     v = sub.add_parser("vse", help="res + matice + kontroly")
     v.add_argument("--vystup", type=Path)
     args = parser.parse_args()
@@ -516,6 +620,8 @@ def main() -> int:
             nacti_res(conn, getattr(args, "datum", None), not getattr(args, "bez_vedlejsich", False))
         if args.prikaz in ("matice", "vse"):
             odvod_firmy(conn, spocti_matici(conn))
+        if args.prikaz in ("res", "matice", "obnov", "vse"):
+            obnov_rozhrani(conn)
         if args.prikaz in ("kontroly", "vse"):
             text = kontroly(conn)
             print(text)

@@ -171,6 +171,7 @@ se kód odvodí z empirické matice přechodů. Rozhraní pro ostatní produkty 
 python -m firemni_databaze.nasad_sql obor            # po dev a res
 python -m firemni_databaze.nace_ciselniky nahraj     # číselníky z ciselniky/nace/*.csv
 python -m firemni_databaze.nace_firmy vse            # snímek RES → firma_nace, matice, odvození, kontroly
+python -m firemni_databaze.nace_firmy obnov          # jen obnoví materializované rozhraní (~2 min)
 ```
 
 `ares_import` od této změny stahuje i endpoint `ekonomicke-subjekty-res` a kódy obou verzí zapisuje do
@@ -182,7 +183,7 @@ Metodika a schválená pravidla: [`docs/report_metodika.md`](docs/report_metodik
 [`reporty/katalog_ukazatelu.yaml`](reporty/katalog_ukazatelu.yaml).
 
 ```bash
-python -m firemni_databaze.res_import agregaty      # DataStat (RES02QT1, OBY02A, RES05, RESDP00, MZDCRR, MZDR) a Eurostat
+python -m firemni_databaze.res_import agregaty      # DataStat (RES02QT1, RES02QNACET1, OBY02A, RES05, RESDP00, MZDCRR, MZDR) a Eurostat
 python -m firemni_databaze.report --obor F --uzemi CZ051 [--srovnani CZ031,CZ053] [--datum 2026-09-15]
 python -m firemni_databaze.report_kontrola reporty/vystupy/*
 ```

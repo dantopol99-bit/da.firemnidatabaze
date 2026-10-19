@@ -9,11 +9,11 @@ Rozhodnutí k nálezům z Bloku 1. Platí pro všechny výstupy reportu.
 
 | # | rozhodnutí | jak je v kódu |
 |---|---|---|
-| 1 | Report vždy uvádí **„registrované subjekty“**, nikdy „firmy“ ani „aktivní“. Jako kontext uvádí **krajský podíl subjektů se zjištěnou aktivitou podle ČSÚ** z DataStatu. Aktivitu po subjektech nedopočítáváme. | ukazatel `AKTIVNI_PODIL_KRAJ` (RES02QT1, u okresu jeho kraj); kontrola výstupu odmítne texty se slovy „firm…“ a „aktivn…“ |
+| 1 | Report vždy uvádí **„registrované subjekty“**, nikdy „firmy“ ani „aktivní“. Jako kontext uvádí **krajský podíl subjektů se zjištěnou aktivitou podle ČSÚ** z DataStatu. Aktivitu po subjektech nedopočítáváme. | ukazatel `AKTIVNI_PODIL_KRAJ` (RES02QNACET1, u okresu jeho kraj); kontrola výstupu odmítne texty se slovy „firm…“ a „aktivn…“ |
 | 2 | Velikostní profil (KATPO) **zvlášť pro FO a PO**. „Neuvedeno“ se nikdy neslučuje s „bez zaměstnanců“ a jeho podíl se vždy zobrazí. | tabulky `T07_velikost_fo`, `T08_velikost_po`; „Neuvedeno“ je samostatné pásmo (podléhá jen prahu) |
 | 3 | **Ochrana proti dopočtu**: buňky pod prahem 10 se v každém členění slučují do „ostatní“. Je-li „ostatní“ samo pod prahem, přidá se k němu další nejmenší buňka. Skryté číslo nesmí jít dopočítat odečtem od součtu ani z jiné tabulky téhož reportu. | `report_potlaceni.potlac()` + ověření lineární soustavou `dopocitatelne()` při výpočtu i v kontrolním skriptu |
 | 4 | „Vzniky podle let“ se jmenují **„věková struktura existujících subjektů“**. Dynamiku vzniku a zániku bereme z publikovaných tabulek ČSÚ (DataStat) na úrovni kraj × sekce, pokud existují. Zániky z RES jen od roku 2023, výkyv FO 2–3/2023 označit jako mimořádný. | `T09_vekova_struktura` (+ průměr/medián v T01); `T11_dynamika_csu` z RES05 (**kraj × sekce neexistuje**, viz níže); `T10_zaniky_po` od 2023; řádek 2023 nese poznámku o mimořádném výkyvu |
-| 5 | Klasifikace v0: **CZ-NACE Rev. 2** (sloupec `NACE`). | `KLASIFIKACE = 80004` |
+| 5 | ~~Klasifikace v0: CZ-NACE Rev. 2 (sloupec `NACE`).~~ **Nahrazeno rozhodnutím 15 (19. 10. 2026): CZ-NACE 2025.** | – |
 | 6 | Subjekty s NACE jen na úrovni sekce: v reportu za oddíl nebo nižší úroveň samostatný řádek **„zařazeno jen do sekce“**. Pseudokód 00 = **„obor neurčen“**. | T01: `DOPL_JEN_VYSSI` (pro každý nadřazený kód oboru), `DOPL_OBOR_NEURCEN` |
 | 7 | Každý výstup nese **citaci zdroje** (ČSÚ, RES, datum snímku, CC BY 4.0) a označení **„Odvozené údaje, nejde o oficiální statistiku ČSÚ.“** | `meta.citace` a `meta.oznaceni` v JSON, řádky 2–3 každého listu XLSX, list „Zdroj a licence“, hlavička MD; ověřuje kontrola |
 
@@ -76,6 +76,24 @@ funguje – obor zadaný jako celá sekce CZ-NACE, která je v regionálních ú
 na ČR: celostátní obrat SBS musí ležet v pásmu modelu a obě meze se od něj smějí lišit nejvýš o ±1 %;
 přesná shoda se vyžaduje jen u modelu s počty podniků ze SBS (jednotkový test).
 
+**Rozhodnutí 15 (19. 10. 2026): klasifikace CZ-NACE 2025** (nahrazuje rozhodnutí 5). Obor se zadává
+a počítá podle CZ-NACE 2025; zařazení subjektů bere report z rozhraní `obor.v_firma_obor_aktualni`
+(kód 2025 z RES, u zaniklých subjektů bez kódu 2025 odvozený z CZ-NACE 2008, jen při jistotě oddílu
+≥ 0,8 – viz [`cz-nace-2025.md`](cz-nace-2025.md)). Podíl se zjištěnou aktivitou je z tabulky ČSÚ
+v CZ-NACE 2025 (RES02QNACET1). Zdroje publikované jen v NACE Rev. 2 – skupiny A*10 regionálních účtů,
+SBS, mzdy ČSÚ a demografie podniků – se k oboru připojují převodní tabulkou sekcí `obor.nace_sekce_a10`
+(`sekce_rev2`, `a10_rev2`); výstup to uvádí poznámkou „spojení dvou verzí klasifikace na úrovni sekcí“
+(`meta.klasifikace_poznamky`, metodika a omezení PDF, list Přehled v XLSX). Pro obor zadaný celými
+sekcemi výstup uvádí i změnu proti CZ-NACE 2008 (`meta.zmena_klasifikace`, strojová vrstva výkladu
+„co je vidět“): pilot F × Liberecký kraj k 15. 10. 2026 má 14 799 subjektů proti 14 817 podle
+CZ-NACE 2008 (−18; 20 odešlo do oddílu 68, méně než 10 přišlo z oddílu 45).
+
+| | |
+|---|---|
+| kód | `report.KLASIFIKACE = 2025`, `report.VYBER_AKTIVITA = "RES02QNACET1"`, `report.PODMINKA_OBORU`, `report.zmena_klasifikace` |
+| omezení | 492 402 zaniklých fyzických osob (snímek 15. 10. 2026) nemá v otevřených datech kód činnosti v žádné verzi klasifikace – historické řady vzniků a zániků podle oboru zahrnují jen subjekty s kódem (`meta.klasifikace_poznamky`) |
+| historické snímky | rozhraní je „poslední známý stav“; report nad starším snímkem by bral dnešní kód 2025 (zatím jediný snímek, viz další kroky v `cz-nace-2025.md`) |
+
 **Upřesnění k rozhodnutí 1:** kontrola zakázaných slov povoluje jen sousloví **„aktivní podnik(y)“**.
 Je to oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10), ne označení
 registrovaných subjektů.
@@ -91,7 +109,7 @@ python -m firemni_databaze.report --obor 62 --uzemi Jeseník --datum 2026-09-15
 python -m firemni_databaze.report_kontrola reporty/vystupy/*
 ```
 
-- **Obor**: kódy CZ-NACE Rev. 2 na úrovni sekce, oddílu, skupiny nebo třídy, i seznam (`41,42`).
+- **Obor**: kódy CZ-NACE 2025 (rozhodnutí 15) na úrovni sekce, oddílu, skupiny nebo třídy, i seznam (`41,42`).
   Kódy se nesmí překrývat (`41,4120` je chyba). Pseudokódy a podtřídy zadat nelze. Subjekt patří do
   oboru, je-li jeho převažující činnost zařazena na úrovni zadaného kódu nebo nižší. Subjekty zařazené
   jen výš (např. jen „J“ u oddílu 62) jsou v řádku „zařazeno jen do …“.

@@ -5,6 +5,9 @@ import re
 import unittest
 
 from firemni_databaze import nace_ciselniky as nc
+from datetime import date
+
+from firemni_databaze import nace_firmy as nf
 from firemni_databaze.nace_firmy import MIN_ZAKLAD, pravidlo
 from firemni_databaze.nasad_sql import sql_soubory
 
@@ -146,6 +149,59 @@ class TestPravidlo(unittest.TestCase):
         self.assertEqual((p.kod_2025, p.metoda), ("F", "prevodnik_jediny_cil"))
 
 
+class TestRozhodnuti(unittest.TestCase):
+    """Rozhodnutí z 19. 10. 2026 (docs/cz-nace-2025.md, kap. 1)."""
+
+    def setUp(self):
+        def c(verze, kod, uroven, sekce, oddil=None, skupina=None, trida=None):
+            return (verze, kod), {"verze": verze, "kod": kod, "uroven": uroven, "sekce": sekce, "oddil": oddil,
+                                  "skupina": skupina, "trida": trida}
+
+        self.ciselnik = dict([
+            c(2008, "S", 1, "S"), c(2008, "96", 2, "S", "96"), c(2008, "9609", 4, "S", "96", "960", "9609"),
+            c(2008, "9601", 4, "S", "96", "960", "9601"), c(2008, "9602", 4, "S", "96", "960", "9602"),
+            c(2025, "T", 1, "T"), c(2025, "96", 2, "T", "96"), c(2025, "9699", 4, "T", "96", "969", "9699"),
+            c(2025, "9691", 4, "T", "96", "969", "9691"), c(2025, "9610", 4, "T", "96", "961", "9610"),
+        ])
+        # 9601 a 9602 se slučují do 9610 (vazba N:1); 9609 → 9699 je vazba 1:1
+        self.prevodnik = {"9601": [("9610", "N:1")], "9602": [("9610", "N:1")], "9609": [("9699", "1:1")]}
+
+    def test_1_vazba_n_1_ma_jistotu_1(self):
+        p = pravidlo("9601", 4, self.ciselnik, self.prevodnik, {})
+        self.assertEqual((p.kod_2025, p.jistota, p.metoda), ("9610", 1.0, "prevodnik_jediny_cil"))
+        # i když empirie ukazuje 85 % (pod prahem rozporu), platí převodník
+        p = pravidlo("9601", 4, self.ciselnik, self.prevodnik, {("9601", 4): ("9699", 85, 100)})
+        self.assertEqual((p.kod_2025, p.jistota), ("9610", 1.0))
+
+    def test_2_rozpor_rozhoduje_empirie(self):
+        matice = {("9609", 4): ("9691", 14_536, 14_653)}
+        p = pravidlo("9609", 4, self.ciselnik, self.prevodnik, matice)
+        self.assertEqual((p.kod_2025, p.metoda, p.cil_prevodnik), ("9691", "empiricky_rozpor", "9699"))
+        self.assertAlmostEqual(p.jistota, 0.992, places=3)
+
+    def test_2_rozpor_jen_nad_prahy(self):
+        # podíl pod 0,9 → převodník
+        p = pravidlo("9609", 4, self.ciselnik, self.prevodnik, {("9609", 4): ("9691", 89, 100)})
+        self.assertEqual((p.kod_2025, p.metoda), ("9699", "prevodnik_1:1"))
+        # základ pod 20 → převodník
+        p = pravidlo("9609", 4, self.ciselnik, self.prevodnik, {("9609", 4): ("9691", MIN_ZAKLAD - 1, MIN_ZAKLAD - 1)})
+        self.assertEqual((p.kod_2025, p.metoda), ("9699", "prevodnik_1:1"))
+        # empirie se shoduje s převodníkem → žádný rozpor
+        p = pravidlo("9609", 4, self.ciselnik, self.prevodnik, {("9609", 4): ("9699", 99, 100)})
+        self.assertEqual((p.metoda, p.cil_prevodnik), ("prevodnik_1:1", None))
+
+    def test_6_kod_2025_nejdriv_od_1_1_2025(self):
+        self.assertEqual(nf._nejdriv_2025("2023-06-29"), "2025-01-01")
+        self.assertEqual(nf._nejdriv_2025("2026-01-15"), "2026-01-15")
+        self.assertIsNone(nf._nejdriv_2025(None))
+
+    def test_7_konec_dvojiho_kodovani(self):
+        self.assertFalse(nf.je_konec_dvojiho_kodovani(date(2026, 10, 15), 3_038_940))
+        self.assertFalse(nf.je_konec_dvojiho_kodovani(date(2028, 12, 31), 1))
+        self.assertTrue(nf.je_konec_dvojiho_kodovani(date(2029, 1, 15), 3_000_000))   # po 31. 12. 2028
+        self.assertTrue(nf.je_konec_dvojiho_kodovani(date(2027, 6, 30), 0))           # zdroj přestal dodávat
+
+
 def bez_komentaru(sql: str) -> str:
     return re.sub(r"--[^\n]*", "", sql)
 
@@ -164,8 +220,10 @@ class TestSqlObor(unittest.TestCase):
                     # pohled bez OR REPLACE jen po DROP VIEW IF EXISTS téhož pohledu (nedrží data)
                     self.assertIn(f"drop view if exists {prikaz[5:]};", sql, nazev)
                     continue
-                self.assertRegex(prikaz, r"^(schema|table|unique index|index)", nazev)
-            self.assertNotRegex(sql, r"\bcreate\s+(schema|table|unique\s+index|index)\s+(?!if\s+not\s+exists)", nazev)
+                self.assertRegex(prikaz, r"^(schema|table|unique index|index|materialized view)", nazev)
+            self.assertNotRegex(
+                sql, r"\bcreate\s+(schema|table|unique\s+index|index|materialized\s+view)\s+(?!if\s+not\s+exists)", nazev)
+            self.assertNotRegex(sql, r"\bdrop\s+(table|materialized\s+view)\b", nazev)
 
     def test_nemaze_ani_nemeni_jine_schema(self):
         zakazane = re.compile(r"\b(drop|truncate|delete\s+from|insert\s+into|update)\s+(dev|res)\.|\bdrop\s+table\b")

@@ -204,6 +204,9 @@ def postaveni(v: Vstup, L: dict) -> list[dict]:
         if akt_s is not None:
             veta += f" a {cz(akt_s)} % subjektů sekce {v.meta['obor'][0]['kod']} ({vztah(akt_s, akt, 've všech oborech')})"
         casti.append(veta + f"; počty v reportu zahrnují i subjekty bez zjištěné aktivity ({L['T01']}).")
+    zmena = (v.meta.get("zmena_klasifikace") or {}).get("text")
+    if zmena:                    # rozhodnutí 15: přechod na CZ-NACE 2025
+        casti.append(zmena)
     return [_blok("vidět", " ".join(casti))] + zjisteni_kapitoly(v, "postaveni", L)
 
 

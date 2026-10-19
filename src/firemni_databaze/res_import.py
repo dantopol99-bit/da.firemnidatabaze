@@ -542,7 +542,9 @@ def main() -> int:
                 return KOD_PRAH_PREKROCEN
         if args.prikaz in ("agregaty", "vse"):
             print("Agregáty ČSÚ:")
-            for davka in (nacti_agregaty(conn), nacti_obyvatelstvo(conn), nacti_vznik_zanik(conn),
+            # RES02QT1 (Rev. 2) pro srovnání s ČSÚ, RES02QNACET1 (CZ-NACE 2025) pro report – rozhodnutí 15
+            for davka in (nacti_agregaty(conn), nacti_agregaty(conn, "RES02QNACET1"),
+                          nacti_obyvatelstvo(conn), nacti_vznik_zanik(conn),
                           nacti_demografii(conn)):
                 print(f"  dávka {davka} OK")
         if args.prikaz in ("agregaty", "eurostat", "vse"):

@@ -6,8 +6,8 @@ jako historický atribut. Obě verze se ukládají s platností v čase a verze 
 (některé kódy CZ-NACE 2008 mají v CZ-NACE 2025 jiný obsah, např. oddíly 58–63, sekce J–U).
 
 Stav: schéma `obor` (migrace, číselníky, kódy firem z RES a ARES, matice přechodů, odvození, rozhraní
-`obor.v_firma_obor_aktualni`, kontroly) je nasazené a ověřené na snímku RES k 15. 10. 2026 (kap. 6). Oborově-regionální report zatím počítá podle CZ-NACE 2008
-(rozhodnutí 5 metodiky), přepnutí je v [dalších krocích](#9-další-kroky).
+`obor.v_firma_obor_aktualni`, kontroly) je nasazené a ověřené na snímku RES k 15. 10. 2026 (kap. 6). Oborově-regionální report počítá od 19. 10. 2026 podle
+CZ-NACE 2025 nad tímto rozhraním (R3, rozhodnutí 15 metodiky reportu).
 
 ## 1. Schválená rozhodnutí
 
@@ -16,6 +16,18 @@ Stav: schéma `obor` (migrace, číselníky, kódy firem z RES a ARES, matice p�
 2. Nejednoznačné převody (historické stavy před 2026, firmy bez kódu 2025) se řeší **empirickou vahou**
    z dvojího kódování v RES: nejčastější cíl, jeho podíl jako jistota, `zdroj = 'odvozeno'`.
 3. Primární verze je CZ-NACE 2025. Verze 2008 jen jako historický atribut.
+
+**Rozhodnutí z 19. 10. 2026** (po PR #20):
+
+| # | rozhodnutí | jak je v kódu |
+|---|---|---|
+| R1 | Jistotu 1 dostane i **jediný cíl podle převodníku** (vazba N:1, nebo kandidáti s jediným společným předkem na cílové úrovni), ne jen vazba 1:1. | metoda `prevodnik_jediny_cil` (`nace_firmy.pravidlo`) |
+| R2 | **Rozpor převodníku s empirií**: má-li empirická matice pro kód 2008 základ ≥ 20 subjektů a cíl s podílem ≥ 0,9, který převodník neuvádí jako jediný cíl, **rozhoduje empirie**. Každý případ se zapisuje. | metoda `empiricky_rozpor`, tabulka `obor.nace_rozpory_prevodnik`, kap. 6 |
+| R3 | **Oborově-regionální report přechází na CZ-NACE 2025** (rozhodnutí 15 metodiky reportu nahrazuje rozhodnutí 5). | `report.py` nad `obor.v_firma_obor_aktualni`, [`report_metodika.md`](report_metodika.md) |
+| R4 | **Náhrada vdb.czso.cz** za iSMS + pseudokódy RES je schválená (kap. 2). | `res_zdroj.CISELNIKY`, `nace_ciselniky` |
+| R5 | Práh empirické matice zůstává **20 subjektů**. Automatické spojení firmy s oborem jen při **`jistota_oddil ≥ 0,8`**, pod tím „odvozeno, nejisté“. | `v_firma_obor_aktualni.automaticke_spojeni`, `stav_zarazeni` (kap. 8) |
+| R6 | Začátek platnosti kódu 2025: `platnost_od` = **pozdější z data aktualizace záznamu v RES a 1. 1. 2025**. | `obor.zacatek_2025()`, loader i oprava uložených dat (kap. 4) |
+| R7 | **Konec dvojího kódování**: po 31. 12. 2028 (nebo jakmile zdroj kódy 2008 přestane dodávat) loader uzavře všechny otevřené kódy 2008 s `platnost_do = 2028-12-31` a důvodem „konec dvojího kódování“. | `nace_firmy.je_konec_dvojiho_kodovani`, `uzavri_kody_2008`, sloupec `duvod_uzavreni` |
 
 ## 2. Zdroje a podmínky (ověřeno 18. 10. 2026)
 
@@ -27,6 +39,12 @@ Stav: schéma `obor` (migrace, číselníky, kódy firem z RES a ARES, matice p�
 | převodník NACE Rev. 2 ↔ Rev. 2.1 (třídy) | [csu.gov.cz/prevodniky-v105](https://csu.gov.cz/prevodniky-v105), Eurostat V1.05 | robots.txt `csu.gov.cz` zakazuje jen 3 cesty, AI crawlery neblokuje | **ano** |
 | převodník 5místných položek CZ-NACE 2008 ↔ 2025 | tamtéž, ČSÚ 12/2025 | tamtéž | **ano** |
 | číselníky `CZ_NACE_RES`, `CZ_NACE_RES2025` (s pseudokódy RES) | `vdb.czso.cz/opendata/ciselniky` | **robots.txt `User-agent: *` / `Disallow: /`** – blokuje všechny automatické klienty | **ne** – krok zastaven, viz níže |
+
+**Rozhodnutí R4 (19. 10. 2026): číselníky CZ-NACE z iSMS místo vdb.czso.cz.** Důvod: robots.txt
+`vdb.czso.cz` obsahuje `User-agent: *` / `Disallow: /`, tedy zakazuje celý web všem automatickým
+klientům včetně AI crawlerů, a podle rozhodnutí 13 se takový zdroj nekontaktuje ani neobchází.
+iSMS (`apl2.czso.cz`) je oficiální kanál, na který odkazuje stránka ČSÚ ke CZ-NACE 2025, a robots.txt
+nemá. Náhrada pokryla všechny kódy snímku RES (kap. 7).
 
 **vdb.czso.cz je blokované.** Dosavadní `res_import ciselniky` z něj bral číselníky CZ-NACE pro RES.
 Robots.txt teď zakazuje celý web všem robotům (tedy i AI crawlerům), proto se už nekontaktuje
@@ -94,9 +112,14 @@ předchůdce (Eurostat: „not possible to link“).
 ### Pravidla platnosti a historie
 
 - Kód z RES: `platnost_od` = datum poslední aktualizace záznamu v RES (`DDATPAKT` z otevřených dat,
-  `datumAktualizace` z ARES) – kód platí nejpozději od tohoto dne. U kódu 2025 to může být datum
-  před 1. 1. 2025: jde o zařazení stavu, který trvá od té doby (ČSÚ překódoval existující stavy).
+  `datumAktualizace` z ARES) – kód platí nejpozději od tohoto dne. **U kódu 2025 nejdřív 1. 1. 2025**
+  (R6, `obor.zacatek_2025`); u subjektu zaniklého před 1. 1. 2025 je interval kódu 2025 prázdný
+  (`platnost_od = platnost_do = 2025-01-01`). Odvozených kódů se R6 netýká – popisují historické stavy.
   `platnost_do` = datum zániku, nebo datum aktualizace, se kterou další snímek kód nahradil.
+- `duvod_uzavreni` (R7): `zánik subjektu`, `zdroj kód už neuvádí`, `konec dvojího kódování`.
+- **Konec dvojího kódování (R7):** je-li snímek po 31. 12. 2028, nebo neobsahuje žádný kód 2008, loader
+  kódy 2008 nenačítá a všechny otevřené kódy 2008 uzavře k 2028-12-31. U ARES (jedno IČO) rozhoduje jen
+  datum – chybějící kód 2008 u jedné firmy neznamená, že ho zdroj přestal dodávat.
 - Každý snímek RES / dotaz ARES: otevřené kódy, které zdroj už neuvádí, se **uzavřou**; nové se vloží;
   stejné se nemění. Opakovaný běh nic nezmění (ověřeno, kap. 7).
 - Kódy z RES se nemažou a nepřepisují (trigger `obor.firma_nace_straz`), smí se jen uzavřít. Stávající
@@ -114,14 +137,10 @@ podrobnější než zdrojový kód). Každý starý kód má tak vlastní rozdě
 | metoda | podmínka | výsledek |
 |---|---|---|
 | `prevodnik_1:1` | `k` nebo jeho předek na úrovni L má v převodníku vazbu 1:1 | cíl (jeho předek na úrovni L), jistota 1 |
-| `prevodnik_jediny_cil` | všichni kandidáti z převodníku mají na úrovni L společného předka (vč. vazby N:1) | ten předek, jistota 1 |
+| `prevodnik_jediny_cil` | všichni kandidáti z převodníku mají na úrovni L společného předka (vč. vazby N:1) – R1 | ten předek, jistota 1 |
+| `empiricky_rozpor` | převodník dává jediný cíl, ale matice má základ ≥ 20 a jiný cíl s podílem ≥ 0,9 – R2 | empirický cíl, jistota = jeho podíl; zápis do `nace_rozpory_prevodnik` |
 | `empiricky` | v matici je pro `k` aspoň 20 firem | nejčastější cíl, jistota = jeho podíl |
 | `nejednoznacne` | jinak | `kod` NULL, `priznak = 'nejednoznacne'`, `kandidati` z převodníku |
-
-Metoda `prevodnik_jediny_cil` rozšiřuje zadání „vazba 1:1 → jistota 1“: je-li podle převodníku jediný
-možný cíl (vazba N:1, nebo se kandidáti na vyšší úrovni sejdou v jednom oddílu či sekci), je výsledek
-logicky jistý. Bez ní by např. kód s 15 firmami, jehož všechny kandidátní třídy leží v jednom oddílu,
-dostal oddíl NULL. **Ke schválení** (kap. 10).
 
 Odvozuje se pro každý stav hlavní činnosti 2008 z RES, ke kterému neexistuje kód 2025 z RES pro tentýž
 stav – dnes zaniklé subjekty, které zanikly před dvojím kódováním, v budoucnu i starší stavy z archivu
@@ -164,19 +183,54 @@ CZ-NACE 2025: 2 993 853 hlavních + 7 839 168 vedlejších, odvozených 170 904 
 
 ### Odvozené kódy podle úrovně a metody (subjektů, průměrná jistota)
 
-| úroveň | `prevodnik_1:1` | `prevodnik_jediny_cil` | `empiricky` | `nejednoznacne` |
-|---|---:|---:|---:|---:|
-| sekce | 14 255 (1) | 18 537 (1) | 12 294 (0,9974) | < 10 |
-| oddíl | 14 988 (1) | 15 574 (1) | 14 382 (0,9979) | < 10 |
-| skupina | 16 719 (1) | 5 811 (1) | 15 755 (0,9863) | 10 |
-| třída | 11 246 (1) | 2 457 (1) | 14 176 (0,9905) | 26 |
-| podtřída | 6 309 (1) | 2 247 (1) | 6 046 (0,9747) | 70 |
+| úroveň | `prevodnik_1:1` | `prevodnik_jediny_cil` | `empiricky_rozpor` | `empiricky` | `nejednoznacne` |
+|---|---:|---:|---:|---:|---:|
+| sekce | 14 255 (1) | 18 537 (1) | – | 12 294 (0,9974) | < 10 |
+| oddíl | 14 988 (1) | 15 574 (1) | – | 14 382 (0,9979) | < 10 |
+| skupina | 16 719 (1) | 5 811 (1) | – | 15 755 (0,9863) | 10 |
+| třída | 11 234 (1) | 2 457 (1) | 12 (0,9975) | 14 176 (0,9905) | 26 |
+| podtřída | 6 300 (1) | 2 247 (1) | < 10 (0,9994) | 6 046 (0,9747) | 70 |
+
+### Rozpory převodníku s empirií (R2, `obor.nace_rozpory_prevodnik`)
+
+| kód 2008 | cílová úroveň | cíl převodníku | cíl empirie (použit) | podíl | základ |
+|---|---:|---|---|---:|---:|
+| 96.09 | třída | 96.99 | **96.91** | 0,9919 | 14 653 |
+| 96.09.0 | třída | 96.99 | **96.91** | 0,9994 | 14 383 |
+| 96.09.0 | podtřída | 96.99.0 | **96.91.0** | 0,9994 | 14 383 |
+
+Jiné rozpory (základ ≥ 20, podíl ≥ 0,9, jiný než jediný cíl převodníku) v matici k 15. 10. 2026 nejsou.
+Na úrovni skupiny, oddílu a sekce rozpor nevzniká (96.91 i 96.99 leží ve skupině 96.9).
+
+### Stav zařazení v rozhraní (R5)
+
+| `stav_zarazeni` | IČO |
+|---|---:|
+| RES | 2 993 853 |
+| odvozeno (`jistota_oddil ≥ 0,8`) | 44 931 |
+| odvozeno, nejisté | 156 |
+
+### Změna oproti PR #20 (přepočet 19. 10. 2026)
+
+| | PR #20 | nyní |
+|---|---:|---:|
+| odvozených subjektů | 45 087 | 45 087 |
+| z toho nejednoznačných na úrovni kódu | 71 | 71 |
+| pravidel s rozporem převodník × empirie (R2) | – | 3 |
+| subjektů s kódem podle empirie místo vazby 1:1 (třída / podtřída) | – | 12 / < 10 |
+| kódů 2025 z RES s posunutým začátkem platnosti na 1. 1. 2025 (R6) | – | 4 |
+| subjektů „odvozeno, nejisté“ (mimo automatické spojení, R5) | – | 156 |
+
+R1 (jistota 1 pro jediný cíl) platil už v PR #20 jako návrh – počty se nemění. R6 se v otevřených
+datech RES neprojevil (datum aktualizace je u všech záznamů po 1. 1. 2025, hromadné překódování
+v lednu 2026); posunuly se jen 4 kódy dvou subjektů načtených přes ARES (`datumAktualizace` 2023).
+Druhý běh loaderu po změnách nic nevložil ani neuzavřel.
 
 **Převodník proti empirii:** u pravidel se základem ≥ 20 firem dává `prevodnik_jediny_cil` stejný cíl
 jako nejčastější empirický přechod ve **všech 1 627 případech**. U `prevodnik_1:1` je to 2 617 z 2 620.
 Jediný rozpor je **96.09 → 96.99** („ostatní osobní služby j. n.“): podle převodníku Eurostatu jde
 o vazbu 1:1, ČSÚ ale v RES zařadil 99,9 % z 14 383 subjektů do **96.91** („osobní služby
-v domácnostech“). Odvození se tu řídí převodníkem (pravidlo 1), což je v rozporu s praxí ČSÚ (kap. 10).
+v domácnostech“). Podle R2 teď rozhoduje empirie (tabulka výše).
 
 ### Změna oddílu a sekce (subjekty bez zániku s oběma kódy z RES)
 
@@ -230,7 +284,11 @@ srovnání s empirickou maticí. Po opravě má převodník 2 728 párů místo 
 
 ## 8. Rozhraní pro ostatní produkty
 
-`obor.v_firma_obor_aktualni` – jeden řádek na IČO, poslední známá hlavní činnost:
+`obor.v_firma_obor_aktualni` – jeden řádek na IČO, poslední známá hlavní činnost. Od 19. 10. 2026 je to
+**materializovaný pohled** (výpočet `obor.v_firma_obor_vypocet` trvá ~2 min, dotaz nad materializovaným
+pohledem s indexy na `ico`, `oddil`, `sekce` jsou milisekundy). Obnovuje ho `nace_firmy` po každém
+načtení (`res`, `matice`) nebo ručně `python -m firemni_databaze.nace_firmy obnov`; `ares_import` ho
+neobnovuje.
 
 | sloupec | význam |
 |---|---|
@@ -243,6 +301,13 @@ srovnání s empirickou maticí. Po opravě má převodník 2 728 párů místo 
 | `je_pseudokod` | sekce X/Y (obor neurčen) |
 | `kod_2008`, `sekce_2008`, `oddil_2008` | historický atribut (CZ-NACE 2008 z RES) |
 | `platnost_od`, `platnost_do` | platnost řádku; živé subjekty mají `platnost_do IS NULL` |
+| `automaticke_spojeni` | R5: `true` = kód z RES, nebo odvozený s `jistota_oddil ≥ 0,8` |
+| `stav_zarazeni` | `RES` / `odvozeno` / `odvozeno, nejisté` (odvozený s `jistota_oddil < 0,8` nebo bez oddílu) |
+
+**Pravidlo pro všechny produkty (R5):** firmu s oborem spojuj automaticky jen při `automaticke_spojeni`
+(tj. kód z RES, nebo `jistota_oddil ≥ 0,8`). Pod tím ji zobrazuj jako **„odvozeno, nejisté“**
+(`stav_zarazeni`) a do automatických výpočtů nezahrnuj. Oborově-regionální report to tak dělá
+(`report.PODMINKA_OBORU`).
 
 **Spojení s parlamentní a aktérskou analytikou** jde přes `oddil` (2 místa, CZ-NACE 2025):
 
@@ -251,7 +316,7 @@ SELECT z.zakon_id, f.ico
 FROM analytika.zakon_oddil z                       -- tagy zákonů do oddílů CZ-NACE 2025
 JOIN obor.v_firma_obor_aktualni f ON f.oddil = z.oddil
 WHERE f.platnost_do IS NULL AND NOT f.je_pseudokod
-  AND coalesce(f.jistota_oddil, 0) >= 0.8;         -- práh jistoty volí konzument
+  AND f.automaticke_spojeni;                       -- R5: kód z RES nebo jistota_oddil ≥ 0,8
 ```
 
 Doporučení pro konzumenty: (1) vždy uvádět, že kód z RES je oficiální, ne neomylný (ČSÚ připouští, že
@@ -267,52 +332,38 @@ na úrovni sekcí; obsah sekcí se mezi verzemi klasifikace částečně liší.
 
 ## 9. Další kroky
 
-Hotovo v této změně: kroky 0–4 a 6, z kroku 5 loader ARES/RES (obě verze do `firma_nace`), převodní
-tabulka sekce 2025 → A*10 a náhrada blokovaného zdroje číselníků. Zbývá:
+Hotovo: kroky 0–6 původního zadání a rozhodnutí R1–R7 (19. 10. 2026), včetně přepnutí
+Oborově-regionálního reportu na CZ-NACE 2025. Zbývá:
 
-1. **Přepnout Oborově-regionální report na CZ-NACE 2025** (report je v tomto repozitáři). Vyžaduje nové
-   rozhodnutí místo rozhodnutí 5 metodiky („v0 = CZ-NACE Rev. 2“) – změní čísla pilotu a tím i podklad
-   textu analytika (`reporty/vyklad/`), který se sám upravovat nesmí. Místa ke změně:
-   - `report.py`: `KLASIFIKACE = 80004`; `urci_obor` (číselník `res.cis_nace` 80004 → `obor.nace_ciselnik`
-     verze 2025); `nacti_populaci` / dotazy nad `res.subjekt.nace` a `JOIN res.cis_nace … 80004`
-     (populace, „zařazeno jen do sekce“, „obor neurčen“) → `obor.v_firma_obor_aktualni` (pro historický
-     snímek `obor.firma_nace` k datu); `navrhy_vyssi_urovne`.
-   - srovnání s ČSÚ: `res.csu_agregat` z RES02QT1 (Rev. 2) → RES02QNACET1 (CZ-NACE 2025, importér už umí,
-     `res_import.nacti_agregaty(conn, 'RES02QNACET1')`), `res.v_srovnani_csu`.
-   - `ODVETVI_DEMOGRAFIE` (RESDP00), `nacti_mzdy` (MZDCRR/MZDR), `nacti_sbs` (SBS) a `SKUPINY_A10`
-     (regionální účty) jsou v Rev. 2: sekce 2025 se na ně převede přes `obor.nace_sekce_a10`
-     (`sekce_rev2`, `a10_rev2`) a do `meta.poznamky` / metodické poznámky PDF se přidá věta z kap. 8
-     („spojení dvou verzí na úrovni sekcí“). U sekcí J/K 2025 (obě → J Rev. 2) mzdy a SBS za oddíly
-     nejdou.
-   - `res.prunik_souhrn`, `res.v_pilot_f_liberecky`, `res.v_pocty_kraj_sekce`, `res.v_kvalita`
-     (výchozí klasifikace 80004), `reporty/katalog_ukazatelu.yaml`, `docs/report_metodika.md`, vzorový
-     pilot `reporty/ukazky/`.
-2. **Archiv snímků**: po každém snímku RES (2× měsíčně) spustit `nace_firmy res` a `matice`; historie
+1. **Report nad historickým snímkem.** Rozhraní je „poslední známý stav“; report nad starším snímkem
+   by bral dnešní kód 2025. Až bude víc snímků, doplnit funkci `obor.firma_obor_k_datu(d)` (stejné
+   sloupce jako rozhraní, kódy platné k datu) a report přepnout na ni.
+2. **Pilot a vzorové výstupy.** Nový pilot `reporty/vystupy/F__CZ051__2026-10-15` je spočítaný v CZ-NACE
+   2025; výklad analytika k němu (`reporty/vyklad/F__CZ051__2026-10-15.md`) má jen zástupný text a
+   PDF (`reporty/ukazky/`) se nesázelo (v prostředí chybí typst). Starý pilot k 15. 9. 2026 (Rev. 2)
+   zůstává jako archiv.
+3. **Pohledy ve schématu `res`** (`v_pocty_kraj_sekce`, `prunik_souhrn`, `v_pilot_f_liberecky`,
+   `v_srovnani_csu`, `v_kvalita`) dál pracují s kódy RES v obou verzích (výchozí Rev. 2) – jsou to
+   kontroly zdroje, ne report; přepnout jen bude-li je některý produkt používat.
+4. **Archiv snímků**: po každém snímku RES (2× měsíčně) spustit `nace_firmy res` a `matice`; historie
    kódů v `firma_nace` vzniká až řadou snímků (dnes jeden).
-3. **Konec dvojího kódování (31. 12. 2028)**: až RES přestane dodávat `NACE`, loader otevřené kódy 2008
-   uzavře k datu aktualizace záznamu. Rozhodnout, zda je místo toho nechat otevřené jako „poslední známý“.
-4. `dev.subjekt_verze.cz_nace` obsahuje CZ-NACE **2025** (všechny činnosti), název to neříká – doplnit
+5. `dev.subjekt_verze.cz_nace` obsahuje CZ-NACE **2025** (všechny činnosti), název to neříká – doplnit
    komentář sloupce, nebo ho nahradit odkazem na `obor.firma_nace`.
-5. Odvození vedlejších činností (dnes jen hlavní) – jen pokud je některý produkt potřebuje.
-6. Kontrola skutečné činnosti: ČSÚ připouští, že `NACE2025` u části subjektů neodpovídá skutečnosti.
+6. Odvození vedlejších činností (dnes jen hlavní) – jen pokud je některý produkt potřebuje.
+7. Kontrola skutečné činnosti: ČSÚ připouští, že `NACE2025` u části subjektů neodpovídá skutečnosti.
    Kandidáti na revizi = firmy, jejichž dvojice (2008, 2025) má v matici podíl pod např. 5 %.
 
 ## 10. Otevřené otázky k rozhodnutí
 
-1. **Metoda `prevodnik_jediny_cil`** (kap. 5): smí jedinečný cíl podle převodníku (vazba N:1, kandidáti
-   v jednom oddílu/sekci) dostat jistotu 1 i mimo vazbu 1:1? Bez ní by část oddílů a sekcí zůstala NULL.
-2. **Přepnutí reportu na CZ-NACE 2025** (kap. 9, bod 1): nahradit rozhodnutí 5 metodiky? Změní čísla
-   pilotu F × Liberecký kraj a analytik musí napsat nový výklad. A přechodně vydávat obě verze?
-3. **Náhrada vdb.czso.cz** (kap. 2): souhlas s iSMS + čtyřmi pseudokódy RES jako zdrojem `res.cis_nace`?
-   Alternativou je požádat ČSÚ o výjimku pro VDB.
-4. **Práh 20 firem** pro empirickou váhu a **doporučený práh jistoty** pro konzumenty (návrh: oddíl
-   s `jistota_oddil ≥ 0,8`, jinak vykazovat jako nejednoznačné).
-5. **Platnost kódu 2025 před 1. 1. 2025** (kap. 4): ponechat `platnost_od` = datum aktualizace záznamu
-   (zpětné zařazení stavu), nebo ořezat na 1. 1. 2025?
-6. **Kontrola ARES**: `ares_import` nově posílá 3 dotazy na IČO místo 2 (navíc `ekonomicke-subjekty-res`).
-   Pro hromadné běhy hlídat limity provozovatele ARES.
-7. **96.09 → 96.99 vs. 96.91** (kap. 6): převodník Eurostatu má vazbu 1:1 na 96.99, ČSÚ ale v RES dal
-   99,9 % subjektů do 96.91. Má mít u odvození přednost převodník (dnešní stav podle pravidla 1), nebo
-   empirie? Obecně: má empirie přebít vazbu 1:1, když jí odporuje nad nějaký práh (např. podíl cíle < 50 %)?
-8. **Konec dvojího kódování (31. 12. 2028)** (kap. 9, bod 3): uzavřít otevřené kódy 2008, nebo je nechat
-   jako „poslední známý“?
+1. **Report nad historickým snímkem** (kap. 9, bod 1): stačí „poslední známý stav“, dokud je načtený
+   jediný snímek, nebo mám funkci `obor.firma_obor_k_datu` doplnit hned?
+2. **Dopočet v pilotu:** věta „−18; 20 odešlo, méně než 10 přišlo“ spolu s počty 14 799 a 14 817 umožní
+   dopočítat skrytý počet přišlých (2). Pravidlo 3 metodiky reportu to jinak nedovoluje – je to tu
+   přijatelné (jde o změnu klasifikace, ne o členění subjektů), nebo mám v reportu uvádět jen směr?
+3. **R6 a odvozené kódy:** pravidlo „nejdřív 1. 1. 2025“ jsem uplatnil jen na kódy z RES. Odvozené kódy
+   popisují stavy zaniklých subjektů před rokem 2025, s ořezem by měly prázdný interval. Souhlas?
+4. **Materializované rozhraní:** `ares_import` ho po načtení jednotlivých IČO neobnovuje (obnova trvá
+   ~2 min). Stačí obnova po každém snímku RES (`nace_firmy res`), nebo obnovovat i po ARES?
+5. **Starý pilot v Rev. 2** (`reporty/vystupy/F__CZ051__2026-09-15`, `reporty/ukazky/`) – ponechat jako
+   archiv, nebo smazat? Nový pilot čeká na výklad analytika a sazbu PDF.
+

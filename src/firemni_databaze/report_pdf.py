@@ -230,7 +230,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
     if v.t("T23_nahrady"):
         obsah.append(tabulka(v.tab["T23_nahrady"], s.pismeno_tab("T23"), zdroj_eu))
     # pododdíl Modelové odhady (Blok 8) – odhady, ne fakta; nevstupují do detektoru zjištění
-    zdroj_model = ("Modelový odhad: RES (stav ke dni snímku), ČSÚ RES02QT1, Eurostat nama_10r_3gva a sbs_sc_ovw; "
+    zdroj_model = ("Modelový odhad: RES (stav ke dni snímku), ČSÚ RES02QNACET1, Eurostat nama_10r_3gva a sbs_sc_ovw; "
                    "vlastní výpočet – upraveno, za úpravy Eurostat neodpovídá.")
     obsah.append({"typ": "nadpis", "text": "Modelové odhady"})
     obsah.append({"typ": "odstavec", "text":
@@ -409,6 +409,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
             "Zaniklé fyzické osoby mají v otevřených datech jen IČO a datum zániku, proto zánik v oboru lze sledovat "
             "jen u právnických osob; dynamiku oboru za kraj ani okres ČSÚ nepublikuje.",
             "Demografie podniků ČSÚ používá jinou jednotku (aktivní podnik) a je jen za ČR – slouží jen jako kontext.",
+            *meta.get("klasifikace_poznamky", []),
             "Míra zániku PO: jen právnické osoby a jen okno let, které RES ještě uchovává (zaniklé subjekty jsou "
             "v RES 4 roky po zániku); stav k 1. 1. je rekonstruován z jednoho snímku, obor a sídlo jsou podle "
             "snímku. Neúplný poslední rok se srovnává za stejné období roku.",

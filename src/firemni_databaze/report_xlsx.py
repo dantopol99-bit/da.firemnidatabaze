@@ -32,6 +32,9 @@ def zapis_xlsx(vysledek: dict, cesta: Path, katalog_cesta: Path) -> None:
         ("Oborově-regionální report – datová příloha", None),
         ("Obor", meta["obor_popis"]),
         ("Klasifikace", meta["klasifikace"]),
+    ] + [("Poznámka ke klasifikaci", z) for z in meta.get("klasifikace_poznamky", [])] + [
+        ("Změna klasifikace", (meta.get("zmena_klasifikace") or {}).get("text")
+         or "počítá se jen pro obor zadaný celými sekcemi"),
         ("Území", f"{meta['uzemi']['nazev']} ({meta['uzemi']['kod']})"),
         ("Datum snímku RES", meta["zadani"]["datum_snimku"]),
         ("Populace", meta["populace"]),

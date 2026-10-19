@@ -55,9 +55,30 @@ CREATE INDEX IF NOT EXISTS firma_nace_kod_idx ON obor.firma_nace (verze, kod);
 
 COMMENT ON TABLE obor.firma_nace IS 'Kódy CZ-NACE firem (obě verze, hlavní i vedlejší) s platností v čase; zdroj RES nebo odvozeno';
 COMMENT ON COLUMN obor.firma_nace.jistota IS 'RES = 1; odvozeno: 1 u vazby 1:1 v převodníku, jinak podíl nejčastějšího cíle v empirické matici';
-COMMENT ON COLUMN obor.firma_nace.platnost_od IS 'RES: datum poslední aktualizace záznamu v RES (kód platí nejpozději od něj)';
+COMMENT ON COLUMN obor.firma_nace.platnost_od IS 'RES: datum poslední aktualizace záznamu v RES (kód platí nejpozději od něj); u verze 2025 nejdřív 1. 1. 2025';
 
--- Stráž: kódy z RES se nemažou a nemění, jen se uzavírají (platnost_do z NULL).
+-- ---------------------------------------------------------------------
+-- Rozhodnutí 6 (19. 10. 2026): kód CZ-NACE 2025 z RES platí nejdřív od 1. 1. 2025,
+-- tj. platnost_od = pozdější z data aktualizace záznamu v RES a 1. 1. 2025.
+-- Interval zůstává [od, do): u subjektu zaniklého před 1. 1. 2025 je prázdný
+-- (od = do = 1. 1. 2025). Odvozené kódy se netýká – popisují historické stavy.
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION obor.zacatek_2025(d date) RETURNS date
+LANGUAGE sql IMMUTABLE AS $$ SELECT greatest(d, DATE '2025-01-01') $$;
+
+CREATE OR REPLACE FUNCTION obor.konec_2025(d date) RETURNS date
+LANGUAGE sql IMMUTABLE AS $$ SELECT CASE WHEN d < DATE '2025-01-01' THEN DATE '2025-01-01' ELSE d END $$;
+
+-- Rozhodnutí 7: proč byl kód uzavřen ('zánik subjektu', 'zdroj kód už neuvádí',
+-- 'konec dvojího kódování').
+ALTER TABLE obor.firma_nace ADD COLUMN IF NOT EXISTS duvod_uzavreni text;
+COMMENT ON COLUMN obor.firma_nace.duvod_uzavreni IS
+    'Důvod uzavření kódu: zánik subjektu / zdroj kód už neuvádí / konec dvojího kódování (31. 12. 2028)';
+
+-- Stráž: kódy z RES se nemažou a nemění. Povolené jsou jen tyto změny:
+--   (a) uzavření otevřeného kódu: platnost_do z NULL, s důvodem;
+--   (b) doplnění důvodu uzavření, který chybí;
+--   (c) rozhodnutí 6: posun začátku kódu 2025 na 1. 1. 2025 (a konce, byl-li dřív).
 CREATE OR REPLACE FUNCTION obor.firma_nace_straz() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
@@ -68,14 +89,24 @@ BEGIN
         END IF;
         RETURN OLD;
     END IF;
-    IF OLD.zdroj = 'RES' AND (
-        (to_jsonb(NEW) - 'platnost_do') IS DISTINCT FROM (to_jsonb(OLD) - 'platnost_do')
-        OR OLD.platnost_do IS NOT NULL
-    ) THEN
-        RAISE EXCEPTION 'obor.firma_nace: kód ze zdroje RES lze jen uzavřít (IČO %, verze %, kód %)',
-            OLD.ico, OLD.verze, OLD.kod;
+    IF OLD.zdroj <> 'RES' THEN
+        RETURN NEW;
     END IF;
-    RETURN NEW;
+    IF (to_jsonb(NEW) - 'platnost_do' - 'duvod_uzavreni') = (to_jsonb(OLD) - 'platnost_do' - 'duvod_uzavreni')
+       AND (
+           (OLD.platnost_do IS NULL AND NEW.platnost_do IS NOT NULL)                                     -- (a)
+           OR (NEW.platnost_do IS NOT DISTINCT FROM OLD.platnost_do AND OLD.duvod_uzavreni IS NULL)     -- (b)
+       ) THEN
+        RETURN NEW;
+    END IF;
+    IF OLD.verze = 2025 AND OLD.platnost_od < DATE '2025-01-01'                                          -- (c)
+       AND NEW.platnost_od = DATE '2025-01-01'
+       AND NEW.platnost_do IS NOT DISTINCT FROM obor.konec_2025(OLD.platnost_do)
+       AND (to_jsonb(NEW) - 'platnost_od' - 'platnost_do') = (to_jsonb(OLD) - 'platnost_od' - 'platnost_do') THEN
+        RETURN NEW;
+    END IF;
+    RAISE EXCEPTION 'obor.firma_nace: kód ze zdroje RES lze jen uzavřít (IČO %, verze %, kód %)',
+        OLD.ico, OLD.verze, OLD.kod;
 END;
 $$;
 
@@ -86,3 +117,13 @@ CREATE OR REPLACE TRIGGER firma_nace_straz_zmena
 CREATE OR REPLACE TRIGGER firma_nace_zakaz_truncate
     BEFORE TRUNCATE ON obor.firma_nace
     FOR EACH STATEMENT EXECUTE FUNCTION dev.zakaz_mazani();
+
+-- Rozhodnutí 6 pro už uložená data (idempotentní: podruhé nic nenajde).
+UPDATE obor.firma_nace
+SET platnost_od = DATE '2025-01-01', platnost_do = obor.konec_2025(platnost_do)
+WHERE zdroj = 'RES' AND verze = 2025 AND platnost_od < DATE '2025-01-01';
+
+-- Důvod u kódů uzavřených dřív, než sloupec existoval (zaniklé subjekty ze snímku).
+UPDATE obor.firma_nace
+SET duvod_uzavreni = 'zánik subjektu'
+WHERE zdroj = 'RES' AND platnost_do IS NOT NULL AND duvod_uzavreni IS NULL;
