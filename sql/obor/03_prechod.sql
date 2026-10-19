@@ -52,3 +52,28 @@ CREATE TABLE IF NOT EXISTS obor.nace_odvozeni (
 
 COMMENT ON TABLE obor.nace_odvozeni IS
     'Pravidlo odvození kódu CZ-NACE 2025 pro každý kód CZ-NACE 2008 a cílovou úroveň';
+
+-- ---------------------------------------------------------------------
+-- Rozhodnutí 2 (19. 10. 2026): rozpor převodníku s empirií. Dává-li převodník
+-- jediný cíl, ale empirická matice má pro kód 2008 základ aspoň 20 subjektů
+-- a jiný cíl s podílem aspoň 0,9, rozhoduje empirie (metoda 'empiricky_rozpor').
+-- Každý takový případ se zapíše sem. Známý případ: 96.09 → 96.91 místo 96.99.
+-- ---------------------------------------------------------------------
+ALTER TABLE obor.nace_odvozeni DROP CONSTRAINT IF EXISTS nace_odvozeni_metoda_check;
+ALTER TABLE obor.nace_odvozeni ADD CONSTRAINT nace_odvozeni_metoda_check CHECK (metoda IN (
+    'prevodnik_1:1', 'prevodnik_jediny_cil', 'empiricky', 'empiricky_rozpor', 'nejednoznacne'));
+
+CREATE TABLE IF NOT EXISTS obor.nace_rozpory_prevodnik (
+    zaklad_k        date     NOT NULL,          -- matice, ze které rozpor plyne
+    kod_2008        text     NOT NULL,
+    uroven          smallint NOT NULL CHECK (uroven BETWEEN 1 AND 5),   -- cílová úroveň 2025
+    cil_prevodnik   text     NOT NULL,          -- jediný cíl podle převodníku
+    cil_empirie     text     NOT NULL,          -- nejčastější cíl v matici (použije se)
+    podil           numeric(5, 4) NOT NULL CHECK (podil >= 0.9),
+    zaklad          integer  NOT NULL CHECK (zaklad >= 20),
+    PRIMARY KEY (zaklad_k, kod_2008, uroven),
+    CHECK (cil_prevodnik <> cil_empirie)
+);
+
+COMMENT ON TABLE obor.nace_rozpory_prevodnik IS
+    'Kódy 2008, u kterých empirie (základ ≥ 20, podíl ≥ 0,9) odporuje jedinému cíli převodníku a rozhoduje empirie';

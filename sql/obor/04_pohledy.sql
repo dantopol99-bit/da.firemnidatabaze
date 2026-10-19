@@ -1,8 +1,10 @@
 -- =====================================================================
 -- 04_pohledy.sql – rozhraní pro ostatní produkty a kontroly
 --
--- obor.v_firma_obor_aktualni  – jeden řádek na IČO: hlavní činnost CZ-NACE 2025
+-- obor.v_firma_obor_vypocet   – výpočet: jeden řádek na IČO, hlavní činnost CZ-NACE 2025
 --                               (sekce … podtřída, zdroj, jistota) + kód 2008 jako atribut
+-- obor.v_firma_obor_aktualni  – ROZHRANÍ: materializovaný obsah v_firma_obor_vypocet
+--                               (výpočet trvá ~2 min; obnovuje nace_firmy po každém načtení)
 -- obor.v_firma_nace_mimo_ciselnik – kódy firem, které nejsou v číselníku své verze
 -- =====================================================================
 
@@ -14,10 +16,16 @@
 -- nejpodrobnější úroveň, kterou se podařilo určit.
 -- Spojení s parlamentní a aktérskou analytikou: sloupec oddil (2 místa, CZ-NACE 2025).
 -- ---------------------------------------------------------------------
--- DROP + CREATE: pohled nedrží data a CREATE OR REPLACE nezmění typ sloupce
--- (první verze měla kandidati omylem jako text místo text[]).
-DROP VIEW IF EXISTS obor.v_firma_obor_aktualni;
-CREATE VIEW obor.v_firma_obor_aktualni AS
+-- Do 19. 10. 2026 byl obor.v_firma_obor_aktualni obyčejný pohled; teď je materializovaný.
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+               WHERE n.nspname = 'obor' AND c.relname = 'v_firma_obor_aktualni' AND c.relkind = 'v') THEN
+        DROP VIEW obor.v_firma_obor_aktualni;
+    END IF;
+END $$;
+
+CREATE OR REPLACE VIEW obor.v_firma_obor_vypocet AS
 WITH res25 AS (
     SELECT DISTINCT ON (ico) ico, kod, platnost_od, platnost_do
     FROM obor.firma_nace
@@ -85,7 +93,13 @@ SELECT
     c08.oddil                                                                              AS oddil_2008,
     coalesce(r.platnost_od, o.platnost_od, s08.platnost_od)                                AS platnost_od,
     CASE WHEN r.ico IS NOT NULL THEN r.platnost_do
-         WHEN o.ico IS NOT NULL THEN o.platnost_do ELSE s08.platnost_do END                AS platnost_do
+         WHEN o.ico IS NOT NULL THEN o.platnost_do ELSE s08.platnost_do END                AS platnost_do,
+    -- rozhodnutí 5: automatické spojení firmy s oborem jen u kódu z RES nebo při jistota_oddil ≥ 0,8
+    (r.ico IS NOT NULL OR coalesce(o.jistota_oddil, 0) >= 0.8)                             AS automaticke_spojeni,
+    CASE WHEN r.ico IS NOT NULL THEN 'RES'
+         WHEN o.ico IS NULL THEN NULL
+         WHEN coalesce(o.jistota_oddil, 0) >= 0.8 THEN 'odvozeno'
+         ELSE 'odvozeno, nejisté' END                                                      AS stav_zarazeni
 FROM icos i
 LEFT JOIN res25 r ON r.ico = i.ico
 LEFT JOIN obor.nace_ciselnik c ON c.verze = 2025 AND c.kod = r.kod
@@ -94,8 +108,22 @@ LEFT JOIN obor.nace_ciselnik c_odv ON c_odv.verze = 2025 AND c_odv.kod = o.sekce
 LEFT JOIN res08 s08 ON s08.ico = i.ico
 LEFT JOIN obor.nace_ciselnik c08 ON c08.verze = 2008 AND c08.kod = s08.kod;
 
-COMMENT ON VIEW obor.v_firma_obor_aktualni IS
-    'Rozhraní pro ostatní produkty: jeden řádek na IČO, hlavní činnost CZ-NACE 2025 (sekce–podtřída, zdroj, jistota) a kód 2008 jako atribut';
+COMMENT ON VIEW obor.v_firma_obor_vypocet IS
+    'Výpočet rozhraní v_firma_obor_aktualni (pomalý – pro dotazy používej materializovaný v_firma_obor_aktualni)';
+
+-- Materializované rozhraní. Při první instalaci se naplní (~2 min); dál ho obnovuje
+-- python -m firemni_databaze.nace_firmy (res, matice, obnov). SELECT * se rozbalí
+-- při vytvoření: přibude-li ve výpočtu sloupec, je třeba pohled zahodit a vytvořit znovu.
+CREATE MATERIALIZED VIEW IF NOT EXISTS obor.v_firma_obor_aktualni AS
+SELECT * FROM obor.v_firma_obor_vypocet;
+
+CREATE UNIQUE INDEX IF NOT EXISTS v_firma_obor_aktualni_ico ON obor.v_firma_obor_aktualni (ico);
+CREATE INDEX IF NOT EXISTS v_firma_obor_aktualni_oddil ON obor.v_firma_obor_aktualni (oddil);
+CREATE INDEX IF NOT EXISTS v_firma_obor_aktualni_sekce ON obor.v_firma_obor_aktualni (sekce);
+
+COMMENT ON MATERIALIZED VIEW obor.v_firma_obor_aktualni IS
+    'Rozhraní pro ostatní produkty: jeden řádek na IČO, hlavní činnost CZ-NACE 2025 (sekce–podtřída, zdroj, jistota, '
+    'automaticke_spojeni), kód 2008 jako atribut. Obnovuje nace_firmy.';
 
 -- ---------------------------------------------------------------------
 -- Kontrola: kódy firem, které nejsou v číselníku své verze (má být prázdné).

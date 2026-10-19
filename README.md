@@ -171,6 +171,7 @@ se kód odvodí z empirické matice přechodů. Rozhraní pro ostatní produkty 
 python -m firemni_databaze.nasad_sql obor            # po dev a res
 python -m firemni_databaze.nace_ciselniky nahraj     # číselníky z ciselniky/nace/*.csv
 python -m firemni_databaze.nace_firmy vse            # snímek RES → firma_nace, matice, odvození, kontroly
+python -m firemni_databaze.nace_firmy obnov          # jen obnoví materializované rozhraní (~2 min)
 ```
 
 `ares_import` od této změny stahuje i endpoint `ekonomicke-subjekty-res` a kódy obou verzí zapisuje do
@@ -182,7 +183,7 @@ Metodika a schválená pravidla: [`docs/report_metodika.md`](docs/report_metodik
 [`reporty/katalog_ukazatelu.yaml`](reporty/katalog_ukazatelu.yaml).
 
 ```bash
-python -m firemni_databaze.res_import agregaty      # DataStat (RES02QT1, OBY02A, RES05, RESDP00, MZDCRR, MZDR) a Eurostat
+python -m firemni_databaze.res_import agregaty      # DataStat (RES02QT1, RES02QNACET1, OBY02A, RES05, RESDP00, MZDCRR, MZDR) a Eurostat
 python -m firemni_databaze.report --obor F --uzemi CZ051 [--srovnani CZ031,CZ053] [--datum 2026-09-15]
 python -m firemni_databaze.report_kontrola reporty/vystupy/*
 ```
@@ -193,7 +194,7 @@ píše stroj, „proč“ a „co z toho plyne“ analytik do `reporty/vyklad/<o
 se zástupným textem; `report_pdf --vyklad-schvalen` do jeho vyplnění selže). Tvary názvů území v 6. pádě:
 `reporty/cestina/lokativ.yaml`. Sazba potřebuje binárku [Typst](https://github.com/typst/typst/releases) v PATH;
 fonty jsou v `reporty/sablona/fonty`. Osnova: [`docs/report_osnova.md`](docs/report_osnova.md),
-vzorový pilot: [`reporty/ukazky/`](reporty/ukazky/).
+vzorový pilot: [`reporty/ukazky/`](reporty/ukazky/) (archiv „CZ-NACE 2008, nahrazeno“; pilot v CZ-NACE 2025 je v `reporty/vystupy/F__CZ051__2026-10-15`).
 Podadresář `_interni/` obsahuje i skrytá čísla pro kontrolu dopočtu a do gitu nepatří.
 
 Chceš-li `dev` začít úplně od nuly (smaže vše v něm):
