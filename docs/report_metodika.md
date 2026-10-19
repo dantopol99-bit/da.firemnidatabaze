@@ -204,6 +204,34 @@ Pracuje jen se zveřejněnými čísly tabulek. Typy:
 - **V PDF**: nejsilnější zjištění (nejvýš 5) u každé kapitoly, všechna v příloze „Zjištění detektoru“.
   Shrnutí na straně 2 píše analytik (rozšíření rozhodnutí 12).
 
+## Ověření silné změny trendu (zjištění `zmena_trendu` se silou nad 1)
+
+Zavedeno 19. 10. 2026. Každé zjištění typu `zmena_trendu` se silou nad 1 se před schválením výkladu
+(`--vyklad-schvalen`) ověří tímto postupem. Výsledek se zapíše do `docs/overeni-<jev>-<obor>-<území>.md`,
+jen jako agregáty a s pravidlem 3 (počty pod 10 se neuvádějí ani tam, kde by šly dopočítat ze součtu).
+Údaje o osobách se zpracují jen interně a mimo repozitář. Vzor: [`overeni-zaniku-F-CZ051.md`](overeni-zaniku-F-CZ051.md).
+
+1. **Klasifikace.** Rozdělit zaniklé subjekty podle zdroje kódu CZ-NACE 2025 (RES / odvozený) a míru
+   přepočítat stejnou metodou podle CZ-NACE 2008 pro území i ČR. Srovnat s archivním výstupem v Rev. 2,
+   pokud existuje. Je-li skok i podle 2008, není artefaktem převodu. Pozor: PO zaniklé před 1. 1. 2025
+   kód 2025 z RES nemají, takže zdroj zatřídění se mění přesně na přelomu let 2024 a 2025.
+2. **Konzistence základů.** Ověřit, že čitatel i jmenovatel stojí na stejném zatřídění. Pokud se zdroj
+   kódu mezi roky liší, vyčíslit dopad na míru (rozdíl proti jednotnému zatřídění).
+3. **Velikost základny.** Stav k 1. 1., očekávaný počet při celostátní míře a interval běžného kolísání
+   podle Poissonova rozdělení (95 % a 99,9 %). Leží-li hodnota v intervalu, zjištění je v rámci náhody.
+4. **Shluky.** Rozložení dat zániku (čtvrtletí, dny s více zániky), společné adresní místo sídla
+   a společné osoby ve statutárních orgánech a mezi společníky. Zdroj osob: otevřená data OR
+   (dataor.justice.cz, úplné výpisy za rok zániku) – jen interně; ARES vymazané subjekty nevrací.
+5. **Způsob zániku.** Rozdělit zániky podle ZPZAN (likvidace, bez likvidace bez nástupců, přeměny,
+   ostatní) v území a v ČR, za poslední rok i předchozí roky; u území doplnit právní důvod výmazu z OR
+   (zrušení soudem, likvidace, konkurs, přeměna). Přeměny nejsou ukončení podnikání.
+6. **Obor, nebo celé území.** Srovnat míru v oboru s ostatními obory téhož území a se zbytkem ČR,
+   i bez nejčastějšího způsobu zániku. Skok napříč obory ukazuje na příčinu v území (např. postup
+   rejstříkového soudu), ne v oboru.
+
+Závěr ověření je jeden z: **skutečné zániky / artefakt / shluk / kombinace**, s příčinou. Pokud ověření
+mění závěr kapitoly nebo bod shrnutí, analytik upraví svůj text; stroj ho neupravuje.
+
 ## Ochrana malých buněk – přesný postup
 
 1. **Nulové buňky** se do členění nezařazují (nejsou ani zveřejněné, ani sloučené). Nulový součet
