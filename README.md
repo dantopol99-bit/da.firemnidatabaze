@@ -194,7 +194,7 @@ píše stroj, „proč“ a „co z toho plyne“ analytik do `reporty/vyklad/<o
 se zástupným textem; `report_pdf --vyklad-schvalen` do jeho vyplnění selže). Tvary názvů území v 6. pádě:
 `reporty/cestina/lokativ.yaml`. Sazba potřebuje binárku [Typst](https://github.com/typst/typst/releases) v PATH;
 fonty jsou v `reporty/sablona/fonty`. Osnova: [`docs/report_osnova.md`](docs/report_osnova.md),
-vzorový pilot: [`reporty/ukazky/`](reporty/ukazky/).
+vzorový pilot: [`reporty/ukazky/`](reporty/ukazky/) (archiv „CZ-NACE 2008, nahrazeno“; pilot v CZ-NACE 2025 je v `reporty/vystupy/F__CZ051__2026-10-15`).
 Podadresář `_interni/` obsahuje i skrytá čísla pro kontrolu dopočtu a do gitu nepatří.
 
 Chceš-li `dev` začít úplně od nuly (smaže vše v něm):

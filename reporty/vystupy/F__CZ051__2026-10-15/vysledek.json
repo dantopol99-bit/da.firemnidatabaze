@@ -33,12 +33,14 @@
   ],
   "zmena_klasifikace": {
    "zanikle_bez_kodu": 492402,
-   "text": "Změna klasifikace: podle CZ-NACE 2008 (sekce F) by obor měl 14 817 subjektů, podle CZ-NACE 2025 (sekce F) jich má 14 799, změna −18. Odešlo 20 subjektů (do oddílů 2025: 68), přibylo méně než 10 (z oddílů 2008: 45).",
+   "text": "Změna klasifikace: podle CZ-NACE 2008 (sekce F) by obor měl 14 817 subjektů, podle CZ-NACE 2025 (sekce F) jich má 14 799, čistá změna −18. Odchody šly hlavně do oddílu 68. Příchodů bylo méně než 10, hlavně z oddílu 45.",
    "pocet_2008": 14817,
    "pocet_2025": 14799,
    "zmena": -18,
-   "ubylo": 20,
-   "pribylo": null
+   "oddil_odchody": "68",
+   "oddil_prichody": "45",
+   "odchody_pod_prahem": false,
+   "prichody_pod_prahem": true
   },
   "uzemi": {
    "typ": "KRAJ",
@@ -62,7 +64,7 @@
    "nazev": "CC BY 4.0",
    "url": "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
   },
-  "vygenerovano": "2026-10-19T09:25:14+00:00",
+  "vygenerovano": "2026-10-19T09:35:12+00:00",
   "ukazatele": [
    {
     "kod": "REG_POCET",

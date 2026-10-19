@@ -202,6 +202,31 @@ class TestRozhodnuti(unittest.TestCase):
         self.assertTrue(nf.je_konec_dvojiho_kodovani(date(2027, 6, 30), 0))           # zdroj přestal dodávat
 
 
+class TestZmenaKlasifikaceDopocet(unittest.TestCase):
+    """Rozhodnutí z 20. 10. 2026: z publikovaných čísel o změně klasifikace nesmí jít dopočítat hodnotu pod 10."""
+
+    def sestava(self, odchody: int, prichody: int):
+        from firemni_databaze.report import Sestava, zaregistruj_zmenu_klasifikace
+
+        oboji = 14_797
+        zmena = {"pocet_2008": oboji + odchody, "pocet_2025": oboji + prichody, "zmena": prichody - odchody,
+                 "_skryte": {"oboji": oboji, "odchody": odchody, "prichody": prichody}}
+        s = Sestava(10)
+        zaregistruj_zmenu_klasifikace(s, zmena)
+        self.assertNotIn("_skryte", zmena)                 # počty se do meta nedostanou
+        return s
+
+    def test_cista_zmena_nic_neprozradi(self):
+        s = self.sestava(odchody=20, prichody=2)              # pilot F × Liberecký kraj
+        self.assertEqual(s.kontrola_dopoctu(), [])
+        self.assertFalse(s.zverejnena("klas:odchody") or s.zverejnena("klas:prichody"))
+
+    def test_zverejneny_pocet_odchodu_by_prozradil_prichody(self):
+        s = self.sestava(odchody=20, prichody=2)
+        s.promenna("klas:odchody", 20, True)                  # původní text „20 odešlo“
+        self.assertIn("klas:prichody", s.kontrola_dopoctu())
+
+
 def bez_komentaru(sql: str) -> str:
     return re.sub(r"--[^\n]*", "", sql)
 

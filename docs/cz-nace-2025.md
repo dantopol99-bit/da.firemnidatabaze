@@ -29,6 +29,16 @@ CZ-NACE 2025 nad tímto rozhraním (R3, rozhodnutí 15 metodiky reportu).
 | R6 | Začátek platnosti kódu 2025: `platnost_od` = **pozdější z data aktualizace záznamu v RES a 1. 1. 2025**. | `obor.zacatek_2025()`, loader i oprava uložených dat (kap. 4) |
 | R7 | **Konec dvojího kódování**: po 31. 12. 2028 (nebo jakmile zdroj kódy 2008 přestane dodávat) loader uzavře všechny otevřené kódy 2008 s `platnost_do = 2028-12-31` a důvodem „konec dvojího kódování“. | `nace_firmy.je_konec_dvojiho_kodovani`, `uzavri_kody_2008`, sloupec `duvod_uzavreni` |
 
+**Rozhodnutí z 20. 10. 2026** (otevřené otázky PR #21):
+
+| # | rozhodnutí | jak je v kódu |
+|---|---|---|
+| R8 | **Změna klasifikace bez počtu odchodů.** Výstup uvádí počty podle obou verzí, čistou změnu a hlavní oddíl odchodů a příchodů; počet odchodů ani příchodů ne – z čisté změny by šel dopočítat ten druhý. Směr pod prahem se uvádí jen jako „méně než 10“. | `report.zmena_klasifikace` (obě věty vždy), proměnné `klas:*` v kontrole dopočtu (`zaregistruj_zmenu_klasifikace`), testy `TestZmenaKlasifikaceDopocet`, `test_zmena_klasifikace_bez_dopoctu_pod_prahem` |
+| R9 | **Ořez na 1. 1. 2025 (R6) platí jen pro kódy z RES; odvozené kódy se neořezávají.** Důvod: odvozený kód je rekonstrukce historie ve verzi 2025 – popisuje stav, který skončil dřív, než CZ-NACE 2025 platila. S ořezem by u zaniklých subjektů neplatil nikdy (prázdný interval) a historická řada podle CZ-NACE 2025 by nešla sestavit. | `nace_firmy.odvod_firmy` přebírá platnost stavu 2008 beze změny |
+| R10 | Funkce „kód k datu“ se teď nedělá; je **povinná před načtením druhého snímku RES** (kap. 9). | – |
+| R11 | Rozhraní se obnovuje **po každém snímku RES**; noční obnova po změnách z ARES až po zprovoznění serveru (kap. 9). | `nace_firmy res` / `matice` → `obnov_rozhrani` |
+| R12 | Starý pilot podle CZ-NACE 2008 (15. 9. 2026) zůstává jako **archiv s označením „CZ-NACE 2008, nahrazeno“**. | `meta.archiv` ve `vysledek.json`, nadpis `vysledek.md`, list Přehled v XLSX, `reporty/ukazky/F__CZ051__2026-09-15/ARCHIV.md` |
+
 ## 2. Zdroje a podmínky (ověřeno 18. 10. 2026)
 
 | údaj | zdroj | robots.txt / podmínky | použito |
@@ -114,7 +124,8 @@ předchůdce (Eurostat: „not possible to link“).
 - Kód z RES: `platnost_od` = datum poslední aktualizace záznamu v RES (`DDATPAKT` z otevřených dat,
   `datumAktualizace` z ARES) – kód platí nejpozději od tohoto dne. **U kódu 2025 nejdřív 1. 1. 2025**
   (R6, `obor.zacatek_2025`); u subjektu zaniklého před 1. 1. 2025 je interval kódu 2025 prázdný
-  (`platnost_od = platnost_do = 2025-01-01`). Odvozených kódů se R6 netýká – popisují historické stavy.
+  (`platnost_od = platnost_do = 2025-01-01`). **Odvozených kódů se R6 netýká (R9):** odvozený kód je
+  rekonstrukce historie ve verzi 2025 a s ořezem by u zaniklých subjektů neplatil nikdy.
   `platnost_do` = datum zániku, nebo datum aktualizace, se kterou další snímek kód nahradil.
 - `duvod_uzavreni` (R7): `zánik subjektu`, `zdroj kód už neuvádí`, `konec dvojího kódování`.
 - **Konec dvojího kódování (R7):** je-li snímek po 31. 12. 2028, nebo neobsahuje žádný kód 2008, loader
@@ -254,11 +265,12 @@ oddílu 95 v sekci T.
 
 ### Pilot: stavebnictví × Liberecký kraj (CZ051), subjekty bez zániku
 
-- sekce F podle CZ-NACE 2008: **14 817**, podle CZ-NACE 2025: **14 799**, v obou: 14 797;
-- **ubylo 20** (2008 F, 2025 jinde), všechny do oddílu **68** (činnosti v oblasti nemovitostí,
-  z oddílů 41 a 43, hlavně developerská činnost 41.1 → 68.12);
-- **přibylo < 10** (z oddílu 45 do oddílu 43);
-- rozdíl −18 (−0,12 %). Pro report o stavebnictví v kraji je změna verze zanedbatelná.
+- sekce F podle CZ-NACE 2008: **14 817**, podle CZ-NACE 2025: **14 799**, čistá změna **−18** (−0,12 %);
+- odchody šly hlavně do oddílu **68** (činnosti v oblasti nemovitostí; developerská činnost 41.1 → 68.12);
+- příchodů bylo **méně než 10**, hlavně z oddílu **45**;
+- počty odchodů a příchodů se neuvádějí (R8): z čisté změny by šel dopočítat ten druhý, a ten je pod prahem.
+
+Pro report o stavebnictví v kraji je změna verze zanedbatelná.
 
 ## 7. Fakta, odhady a co nejde
 
@@ -335,35 +347,30 @@ na úrovni sekcí; obsah sekcí se mezi verzemi klasifikace částečně liší.
 Hotovo: kroky 0–6 původního zadání a rozhodnutí R1–R7 (19. 10. 2026), včetně přepnutí
 Oborově-regionálního reportu na CZ-NACE 2025. Zbývá:
 
-1. **Report nad historickým snímkem.** Rozhraní je „poslední známý stav“; report nad starším snímkem
-   by bral dnešní kód 2025. Až bude víc snímků, doplnit funkci `obor.firma_obor_k_datu(d)` (stejné
-   sloupce jako rozhraní, kódy platné k datu) a report přepnout na ni.
-2. **Pilot a vzorové výstupy.** Nový pilot `reporty/vystupy/F__CZ051__2026-10-15` je spočítaný v CZ-NACE
+1. **Funkce „kód k datu“ – POVINNÉ PŘED NAČTENÍM DRUHÉHO SNÍMKU RES (R10).** Rozhraní je „poslední
+   známý stav“; report nad starším snímkem by bral dnešní kód 2025. Než se načte druhý snímek, doplnit
+   funkci `obor.firma_obor_k_datu(d)` (stejné sloupce jako rozhraní, kódy platné k datu `d`, tatáž
+   pravidla R5 a R9) a report přepnout na ni pro `--datum` starší než poslední snímek.
+2. **Noční obnova rozhraní (R11), po zprovoznění serveru.** Cron jednou za noc spustí
+   `python -m firemni_databaze.nace_firmy obnov`, ale jen pokud `ares_import` od poslední obnovy něco
+   změnil (nová nebo uzavřená řádka v `obor.firma_nace` se zdrojem ARES – např. porovnat
+   `max(nacteno)` a počet uzavřených řádků s časem poslední obnovy). Po každém snímku RES se rozhraní
+   obnovuje už teď.
+3. **Pilot a vzorové výstupy.** Nový pilot `reporty/vystupy/F__CZ051__2026-10-15` je spočítaný v CZ-NACE
    2025; výklad analytika k němu (`reporty/vyklad/F__CZ051__2026-10-15.md`) má jen zástupný text a
-   PDF (`reporty/ukazky/`) se nesázelo (v prostředí chybí typst). Starý pilot k 15. 9. 2026 (Rev. 2)
-   zůstává jako archiv.
-3. **Pohledy ve schématu `res`** (`v_pocty_kraj_sekce`, `prunik_souhrn`, `v_pilot_f_liberecky`,
+   PDF (`reporty/ukazky/`) se nesázelo (v prostředí chybí typst). Starý pilot k 15. 9. 2026 je archiv
+   „CZ-NACE 2008, nahrazeno“ (R12).
+4. **Pohledy ve schématu `res`** (`v_pocty_kraj_sekce`, `prunik_souhrn`, `v_pilot_f_liberecky`,
    `v_srovnani_csu`, `v_kvalita`) dál pracují s kódy RES v obou verzích (výchozí Rev. 2) – jsou to
    kontroly zdroje, ne report; přepnout jen bude-li je některý produkt používat.
-4. **Archiv snímků**: po každém snímku RES (2× měsíčně) spustit `nace_firmy res` a `matice`; historie
+5. **Archiv snímků**: po každém snímku RES (2× měsíčně) spustit `nace_firmy res` a `matice`; historie
    kódů v `firma_nace` vzniká až řadou snímků (dnes jeden).
-5. `dev.subjekt_verze.cz_nace` obsahuje CZ-NACE **2025** (všechny činnosti), název to neříká – doplnit
+6. `dev.subjekt_verze.cz_nace` obsahuje CZ-NACE **2025** (všechny činnosti), název to neříká – doplnit
    komentář sloupce, nebo ho nahradit odkazem na `obor.firma_nace`.
-6. Odvození vedlejších činností (dnes jen hlavní) – jen pokud je některý produkt potřebuje.
-7. Kontrola skutečné činnosti: ČSÚ připouští, že `NACE2025` u části subjektů neodpovídá skutečnosti.
+7. Odvození vedlejších činností (dnes jen hlavní) – jen pokud je některý produkt potřebuje.
+8. Kontrola skutečné činnosti: ČSÚ připouští, že `NACE2025` u části subjektů neodpovídá skutečnosti.
    Kandidáti na revizi = firmy, jejichž dvojice (2008, 2025) má v matici podíl pod např. 5 %.
 
 ## 10. Otevřené otázky k rozhodnutí
 
-1. **Report nad historickým snímkem** (kap. 9, bod 1): stačí „poslední známý stav“, dokud je načtený
-   jediný snímek, nebo mám funkci `obor.firma_obor_k_datu` doplnit hned?
-2. **Dopočet v pilotu:** věta „−18; 20 odešlo, méně než 10 přišlo“ spolu s počty 14 799 a 14 817 umožní
-   dopočítat skrytý počet přišlých (2). Pravidlo 3 metodiky reportu to jinak nedovoluje – je to tu
-   přijatelné (jde o změnu klasifikace, ne o členění subjektů), nebo mám v reportu uvádět jen směr?
-3. **R6 a odvozené kódy:** pravidlo „nejdřív 1. 1. 2025“ jsem uplatnil jen na kódy z RES. Odvozené kódy
-   popisují stavy zaniklých subjektů před rokem 2025, s ořezem by měly prázdný interval. Souhlas?
-4. **Materializované rozhraní:** `ares_import` ho po načtení jednotlivých IČO neobnovuje (obnova trvá
-   ~2 min). Stačí obnova po každém snímku RES (`nace_firmy res`), nebo obnovovat i po ARES?
-5. **Starý pilot v Rev. 2** (`reporty/vystupy/F__CZ051__2026-09-15`, `reporty/ukazky/`) – ponechat jako
-   archiv, nebo smazat? Nový pilot čeká na výklad analytika a sazbu PDF.
-
+Otázky z PR #21 jsou rozhodnuté (R8–R12, kap. 1). Nové otevřené otázky nejsou.

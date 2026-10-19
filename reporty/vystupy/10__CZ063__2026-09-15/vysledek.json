@@ -1,5 +1,12 @@
 {
  "meta": {
+  "archiv": {
+   "stav": "CZ-NACE 2008, nahrazeno",
+   "klasifikace": "CZ-NACE Rev. 2 (CZ-NACE 2008)",
+   "nahrazeno_rozhodnutim": 15,
+   "nahrada": null,
+   "popis": "CZ-NACE 2008, nahrazeno: výstup podle CZ-NACE Rev. 2 (rozhodnutí 5) – archiv. Od 19. 10. 2026 report počítá podle CZ-NACE 2025 (rozhodnutí 15)."
+  },
   "zadani": {
    "obor": [
     "10"

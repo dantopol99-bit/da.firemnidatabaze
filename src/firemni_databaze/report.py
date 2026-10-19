@@ -176,9 +176,11 @@ POZNAMKA_A10 = ("Zdroje publikované jen podle NACE Rev. 2 (CZ-NACE 2008) – sk
 
 
 def zmena_klasifikace(cur, obor: list[dict], uz: "Uzemi", datum: date, prah: int) -> dict:
-    """Kolik subjektů území by obor měl podle CZ-NACE 2008 a kolik jich přibylo a ubylo přechodem na 2025.
-    Jen pro obor zadaný celými sekcemi (sekce 2008 = sekce_rev2); kódy nižších úrovní mají mezi verzemi
-    jiný obsah. Počty pod prahem se neuvádějí. Vrací i počet zaniklých subjektů bez kódu v obou verzích."""
+    """Změna počtu subjektů oboru v území proti CZ-NACE 2008 (jen obor zadaný celými sekcemi; kódy
+    nižších úrovní mají mezi verzemi jiný obsah). Zveřejňuje se jen počet podle obou verzí, čistá
+    změna a hlavní oddíly odchodů a příchodů – počty odchodů a příchodů ne: z čisté změny by šel
+    dopočítat ten druhý (rozhodnutí 3). Počty jdou pod klíčem "_skryte" do kontroly dopočtu
+    (zaregistruj_zmenu_klasifikace) a z meta se odstraní. Vrací i počet zaniklých bez kódu."""
     cur.execute("SELECT count(*) FROM res.subjekt WHERE datum_snimku = %s AND ddatzan IS NOT NULL "
                 "AND nace IS NULL AND nace2025 IS NULL", (datum,))
     out = {"zanikle_bez_kodu": cur.fetchone()[0], "text": None}
@@ -199,26 +201,53 @@ def zmena_klasifikace(cur, obor: list[dict], uz: "Uzemi", datum: date, prah: int
     radky = cur.fetchall()
     n08 = sum(r[4] for r in radky if r[2])
     n25 = sum(r[4] for r in radky if r[3])
-    ubylo = sum(r[4] for r in radky if r[2] and not r[3])
-    pribylo = sum(r[4] for r in radky if r[3] and not r[2])
+    oboji = sum(r[4] for r in radky if r[2] and r[3])
+    odchody = [r for r in radky if r[2] and not r[3]]
+    prichody = [r for r in radky if r[3] and not r[2]]
 
-    def pocet(n: int) -> str:
-        return f"{n:,}".replace(",", "\u00a0") if n >= prah else f"méně než {prah}"
+    def hlavni_oddil(vybrane, index: int) -> str | None:
+        podle = {}
+        for r in vybrane:
+            if r[index]:
+                podle[r[index]] = podle.get(r[index], 0) + r[4]
+        return max(sorted(podle), key=podle.get) if podle else None
 
-    def oddily(index: int, vybrane) -> str:
-        kody = sorted({r[index] for r in vybrane if r[index]})
-        return ", ".join(kody) if kody else "–"
+    def cislo(n: int) -> str:
+        return f"{n:,}".replace(",", "\u00a0")
 
-    odesle = [r for r in radky if r[2] and not r[3]]
-    prisle = [r for r in radky if r[3] and not r[2]]
-    sekce_txt = ", ".join(s25)
-    text = (f"Změna klasifikace: podle CZ-NACE 2008 (sekce {', '.join(s08)}) by obor měl {pocet(n08)} subjektů, "
-            f"podle CZ-NACE 2025 (sekce {sekce_txt}) jich má {pocet(n25)}, změna {f'{n25 - n08:+d}'.replace('-', '−')}"
-            + f". Odešlo {pocet(ubylo)} subjektů (do oddílů 2025: {oddily(1, odesle)}), přibylo {pocet(pribylo)} "
-              f"(z oddílů 2008: {oddily(0, prisle)}).")
-    out.update(text=text, pocet_2008=n08, pocet_2025=n25, zmena=n25 - n08,
-               ubylo=ubylo if ubylo >= prah else None, pribylo=pribylo if pribylo >= prah else None)
+    o_odch, o_prich = hlavni_oddil(odchody, 1), hlavni_oddil(prichody, 0)
+    n_odch, n_prich = sum(r[4] for r in odchody), sum(r[4] for r in prichody)
+    casti = [f"Změna klasifikace: podle CZ-NACE 2008 (sekce {', '.join(s08)}) by obor měl {cislo(n08)} subjektů, "
+             f"podle CZ-NACE 2025 (sekce {', '.join(s25)}) jich má {cislo(n25)}, čistá změna "
+             f"{f'{n25 - n08:+d}'.replace('-', '−')}."]
+    # obě věty vždy: vynechaná věta by prozradila nulu a s ní přesný počet druhého směru
+    for smer, oddil, n, sloveso, predlozka in (("odchod", o_odch, n_odch, "šly", "do"),
+                                               ("příchod", o_prich, n_prich, "přišly", "z")):
+        veta = f"{smer.capitalize()}y" + (f" {sloveso} hlavně {predlozka} oddílu {oddil}" if oddil
+                                          else " bez určeného oddílu")
+        if n < prah:
+            veta = (f"{smer.capitalize()}ů bylo méně než {prah}"
+                    + (f", hlavně {predlozka} oddílu {oddil}" if oddil else ""))
+        casti.append(veta + ".")
+    out.update(text=" ".join(casti), pocet_2008=n08, pocet_2025=n25, zmena=n25 - n08,
+               oddil_odchody=o_odch, oddil_prichody=o_prich,
+               odchody_pod_prahem=n_odch < prah, prichody_pod_prahem=n_prich < prah,
+               _skryte={"oboji": oboji, "odchody": n_odch, "prichody": n_prich})
     return out
+
+
+def zaregistruj_zmenu_klasifikace(s: "Sestava", zmena: dict) -> None:
+    """Počty podle obou verzí jsou zveřejněné, průnik, odchody a příchody skryté; dvě rovnice součtu.
+    Kontrola dopočtu (rozhodnutí 3) pak ověří, že žádný skrytý počet nejde dopočítat."""
+    skryte = zmena.pop("_skryte", None)
+    if skryte is None:
+        return
+    s.promenna("klas:2008", zmena["pocet_2008"], True)
+    s.promenna("klas:2025", zmena["pocet_2025"], True)
+    for k, v in skryte.items():
+        s.promenna(f"klas:{k}", v, False)
+    s.rovnice_souctu("klas:2008", ["klas:oboji", "klas:odchody"])
+    s.rovnice_souctu("klas:2025", ["klas:oboji", "klas:prichody"])
 
 
 def poznamka_zaniklych(zmena: dict) -> str:
@@ -959,6 +988,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
 
     prah = zadani.prah
     s = Sestava(prah)
+    zaregistruj_zmenu_klasifikace(s, zmena_klas)
     okres_kraj = {k: o["kraj_kod"] for k, o in okresy.items()}
 
     # --- počty podle okresů a krajů --------------------------------------------------

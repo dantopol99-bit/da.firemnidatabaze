@@ -86,7 +86,10 @@ SBS, mzdy ČSÚ a demografie podniků – se k oboru připojují převodní tabu
 (`meta.klasifikace_poznamky`, metodika a omezení PDF, list Přehled v XLSX). Pro obor zadaný celými
 sekcemi výstup uvádí i změnu proti CZ-NACE 2008 (`meta.zmena_klasifikace`, strojová vrstva výkladu
 „co je vidět“): pilot F × Liberecký kraj k 15. 10. 2026 má 14 799 subjektů proti 14 817 podle
-CZ-NACE 2008 (−18; 20 odešlo do oddílu 68, méně než 10 přišlo z oddílu 45).
+CZ-NACE 2008, čistá změna −18; odchody šly hlavně do oddílu 68, příchodů bylo méně než 10, hlavně
+z oddílu 45. **Počty odchodů a příchodů se nezveřejňují** (rozhodnutí 20. 10. 2026): z čisté změny by
+šel dopočítat ten druhý. Proměnné `klas:*` jsou v kontrole dopočtu jako ostatní tabulky (pravidlo 3).
+Starý pilot k 15. 9. 2026 (Rev. 2) je archiv označený **„CZ-NACE 2008, nahrazeno“** (`meta.archiv`).
 
 | | |
 |---|---|

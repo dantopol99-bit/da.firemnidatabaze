@@ -1,4 +1,6 @@
-# F Stavebnictví × Liberecký kraj
+# F Stavebnictví × Liberecký kraj – CZ-NACE 2008, nahrazeno
+
+> **Archiv – CZ-NACE 2008, nahrazeno.** Výstup podle CZ-NACE Rev. 2 (rozhodnutí 5) – archiv. Od 19. 10. 2026 report počítá podle CZ-NACE 2025 (rozhodnutí 15); náhrada: reporty/vystupy/F__CZ051__2026-10-15.
 
 Stav k 2026-09-15. Populace: registrované ekonomické subjekty bez data zániku (sídlo v území, převažující činnost v oboru). Klasifikace: CZ-NACE Rev. 2 (klasifikace ČSÚ 80004, sloupec NACE). Práh zveřejnění: 10 subjektů.
 

@@ -4,7 +4,7 @@ Stav k 2026-10-15. Populace: registrované ekonomické subjekty bez data zániku
 
 - Zdroje publikované jen podle NACE Rev. 2 (CZ-NACE 2008) – skupiny A*10 regionálních účtů Eurostatu, statistika podniků SBS, mzdy ČSÚ a demografie podniků – jsou k oboru podle CZ-NACE 2025 přiřazeny převodní tabulkou na úrovni sekcí (obor.nace_sekce_a10); jde o spojení dvou verzí klasifikace, obsah sekcí se mezi verzemi částečně liší.
 - 492 402 zaniklých subjektů (fyzických osob) nemá v otevřených datech RES kód činnosti v žádné verzi klasifikace (jen IČO a datum zániku); historické řady vzniků a zániků podle oboru proto zahrnují jen subjekty s kódem.
-- Změna klasifikace: podle CZ-NACE 2008 (sekce F) by obor měl 14 817 subjektů, podle CZ-NACE 2025 (sekce F) jich má 14 799, změna −18. Odešlo 20 subjektů (do oddílů 2025: 68), přibylo méně než 10 (z oddílů 2008: 45).
+- Změna klasifikace: podle CZ-NACE 2008 (sekce F) by obor měl 14 817 subjektů, podle CZ-NACE 2025 (sekce F) jich má 14 799, čistá změna −18. Odchody šly hlavně do oddílu 68. Příchodů bylo méně než 10, hlavně z oddílu 45.
 
 *Zdroj: Český statistický úřad, Registr ekonomických subjektů (RES) – otevřená data, stav k 15. 10. 2026; licence CC BY 4.0 (https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu); vlastní výpočet.* **Odvozené údaje, nejde o oficiální statistiku ČSÚ.**
 

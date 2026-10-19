@@ -554,31 +554,15 @@ def kontroly(conn, kraj: str = "CZ051", sekce_2008: str = "F", sekce_2025: str =
                   f"{_pocet(zm_pismeno)} ({_procento(zm_pismeno, n)})")
         md.append("")
 
-        # --- pilot sekce F × kraj
-        cur.execute(
-            """
-            SELECT v.oddil_2008, v.oddil, (v.sekce_2008 = %(s08)s) AS v08, (v.sekce = %(s25)s) AS v25, count(*)
-            FROM obor.v_firma_obor_aktualni v
-            JOIN res.subjekt s ON s.ico = v.ico AND s.datum_snimku = %(d)s AND s.ddatzan IS NULL
-            JOIN res.cis_okres o ON o.kod = s.okreslau
-            WHERE o.kraj_kod = %(kraj)s AND (v.sekce_2008 = %(s08)s OR v.sekce = %(s25)s)
-            GROUP BY 1, 2, 3, 4 ORDER BY 5 DESC
-            """,
-            {"s08": sekce_2008, "s25": sekce_2025, "d": datum, "kraj": kraj},
-        )
-        radky = cur.fetchall()
-        v08 = sum(r[4] for r in radky if r[2])
-        v25 = sum(r[4] for r in radky if r[3])
-        oboji = sum(r[4] for r in radky if r[2] and r[3])
+        # --- pilot sekce F × kraj: stejné pravidlo jako report (bez počtů odchodů a příchodů – dopočet)
+        from firemni_databaze.report import Uzemi, zmena_klasifikace
+        obor = [{"kod": sekce_2025, "uroven": 1, "sekce": sekce_2025, "sekce_rev2": sekce_2008}]
+        zmena = zmena_klasifikace(cur, obor, Uzemi("KRAJ", kraj, kraj, kraj), datum, PRAH_ZVEREJNENI)
+        zmena.pop("_skryte", None)
         md.append(f"### Pilot: sekce {sekce_2008} (2008) / {sekce_2025} (2025) × kraj {kraj}, subjekty bez zániku\n")
-        md.append(f"- v sekci podle CZ-NACE 2008: {_pocet(v08)}; podle CZ-NACE 2025: {_pocet(v25)}; v obou: {_pocet(oboji)}")
-        md.append(f"- **přibylo** (2025 ano, 2008 ne): {_pocet(v25 - oboji)}; **ubylo** (2008 ano, 2025 ne): "
-                  f"{_pocet(v08 - oboji)}; rozdíl {v25 - v08:+d}")
-        md.append("\n| směr | oddíl 2008 | oddíl 2025 | subjektů |")
-        md.append("|---|---|---|---:|")
-        for o08, o25, a, b, n in radky:
-            if a != b:
-                md.append(f"| {'přibylo' if b else 'ubylo'} | {o08 or '–'} | {o25 or '–'} | {_pocet(n)} |")
+        md.append(zmena["text"] or "–")
+        md.append("\nPočty odchodů a příchodů se neuvádějí: z čisté změny by šel dopočítat ten druhý, "
+                  "a ten je pod prahem 10 (rozhodnutí 3 metodiky reportu).")
         md.append("")
 
         # --- kontrola číselníku

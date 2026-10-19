@@ -64,6 +64,8 @@ python -m firemni_databaze.report --obor F --uzemi CZ051 --srovnani CZ052,CZ041 
 python -m firemni_databaze.report_pdf reporty/vystupy/F__CZ051__2026-09-15 --vystup reporty/ukazky
 ```
 
-Vzorový pilot: `reporty/ukazky/F__CZ051__2026-09-15/` (report.pdf, priloha.xlsx, zjisteni.json);
-výklad analytika k pilotu: `reporty/vyklad/F__CZ051__2026-09-15.md` (zatím zástupný text). Odmítnutí podle
+Vzorový pilot: `reporty/ukazky/F__CZ051__2026-09-15/` (report.pdf, priloha.xlsx, zjisteni.json) –
+**archiv „CZ-NACE 2008, nahrazeno“** (rozhodnutí 15 metodiky); výklad analytika k němu:
+`reporty/vyklad/F__CZ051__2026-09-15.md`. Pilot v CZ-NACE 2025: `reporty/vystupy/F__CZ051__2026-10-15/`
+(výklad analytika `reporty/vyklad/F__CZ051__2026-10-15.md` zatím se zástupným textem, PDF nevysázené). Odmítnutí podle
 rozhodnutí 8: `reporty/ukazky/62__CZ0711__odmitnuti.txt`.

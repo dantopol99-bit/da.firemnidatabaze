@@ -78,6 +78,27 @@ class TestReport(unittest.TestCase):
         self.assertEqual((zmena["pocet_2025"], zmena["pocet_2008"]), (ocekavano, podle_2008))
         self.assertEqual(zmena["zmena"], ocekavano - podle_2008)
         self.assertIn("Změna klasifikace", zmena["text"])
+
+    def test_zmena_klasifikace_bez_dopoctu_pod_prahem(self):
+        """Z publikovaných čísel (počty podle obou verzí, čistá změna) nejde dopočítat hodnotu pod 10."""
+        import re
+
+        from firemni_databaze.report_potlaceni import dopocitatelne
+
+        vysledek, interni, _ = self.vystupy["F_LBK"]
+        zmena = vysledek["meta"]["zmena_klasifikace"]
+        for klic in ("ubylo", "pribylo", "odchody", "prichody", "_skryte"):
+            self.assertNotIn(klic, zmena)
+        promenne, prah = interni["promenne"], interni["prah"]
+        self.assertFalse(promenne["klas:odchody"]["zverejneno"] or promenne["klas:prichody"]["zverejneno"])
+        zverejnene = {k for k, v in promenne.items() if v["zverejneno"]}
+        skryte_pod_prahem = {k for k, v in promenne.items() if not v["zverejneno"] and v["hodnota"] < prah}
+        self.assertEqual(dopocitatelne(interni["rovnice"], zverejnene, skryte_pod_prahem), [])
+        # text obsahuje jen zveřejněná čísla (počty podle obou verzí, čistá změna, práh, kódy oddílů)
+        povolena = {zmena["pocet_2008"], zmena["pocet_2025"], abs(zmena["zmena"]), prah, 2008, 2025}
+        povolena |= {int(o) for o in (zmena["oddil_odchody"], zmena["oddil_prichody"]) if o}
+        cisla = {int(c.replace("\u00a0", "")) for c in re.findall(r"\d+(?:\u00a0\d{3})*", zmena["text"])}
+        self.assertLessEqual(cisla, povolena, zmena["text"])
         self.assertTrue(any("úrovni sekcí" in p for p in vysledek["meta"]["klasifikace_poznamky"]))
         self.assertTrue(any("zaniklých subjektů" in p for p in vysledek["meta"]["klasifikace_poznamky"]))
 
