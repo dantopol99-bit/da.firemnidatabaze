@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 
 from firemni_databaze.report_cestina import TABULKA, lokativ, tabulka
-from firemni_databaze.report_kontrola import ZAKAZANA_SLOVA, cisla_v_textu, povolena_cisla
+from firemni_databaze.report_kontrola import cisla_v_textu, povolena_cisla, zakazana_slova
 from firemni_databaze.report_zjisteni import PRAH_ZJISTENI, detekuj, srovnej
 
 KOREN = Path(__file__).resolve().parents[1]
@@ -130,7 +130,7 @@ class TestDetektor(unittest.TestCase):
         povolena = povolena_cisla(VZOR)
         for z in self.zjisteni:
             self.assertEqual(cisla_v_textu(z["popis"]) - povolena, set(), z["popis"])
-            self.assertIsNone(ZAKAZANA_SLOVA.search(z["popis"]), z["popis"])
+            self.assertEqual(zakazana_slova(z["popis"]), [], z["popis"])
             self.assertNotRegex(z["popis"], r"[Vv] území ")
 
     def test_bez_interpretace(self):

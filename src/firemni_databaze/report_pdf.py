@@ -31,7 +31,7 @@ from pathlib import Path
 from firemni_databaze import report_grafy as g
 from firemni_databaze import report_vyklad as vy
 from firemni_databaze.report_cestina import lokativ
-from firemni_databaze.report_kontrola import ZAKAZANA_SLOVA, cisla_v_textu, povolena_cisla, zkontroluj, zkontroluj_pdf
+from firemni_databaze.report_kontrola import cisla_v_textu, povolena_cisla, zakazana_slova, zkontroluj, zkontroluj_pdf
 from firemni_databaze.report_vyklad import Vstup, cz
 
 KOREN = Path(__file__).resolve().parents[2]
@@ -66,7 +66,7 @@ NEDOSTUPNE_KAPITOLY = {
 
 # pododdíl kapitoly Ekonomický profil bez dat (rozhodnutí 13: Sbírka listin jen po dohodě s MSp)
 POD_ODDIL_KONCENTRACE = {
-    "nadpis": "Koncentrace a firemní ukazatele",
+    "nadpis": "Koncentrace a ukazatele z účetních závěrek",
     "duvod": "Sbírka listin (účetní závěrky) zakazuje automatický přístup (robots.txt); cestou je dohoda "
              "s Ministerstvem spravedlnosti.",
     "zdroj": "Účetní závěrky ze Sbírky listin obchodního rejstříku – po dohodě s Ministerstvem spravedlnosti.",
@@ -419,7 +419,7 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         "licence": f"Licence {meta['licence']['nazev']}: {meta['licence']['url']}",
         "oznaceni": meta["oznaceni"],
     }
-    return {
+    return nezlomitelna_procenta({
         "koncept": koncept,
         "fonty": str(FONTY),
         "titul": {
@@ -434,7 +434,23 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
         "metodika": metodika,
         "zjisteni": vy.zjisteni_priloha(v, L),
         "odchylky": odchylky or ["Žádné – všechny kapitoly mají údaje."],
-    }
+    })
+
+
+_KLICE_BEZ_TEXTU = ("soubor", "fonty", "koncept", "cislo", "cisel", "zvyrazneni", "klic", "typ", "hypoteza", "druh")
+_MEZERA_PRED_PROCENTEM = re.compile(r"(\d)[ \t]+%")
+
+
+def nezlomitelna_procenta(data):
+    """Mezi číslem a „%“ nezlomitelná mezera (U+00A0) ve všech textech sazby, aby se „82,7 %“
+    nerozdělilo na dva řádky. Slova textu se nemění, jen druh mezery."""
+    if isinstance(data, str):
+        return _MEZERA_PRED_PROCENTEM.sub("\\1\u00a0%", data)
+    if isinstance(data, dict):
+        return {k: (v if k in _KLICE_BEZ_TEXTU else nezlomitelna_procenta(v)) for k, v in data.items()}
+    if isinstance(data, list):
+        return [nezlomitelna_procenta(v) for v in data]
+    return data
 
 
 def texty_dat(data: dict):
@@ -443,7 +459,7 @@ def texty_dat(data: dict):
         yield data
     elif isinstance(data, dict):
         for k, v in data.items():
-            if k not in ("soubor", "fonty", "koncept", "cislo", "cisel", "zvyrazneni", "klic", "typ", "hypoteza", "druh"):
+            if k not in _KLICE_BEZ_TEXTU:
                 yield from texty_dat(v)
     elif isinstance(data, list):
         for v in data:
@@ -493,8 +509,9 @@ def vysazej(adresar_vysledku: Path, cil: Path, koncept: bool = True, adresar_vyk
                             + (f" ({', '.join(prazdne)})" if prazdne else "")))
     for bloky in vyklad_analytika.values():
         for b in bloky:
-            if ZAKAZANA_SLOVA.search(b["text"]):
-                raise ChybaSazby(f"zakázané slovo ve výkladu analytika (rozhodnutí 1): {b['text'][:80]!r}")
+            if zakazana_slova(b["text"]):
+                raise ChybaSazby(f"zakázané slovo {zakazana_slova(b['text'])} ve výkladu analytika (rozhodnutí 1): "
+                                 f"{b['text'][:80]!r}")
     povolena = povolena_cisla(adresar_vysledku)
     cil.mkdir(parents=True, exist_ok=True)
     pdf = cil / "report.pdf"
@@ -508,6 +525,10 @@ def vysazej(adresar_vysledku: Path, cil: Path, koncept: bool = True, adresar_vyk
         odkazy = kontrola_odkazu(data)
         if odkazy:
             raise ChybaSazby("chybné odkazy na tabulky nebo grafy: " + "; ".join(odkazy))
+        slova = [(s, x) for x in texty_dat(data) for s in zakazana_slova(x)]
+        if slova:
+            raise ChybaSazby("zakázaná slova v textech sazby (rozhodnutí 1): "
+                             + "; ".join(f"„{s}“ v …{x[:60]}…" for s, x in slova))
         (tmp / "data.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
         prikaz = ["typst", "compile", "--root", "/", "--font-path", str(FONTY), "--ignore-system-fonts",
                   "--input", f"data={tmp / 'data.json'}", str(SABLONA), str(pdf)]

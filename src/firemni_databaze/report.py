@@ -1847,7 +1847,7 @@ def uloz(vysledek: dict, interni: dict, adresar: Path) -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--obor", required=True, help="kódy CZ-NACE Rev. 2 oddělené čárkou (např. F nebo 10 nebo 41,42)")
+    parser.add_argument("--obor", required=True, help="kódy CZ-NACE 2025 oddělené čárkou (např. F nebo 10 nebo 41,42)")
     parser.add_argument("--uzemi", required=True, help="CZ, kraj (CZ051 / název) nebo okres (CZ0513 / název)")
     parser.add_argument("--datum", type=date.fromisoformat, help="datum snímku RES (výchozí poslední)")
     parser.add_argument("--srovnani", default="", help="srovnávací kraje oddělené čárkou (zadává člověk)")

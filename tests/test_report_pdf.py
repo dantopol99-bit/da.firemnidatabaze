@@ -98,6 +98,83 @@ Text.
 """
 
 
+class TestZakazanaSlova(unittest.TestCase):
+    """Rozhodnutí 1: žádný tvar slova „firma“ ani „aktivní“ (i uvnitř slova); interní kódy se nehlídají."""
+
+    def test_vsechny_tvary_slova_firma(self):
+        from firemni_databaze.report_kontrola import zakazana_slova
+
+        for slovo in ("firma", "firmy", "firem", "firmám", "firmách", "firmou", "Firemní", "firemních", "nefiremní"):
+            self.assertEqual(zakazana_slova(f"Text o {slovo} v kraji."), [slovo], slovo)
+
+    def test_aktivni_i_uvnitr_slova(self):
+        from firemni_databaze.report_kontrola import zakazana_slova
+
+        for slovo in ("aktivní", "aktivních", "Aktivně", "neaktivní", "neaktivních", "nejaktivnější"):
+            self.assertEqual(zakazana_slova(f"Výmazy {slovo} společností."), [slovo], slovo)
+
+    def test_povolene_vyjimky(self):
+        from firemni_databaze.report_kontrola import zakazana_slova
+
+        for text in ("Ukazatel AKTIVNI_PODIL_KRAJ a AKTIVNI_PODIL_SEKCE_KRAJ.",      # interní kódy
+                     "python -m firemni_databaze.report",                            # název balíčku
+                     "Míra vzniků: aktivní podniky ČSÚ, aktivních podniků přibylo.",  # upřesnění rozhodnutí 1
+                     "Podíl subjektů se zjištěnou aktivitou je 58,8 %."):             # „aktivita“ není „aktivní“
+            self.assertEqual(zakazana_slova(text), [], text)
+        # kód v textu nesmí zakrýt skutečné zakázané slovo vedle něj
+        self.assertEqual(zakazana_slova("AKTIVNI_PODIL_KRAJ: aktivní subjekty"), ["aktivní"])
+
+    @unittest.skipUnless((PILOT_2025 / "_interni" / "kontrola.json").exists(),
+                         "chybí interní podklady pilotu (_interni se necommituje; vznikne výpočtem reportu)")
+    def test_kontrola_vystupu_hlida_i_strojove_texty(self):
+        from firemni_databaze.report_kontrola import zkontroluj
+
+        with tempfile.TemporaryDirectory() as tmp:
+            a = Path(tmp) / "vystup"
+            shutil.copytree(PILOT_2025, a)
+            v = json.loads((a / "vysledek.json").read_text(encoding="utf-8"))
+            v["tabulky"][0]["poznamky"].append("Podíl neaktivních subjektů.")
+            (a / "vysledek.json").write_text(json.dumps(v, ensure_ascii=False), encoding="utf-8")
+            self.assertTrue(any("neaktivních" in c for c in zkontroluj(a)))
+
+    @unittest.skipUnless((PILOT_2025 / "vysledek.json").exists(), "pilot v CZ-NACE 2025 chybí")
+    def test_texty_sazby_pilotu_bez_zakazanych_slov(self):
+        from firemni_databaze.report_kontrola import zakazana_slova
+        from firemni_databaze.report_pdf import sestav_data, texty_dat
+
+        v = json.loads((PILOT_2025 / "vysledek.json").read_text(encoding="utf-8"))
+        _, analytik = report_vyklad.nacti_vyklad_analytika(report_vyklad.soubor_vykladu("F__CZ051__2026-10-15"))
+        with tempfile.TemporaryDirectory() as tmp:
+            data = sestav_data(v, Path(tmp), koncept=True, vyklad_analytika=analytik)
+        self.assertEqual([(s, x[:60]) for x in texty_dat(data) for s in zakazana_slova(x)], [])
+
+
+class TestNezlomitelnaProcenta(unittest.TestCase):
+    def test_mezera_pred_procentem_je_nezlomitelna(self):
+        from firemni_databaze.report_pdf import nezlomitelna_procenta
+
+        data = {"text": "proti 82,7 % v ČR a 5 %", "seznam": ["11,6 % (ZOD-SXHQ)"], "soubor": "/tmp/1 %.svg"}
+        vysledek = nezlomitelna_procenta(data)
+        self.assertEqual(vysledek["text"], "proti 82,7\u00a0% v ČR a 5\u00a0%")
+        self.assertEqual(vysledek["seznam"], ["11,6\u00a0% (ZOD-SXHQ)"])
+        self.assertEqual(vysledek["soubor"], "/tmp/1 %.svg")              # cesty k souborům beze změny
+        self.assertEqual(vysledek["text"].replace("\u00a0", " "), data["text"])   # slova beze změny
+
+    @unittest.skipUnless((PILOT_2025 / "vysledek.json").exists(), "pilot v CZ-NACE 2025 chybí")
+    def test_v_sazbe_pilotu_neni_zlomitelna_mezera_pred_procentem(self):
+        import re
+
+        from firemni_databaze.report_pdf import sestav_data, texty_dat
+
+        v = json.loads((PILOT_2025 / "vysledek.json").read_text(encoding="utf-8"))
+        _, analytik = report_vyklad.nacti_vyklad_analytika(report_vyklad.soubor_vykladu("F__CZ051__2026-10-15"))
+        with tempfile.TemporaryDirectory() as tmp:
+            data = sestav_data(v, Path(tmp), koncept=True, vyklad_analytika=analytik)
+        spatne = [x for x in texty_dat(data) if re.search(r"\d[ \t]+%", x)]
+        self.assertEqual(spatne, [])
+        self.assertTrue(any("82,7\u00a0%" in x for x in texty_dat(data)))
+
+
 class TestOdkazy(unittest.TestCase):
     """Tabulky a grafy se číslují (tab. 1, graf 1, …) průběžně přes report; odkaz nesmí být prázdný,
     nedokončený („tab. [“) ani mířit na neexistující tabulku nebo graf."""
@@ -317,7 +394,7 @@ class TestSazba(unittest.TestCase):
         self.assertEqual([n for n in nadpisy if n in poradi], poradi)
         text = " ".join(text_pdf(pdf).split())
         self.assertEqual(text.count("Stav: zatím nedostupné"), len(NEDOSTUPNE_KAPITOLY) + 1)   # + pododdíl koncentrace
-        self.assertIn("Koncentrace a firemní ukazatele", text)
+        self.assertIn("Koncentrace a ukazatele z účetních závěrek", text)
         for n in NEDOSTUPNE_KAPITOLY.values():
             self.assertIn(" ".join(n["zdroj"].split()), text)
 
