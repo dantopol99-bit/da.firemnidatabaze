@@ -47,8 +47,12 @@ Definice: `report_pdf.NEDOSTUPNE_KAPITOLY`, pořadí: `report_pdf.PORADI_KAPITOL
   ČR, srovnávací kraje; chybějící bod = pod prahem). Jednotný vzhled:
   zkoumané území modře, srovnávací kraje oranžově, ostatní šedě; „Neuvedeno“ a „ostatní“ šedě se šrafou.
 - **Každý graf a každá tabulka** nese pod sebou zdroj a datum snímku.
-- Tabulky a grafy se označují **písmeny** (Tabulka A, Graf B) a kapitoly nemají čísla. Jediná čísla
-  v textu PDF jsou tak čísla z dat a čísla stránek.
+- Tabulky a grafy se **číslují** (Tabulka 1, Graf 1; v textu „tab. 1“, „graf 1“), každý typ zvlášť,
+  průběžně přes celý report v pořadí, v jakém jsou v PDF (rozhodnutí 20. 10. 2026; dřív písmena A–Z,
+  za 26. tabulkou vznikl odkaz „tab. [“). Kapitoly čísla nemají. Kontrola čísel odkazy „tab. N“,
+  „Tabulka N“ a „graf N“ přeskakuje stejně jako čísla stránek; `report_pdf.kontrola_odkazu` před sazbou
+  ověří, že žádný odkaz není prázdný ani nedokončený a každý míří na tabulku nebo graf, který v PDF je.
+  Archivní výstupy podle CZ-NACE 2008 zůstávají s písmeny.
 - **Kontrola konzistence** (`report_kontrola.zkontroluj_pdf`): každé číslo v textu PDF, včetně výkladu
   analytika,
   musí být v `vysledek.json` i v `priloha.xlsx`. Čísla stránek („strana X z Y“) se vynechávají.

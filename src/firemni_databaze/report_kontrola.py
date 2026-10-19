@@ -170,6 +170,8 @@ _CISLO_SAZBA = re.compile(r"\d+(?:[  ]\d{3})*(?:[,.]\d+)?")
 # V textech JSON/XLSX se tisíce oddělují i obyčejnou mezerou („na 1 000 obyvatel“).
 _CISLO_TEXT = re.compile(r"\d{1,3}(?: \d{3})+(?:[,.]\d+)?")
 _STRANA = re.compile(r"strana\s+\d+\s+z\s+\d+", re.IGNORECASE)
+# Odkazy na tabulky a grafy („tab. 3“, „Tabulka 3:“, „graf 2“) nejsou čísla z dat.
+_ODKAZ = re.compile(r"\b(?:tab\.|tabulk[ay]|graf[uy]?)\s+\d+\b", re.IGNORECASE)
 
 
 def _norm(cislo: str) -> str:
@@ -182,8 +184,8 @@ def _norm(cislo: str) -> str:
 
 
 def cisla_v_textu(text: str) -> set[str]:
-    """Normalizovaná čísla v textu sazby (bez čísel stránek)."""
-    return {_norm(c) for c in _CISLO_SAZBA.findall(_STRANA.sub(" ", text))}
+    """Normalizovaná čísla v textu sazby (bez čísel stránek a odkazů na tabulky a grafy)."""
+    return {_norm(c) for c in _CISLO_SAZBA.findall(_ODKAZ.sub(" ", _STRANA.sub(" ", text)))}
 
 
 def _cisla_zdroje(hodnoty) -> set[str]:

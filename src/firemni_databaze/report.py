@@ -724,7 +724,7 @@ def tabulky_model(uz: "Uzemi", obor: list[dict], kraje: dict, subjekty_uzemi: li
     radky24.append({"popis": f"celkem ({uz_popis})", "typ": "celkem", "hodnoty": {
         "hph_lo": round(hph_uz), "hph_hi": round(hph_uz), "podil_lo": 100.0, "podil_hi": 100.0,
         "obrat_lo": m.pasmo(*o_cel)[0], "obrat_hi": m.pasmo(*o_cel)[1]},
-        "poznamka": "přidaná hodnota na úrovni SBS (vstup modelu, tab. přepočtu); obrat = modelový odhad"})
+        "poznamka": "přidaná hodnota na úrovni SBS (vstup modelu, viz tabulka přepočtu); obrat = modelový odhad"})
     metodika = ("Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je "
                 "přepočtena na úroveň statistiky podniků (SBS) a rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl "
                 "se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat "

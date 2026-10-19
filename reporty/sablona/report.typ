@@ -58,7 +58,7 @@
 #let popisek(t) = text(size: 7.5pt, fill: sedy, t)
 
 #let tabulka(t) = block(width: 100%, above: 1.2em, below: 1.2em, breakable: t.radky.len() > 22)[
-  #text(size: 8.5pt, weight: "semibold")[Tabulka #t.pismeno: #t.nazev]
+  #text(size: 8.5pt, weight: "semibold")[Tabulka #t.cislo: #t.nazev]
   #v(-0.2em)
   #let n = t.zahlavi.len()
   #let ma_poznamku = t.zahlavi.last() == "Poznámka"
@@ -84,7 +84,7 @@
 ]
 
 #let graf(g) = block(width: 100%, above: 1.2em, below: 1.2em, breakable: false)[
-  #text(size: 8.5pt, weight: "semibold")[Graf #g.pismeno: #g.nazev]
+  #text(size: 8.5pt, weight: "semibold")[Graf #g.cislo: #g.nazev]
   #v(-0.2em)
   #align(center, image(g.soubor, width: if g.at("maly", default: false) { 85% } else { 100% }))
   #v(-0.4em)

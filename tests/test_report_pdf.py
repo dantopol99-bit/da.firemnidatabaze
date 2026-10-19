@@ -20,8 +20,9 @@ from tests.test_res_import_db import CONN, SNIMKY
 KOREN = Path(__file__).resolve().parents[1]
 VZOR = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-09-15"
 TYPST = shutil.which("typst")
-L_VSE = {f"T{i:02d}": "tab. A" for i in range(1, 29)} | {
-    k: "graf A" for k in ("g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po",
+PILOT_2025 = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-10-15"
+L_VSE = {f"T{i:02d}": "tab. 1" for i in range(1, 29)} | {
+    k: "graf 1" for k in ("g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po",
                           "g_zanik")}
 VYKLAD_HOTOVY = """# Výklad analytika
 
@@ -95,6 +96,61 @@ Text.
 
 Text.
 """
+
+
+class TestOdkazy(unittest.TestCase):
+    """Tabulky a grafy se číslují (tab. 1, graf 1, …) průběžně přes report; odkaz nesmí být prázdný,
+    nedokončený („tab. [“) ani mířit na neexistující tabulku nebo graf."""
+
+    @staticmethod
+    def data(texty: list[str], tabulek: int = 2, grafu: int = 1) -> dict:
+        obsah = ([{"typ": "tabulka", "cislo": str(i)} for i in range(1, tabulek + 1)]
+                 + [{"typ": "graf", "cislo": str(i)} for i in range(1, grafu + 1)])
+        return {"kapitoly": [{"obsah": obsah, "vyklad": [{"druh": "vidět", "text": t} for t in texty]}]}
+
+    def test_cislovani_pokracuje_za_26(self):
+        from firemni_databaze.report_pdf import Sestava
+
+        s = Sestava(Path(tempfile.gettempdir()))
+        cisla = [s.cislo_tab(f"T{i:02d}") for i in range(1, 31)]
+        self.assertEqual(cisla[26], "27")
+        self.assertEqual(s.L["T27"], "tab. 27")
+        self.assertEqual(s.cislo_graf("g_dyn"), "1")          # grafy mají vlastní řadu
+        self.assertEqual(s.L["g_dyn"], "graf 1")
+
+    def test_spravne_odkazy_projdou(self):
+        from firemni_databaze.report_pdf import kontrola_odkazu
+
+        self.assertEqual(kontrola_odkazu(self.data(["Text (tab. 1, graf 1).", "Viz tab. 2; graf 1."])), [])
+
+    def test_nedokonceny_a_prazdny_odkaz_se_odhali(self):
+        from firemni_databaze.report_pdf import kontrola_odkazu
+
+        for text in ("kontext ČR (graf K, tab. [).", "(tab. )", "viz tab.", "(graf)", "(tab. A)"):
+            self.assertTrue(kontrola_odkazu(self.data([text])), text)
+
+    def test_odkaz_na_neexistujici_tabulku_nebo_graf_se_odhali(self):
+        from firemni_databaze.report_pdf import kontrola_odkazu
+
+        self.assertTrue(kontrola_odkazu(self.data(["(tab. 3)"], tabulek=2)))
+        self.assertTrue(kontrola_odkazu(self.data(["(graf 2)"], grafu=1)))
+
+    def test_odkaz_neni_cislo_z_dat(self):
+        self.assertEqual(cisla_v_textu("V kraji je 14\u202f799 subjektů (tab. 27, graf 11). Tabulka 3: Kraje"), {"14799"})
+
+    @unittest.skipUnless((PILOT_2025 / "vysledek.json").exists(), "pilot v CZ-NACE 2025 chybí")
+    def test_vsechny_odkazy_pilotu_miri_na_existujici_tabulky_a_grafy(self):
+        from firemni_databaze.report_pdf import kontrola_odkazu, sestav_data, texty_dat
+
+        v = json.loads((PILOT_2025 / "vysledek.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as tmp:
+            data = sestav_data(v, Path(tmp), koncept=True, vyklad_analytika=None)
+        self.assertEqual(kontrola_odkazu(data), [])
+        for druh in ("tabulka", "graf"):
+            cisla = [o["cislo"] for k in data["kapitoly"] for o in k["obsah"] if o["typ"] == druh]
+            self.assertEqual(cisla, [str(i) for i in range(1, len(cisla) + 1)], druh)   # průběžně 1, 2, …
+        self.assertGreater(len([1 for k in data["kapitoly"] for o in k["obsah"] if o["typ"] == "tabulka"]), 26)
+        self.assertFalse(any("tab. [" in x for x in texty_dat(data)))
 
 
 class TestBezDatabaze(unittest.TestCase):
