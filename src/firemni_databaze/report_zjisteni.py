@@ -16,6 +16,14 @@ Zjištění se řadí podle síly. Rozdíl menší než 3 % relativně se jako z
 a v textu se popisuje jako „srovnatelné“ (funkce srovnej). Položky struktury, jejichž
 podíl je v území i v ČR pod 5 %, se nehlásí (relativní rozdíl malých podílů je nestabilní);
 u pořadí okresů se nehlásí posun o jedno místo.
+
+Jev území, ne oboru (zjištění typu změna trendu): stejná změna se spočítá pro všechny
+ostatní obory území (T30). Posunuly-li se stejným směrem a srovnatelně (pravidlo
+jev_uzemi: relativní změna ostatních oborů má stejné znaménko, je aspoň 3 % a aspoň
+polovina relativní změny oboru), zjištění dostane příznak jev_uzemi, k popisu větu
+„jev celého kraje, ne oboru“ a síla se sníží na vlastní část oboru
+|(1 + r_obor) / (1 + r_ostatní) − 1| (nikdy se nezvýší). Ve shrnutí se takové
+zjištění neuvádí jako zjištění oboru, ale jako jev celého území.
 """
 
 from firemni_databaze.report_cestina import lokativ
@@ -23,6 +31,9 @@ from firemni_databaze.report_vyklad import cz
 
 PRAH_ZJISTENI = 0.03        # 3 % relativně
 MIN_PODIL_STRUKTURY = 5.0   # %
+PODIL_JEVU_UZEMI = 0.5      # ostatní obory musí zopakovat aspoň polovinu relativní změny oboru
+JEV_UZEMI = {"KRAJ": "jev celého kraje, ne oboru", "OKRES": "jev celého okresu, ne oboru",
+             "CR": "jev všech oborů v Česku, ne oboru"}
 PORADI_TYPU = ["odchylka_od_cr", "zmena_trendu", "rozdily_uvnitr_uzemi", "aktivita_oboru", "divergence_poradi",
                "mzdy_zamestnanost", "ekonomika"]
 NAZVY_TYPU = {
@@ -80,7 +91,7 @@ class _Detektor:
         return r, (r["hodnoty"]["hodnota"] if r else None)
 
     def pridej(self, typ: str, podtyp: str, a: float, b: float, cisla: list[dict], popis_fn, sila: float | None = None,
-               rozdil: bool = True) -> None:
+               rozdil: bool = True) -> dict | None:
         """popis_fn(rozdil_text) → věta; rozdil_text je „o 21 % vyšší“ apod."""
         if a is None or b is None:
             return
@@ -90,11 +101,38 @@ class _Detektor:
             return
         rozdil_pct = round(abs(100 * r), 1) if r is not None else None
         smer = ("vyšší" if r > 0 else "nižší") if r is not None else None
-        self.zjisteni.append({
+        z = {
             "typ": typ, "typ_nazev": NAZVY_TYPU[typ], "podtyp": podtyp, "sila": round(s, 4),
             "hodnota": a, "srovnani": b, "rozdil_pct": rozdil_pct, "smer": smer,
             "cisla": cisla, "popis": popis_fn(f"relativně o {cz(rozdil_pct)} % {smer}" if r is not None else ""),
-        })
+        }
+        self.zjisteni.append(z)
+        return z
+
+    def jev_uzemi(self, z: dict | None, a: float | None, b: float | None, cisla: list[dict], veta_fn) -> None:
+        """Pravidlo jev_uzemi: změnu oboru (z["hodnota"] / z["srovnani"]) porovná se stejnou změnou všech
+        ostatních oborů území (a / b). veta_fn(rozdil_text) → věta o ostatních oborech (připojí se k popisu,
+        je-li změna srovnatelná)."""
+        if z is None or a is None or b is None or not b or not z["srovnani"]:
+            return
+        r_obor, r_ost = relativni(z["hodnota"], z["srovnani"]), relativni(a, b)
+        srovnatelne = (r_obor * r_ost > 0 and abs(r_ost) >= PRAH_ZJISTENI
+                       and abs(r_ost) >= PODIL_JEVU_UZEMI * abs(r_obor))
+        rozdil = round(abs(100 * r_ost), 1)
+        smer = "vyšší" if r_ost > 0 else "nižší"
+        z["ostatni"] = {"hodnota": a, "srovnani": b, "rozdil_pct": rozdil, "srovnatelne": srovnatelne}
+        z["cisla"] += [dict(c, ucel="jev_uzemi") for c in cisla]
+        if not srovnatelne:
+            return
+        z["jev_uzemi"] = True
+        z["sila_puvodni"] = z["sila"]
+        z["sila"] = round(min(z["sila"], abs((1 + r_obor) / (1 + r_ost) - 1)), 4)
+        z["popis"] = (z["popis"].rstrip(".") + ". " + veta_fn(f"relativně o {cz(rozdil)} % {smer}")
+                      + f" – {JEV_UZEMI[self.uz['typ']]}.")
+
+    def ostatni_t30(self, uzemi: str) -> dict[int, dict]:
+        return {r["rok"]: r for r in self.radky("T30_mira_zaniku_ostatni")
+                if r.get("skupina") == "ostatni" and r["uzemi"] == uzemi}
 
     # --- 1. odchylka od ČR -------------------------------------------------------------------
     def odchylka_od_cr(self) -> None:
@@ -137,6 +175,15 @@ class _Detektor:
         radky = self.radky("T18_mira_zaniku_po")
         uz = [r for r in radky if r["uzemi"] == self.uz["kod"]]
         cr = {r["rok"]: r for r in radky if r["uzemi"] == "CZ"}
+        ost_uz, ost_cr = self.ostatni_t30(self.uz["kod"]), self.ostatni_t30("CZ")
+
+        def ost(rady: dict, rok: int, sl: str):
+            r = rady.get(rok)
+            return r["hodnoty"].get(sl) if r and isinstance(r["hodnoty"].get(sl), (int, float)) else None
+
+        def ost_cislo(rady: dict, rok: int, sl: str, popis: str) -> dict:
+            return _cislo(popis, ost(rady, rok, sl), "T30_mira_zaniku_ostatni", rady[rok]["popis"], sl)
+
         for sl, nazev_obd, druh in (("mira", "za rok", "rok"), ("mira_obd", f"za období {obdobi}", "období")):
             rady = [(r["rok"], r) for r in uz if r["hodnoty"][sl] is not None]
             if len(rady) >= 2:
@@ -145,7 +192,7 @@ class _Detektor:
                 prumer = round(sum(r["hodnoty"][sl] for _, r in predchozi) / len(predchozi), 2)
                 roky_txt = (f"{predchozi[0][0]}–{predchozi[-1][0]}" if len(predchozi) > 1 else str(predchozi[0][0]))
                 a = posl["hodnoty"][sl]
-                self.pridej("zmena_trendu", f"míra zániku PO {nazev_obd}: poslední rok proti předchozím", a, prumer,
+                z = self.pridej("zmena_trendu", f"míra zániku PO {nazev_obd}: poslední rok proti předchozím", a, prumer,
                             [_cislo(f"Míra zániku PO {nazev_obd} {rok} (%)", a, "T18_mira_zaniku_po", posl["popis"], sl)]
                             + [_cislo(f"Míra zániku PO {nazev_obd} {y} (%)", r["hodnoty"][sl], "T18_mira_zaniku_po",
                                       r["popis"], sl) for y, r in predchozi]
@@ -153,25 +200,50 @@ class _Detektor:
                             lambda d, rok=rok, a=a, prumer=prumer, roky_txt=roky_txt, nazev_obd=nazev_obd:
                                 f"Míra zániku PO v oboru {nazev_obd} {rok} je {self.v_uz} {cz(a)} %, průměr "
                                 f"{'let' if '–' in roky_txt else 'roku'} {roky_txt} je {cz(prumer)} % ({d}).")
+                if z:
+                    hodn = [ost(ost_uz, y, sl) for y, _ in predchozi]
+                    a_o = ost(ost_uz, rok, sl)
+                    if a_o is not None and all(h is not None for h in hodn):
+                        p_o = round(sum(hodn) / len(hodn), 2)
+                        self.jev_uzemi(z, a_o, p_o,
+                                       [ost_cislo(ost_uz, rok, sl, f"Ostatní obory – míra zániku PO {nazev_obd} {rok} (%)")]
+                                       + [ost_cislo(ost_uz, y, sl, f"Ostatní obory – míra zániku PO {nazev_obd} {y} (%)")
+                                          for y, _ in predchozi]
+                                       + [_cislo(f"Ostatní obory – průměr let {roky_txt} (%)", p_o, "T19_zjisteni", "",
+                                                 "ost_srovnani")],
+                                       lambda d, a_o=a_o, p_o=p_o, rok=rok, roky_txt=roky_txt, nazev_obd=nazev_obd:
+                                           f"Ve všech ostatních oborech je {self.v_uz} míra zániku PO {nazev_obd} {rok} "
+                                           f"{cz(a_o)} %, průměr {'let' if '–' in roky_txt else 'roku'} {roky_txt} "
+                                           f"{cz(p_o)} % ({d})")
             if self.uz["typ"] == "CR" or not rady:
                 continue
             rok, posl = rady[-1]
             c = cr.get(rok)
             if c and c["hodnoty"][sl] is not None:
                 a, b = posl["hodnoty"][sl], c["hodnoty"][sl]
-                self.pridej("zmena_trendu", f"míra zániku PO {nazev_obd}: proti ČR", a, b, [
+                z = self.pridej("zmena_trendu", f"míra zániku PO {nazev_obd}: proti ČR", a, b, [
                     _cislo(f"Míra zániku PO {nazev_obd} {rok} – {self.uz['nazev']} (%)", a, "T18_mira_zaniku_po",
                            posl["popis"], sl),
                     _cislo(f"Míra zániku PO {nazev_obd} {rok} – Česko (%)", b, "T18_mira_zaniku_po", c["popis"], sl)],
                     lambda d, rok=rok, a=a, b=b, nazev_obd=nazev_obd:
                         f"Míra zániku PO v oboru {nazev_obd} {rok} je {self.v_uz} {cz(a)} %, {self.v_cr} {cz(b)} % ({d}).")
+                if z:
+                    a_o, b_o = ost(ost_uz, rok, sl), ost(ost_cr, rok, sl)
+                    if a_o is not None and b_o is not None:
+                        self.jev_uzemi(z, a_o, b_o, [
+                            ost_cislo(ost_uz, rok, sl, f"Ostatní obory – míra zániku PO {nazev_obd} {rok} – "
+                                                       f"{self.uz['nazev']} (%)"),
+                            ost_cislo(ost_cr, rok, sl, f"Ostatní obory – míra zániku PO {nazev_obd} {rok} – Česko (%)")],
+                            lambda d, a_o=a_o, b_o=b_o, rok=rok, nazev_obd=nazev_obd:
+                                f"Ve všech ostatních oborech je míra zániku PO {nazev_obd} {rok} {self.v_uz} "
+                                f"{cz(a_o)} %, {self.v_cr} {cz(b_o)} % ({d})")
             # vývoj proti ČR: index posledního roku k prvnímu (jen úplné roky)
             prvni_rok, prvni = rady[0]
             c0 = cr.get(prvni_rok)
             if druh == "rok" and c and c0 and len(rady) >= 2 and c["hodnoty"][sl] and c0["hodnoty"][sl]:
                 a0, a1, b0, b1 = prvni["hodnoty"][sl], posl["hodnoty"][sl], c0["hodnoty"][sl], c["hodnoty"][sl]
                 i_uz, i_cr = round(a1 / a0, 2), round(b1 / b0, 2)
-                self.pridej("zmena_trendu", "míra zániku PO za rok: vývoj proti ČR", i_uz, i_cr, [
+                z = self.pridej("zmena_trendu", "míra zániku PO za rok: vývoj proti ČR", i_uz, i_cr, [
                     _cislo(f"Míra zániku PO {prvni_rok} – {self.uz['nazev']} (%)", a0, "T18_mira_zaniku_po", prvni["popis"], sl),
                     _cislo(f"Míra zániku PO {rok} – {self.uz['nazev']} (%)", a1, "T18_mira_zaniku_po", posl["popis"], sl),
                     _cislo(f"Míra zániku PO {prvni_rok} – Česko (%)", b0, "T18_mira_zaniku_po", c0["popis"], sl),
@@ -182,6 +254,22 @@ class _Detektor:
                         f"Míra zániku PO v oboru se mezi lety {r0} a {r1} změnila {self.v_uz} z {cz(a0)} % na "
                         f"{cz(a1)} % (index {cz(i_uz)}), {self.v_cr} z {cz(b0)} % na {cz(b1)} % (index {cz(i_cr)}); "
                         f"index je {d} než {self.v_cr}.")
+                if z:
+                    o = [ost(ost_uz, prvni_rok, sl), ost(ost_uz, rok, sl), ost(ost_cr, prvni_rok, sl), ost(ost_cr, rok, sl)]
+                    if all(o):
+                        oi_uz, oi_cr = round(o[1] / o[0], 2), round(o[3] / o[2], 2)
+                        self.jev_uzemi(z, oi_uz, oi_cr, [
+                            ost_cislo(ost_uz, prvni_rok, sl, f"Ostatní obory – míra zániku PO {prvni_rok} – {self.uz['nazev']} (%)"),
+                            ost_cislo(ost_uz, rok, sl, f"Ostatní obory – míra zániku PO {rok} – {self.uz['nazev']} (%)"),
+                            ost_cislo(ost_cr, prvni_rok, sl, f"Ostatní obory – míra zániku PO {prvni_rok} – Česko (%)"),
+                            ost_cislo(ost_cr, rok, sl, f"Ostatní obory – míra zániku PO {rok} – Česko (%)"),
+                            _cislo(f"Ostatní obory – index {rok}/{prvni_rok} – {self.uz['nazev']}", oi_uz, "T19_zjisteni", "",
+                                   "ost_hodnota"),
+                            _cislo(f"Ostatní obory – index {rok}/{prvni_rok} – Česko", oi_cr, "T19_zjisteni", "",
+                                   "ost_srovnani")],
+                            lambda d, oi_uz=oi_uz, oi_cr=oi_cr, r0=prvni_rok, r1=rok:
+                                f"Ve všech ostatních oborech se míra zániku PO mezi lety {r0} a {r1} změnila "
+                                f"{self.v_uz} s indexem {cz(oi_uz)}, {self.v_cr} s indexem {cz(oi_cr)}; index je {d} než {self.v_cr}")
 
     # --- 3. rozdíly uvnitř území: okresy vůči kraji a ČR ---------------------------------------
     def rozdily_uvnitr(self) -> None:
@@ -385,7 +473,8 @@ def stale_id(z: dict) -> str:
     neobsahovalo číslice (kontrola čísel v PDF by je četla jako čísla)."""
     import hashlib
     klic = "|".join([z["typ"], z["podtyp"]] + sorted(f"{c['tabulka']}/{c['radek']}/{c['sloupec']}"
-                                                      for c in z["cisla"] if c["tabulka"] != "T19_zjisteni"))
+                                                      for c in z["cisla"] if c["tabulka"] != "T19_zjisteni"
+                                                      and c.get("ucel") != "jev_uzemi"))
     n = int(hashlib.sha256(klic.encode("utf-8")).hexdigest(), 16)
     pismena = ""
     for _ in range(4):
@@ -422,12 +511,28 @@ def tabulka_zjisteni(zjisteni: list[dict]) -> dict:
                     {"kod": "sila", "nazev": "Síla", "ukazatel": "ZJ_SILA"},
                     {"kod": "hodnota", "nazev": "Hodnota", "ukazatel": "ZJ_HODNOTA"},
                     {"kod": "srovnani", "nazev": "Srovnání", "ukazatel": "ZJ_SROVNANI"},
-                    {"kod": "rozdil_pct", "nazev": "Relativní rozdíl (%)", "ukazatel": "ZJ_ROZDIL_PCT"}],
+                    {"kod": "rozdil_pct", "nazev": "Relativní rozdíl (%)", "ukazatel": "ZJ_ROZDIL_PCT"},
+                    {"kod": "jev", "nazev": "Jev oboru nebo území", "ukazatel": "ZJ_JEV_UZEMI"},
+                    {"kod": "sila_puvodni", "nazev": "Síla před snížením", "ukazatel": "ZJ_SILA"},
+                    {"kod": "ost_hodnota", "nazev": "Ostatní obory: hodnota", "ukazatel": "ZJ_HODNOTA"},
+                    {"kod": "ost_srovnani", "nazev": "Ostatní obory: srovnání", "ukazatel": "ZJ_SROVNANI"},
+                    {"kod": "ost_rozdil_pct", "nazev": "Ostatní obory: relativní rozdíl (%)",
+                     "ukazatel": "ZJ_ROZDIL_PCT"}],
         "radky": [{"popis": z["popis"], "typ": "polozka", "id": z["id"],
                    "hodnoty": {"id": z["id"], "typ": z["typ_nazev"], "sila": z["sila"], "hodnota": z["hodnota"],
-                               "srovnani": z["srovnani"], "rozdil_pct": z["rozdil_pct"]}} for z in zjisteni],
+                               "srovnani": z["srovnani"], "rozdil_pct": z["rozdil_pct"],
+                               "jev": ("území" if z.get("jev_uzemi") else "obor") if "ostatni" in z else None,
+                               "sila_puvodni": z.get("sila_puvodni"),
+                               "ost_hodnota": z.get("ostatni", {}).get("hodnota"),
+                               "ost_srovnani": z.get("ostatni", {}).get("srovnani"),
+                               "ost_rozdil_pct": z.get("ostatni", {}).get("rozdil_pct")}} for z in zjisteni],
         "zverejneno": True, "duvod": None,
         "poznamky": [f"Síla = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Rozdíly "
                      f"pod {cz(round(100 * PRAH_ZJISTENI))} % relativně se nehlásí. Položky struktury s podílem pod "
-                     f"{cz(MIN_PODIL_STRUKTURY)} % v území i v ČR se nehlásí. Popisy jsou věcné, bez interpretace."],
+                     f"{cz(MIN_PODIL_STRUKTURY)} % v území i v ČR se nehlásí. Popisy jsou věcné, bez interpretace.",
+                     "Změna trendu se porovná se stejnou změnou všech ostatních oborů území (T30). Posunuly-li se "
+                     f"stejným směrem, aspoň o {cz(round(100 * PRAH_ZJISTENI))} % relativně a aspoň o "
+                     f"{cz(round(100 * PODIL_JEVU_UZEMI))} % relativní změny oboru, jde o jev území, ne oboru: síla se "
+                     "sníží na vlastní část oboru |(1 + r oboru) / (1 + r ostatních oborů) − 1| a zjištění se ve "
+                     "shrnutí neuvádí jako zjištění oboru."],
     }

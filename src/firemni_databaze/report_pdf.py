@@ -305,6 +305,30 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
                       "nazev": "Míra zániku právnických osob v oboru – zkoumané území, ČR a srovnávací kraje",
                       "zdroj": zdroj_res + " Chybějící bod = pod prahem."})
         obsah.append(tabulka(v.tab["T18_mira_zaniku_po"], s.cislo_tab("T18"), zdroj_res))
+    if v.t("T29_zaniky_zpusob"):
+        obsah.append(tabulka(v.tab["T29_zaniky_zpusob"], s.cislo_tab("T29"), zdroj_res))
+    t30 = v.radky("T30_mira_zaniku_ostatni")
+    if t30:
+        roky = sorted({r["rok"] for r in t30})[:-1]          # jen úplné roky
+        def rada30(skupina, kod_u, sl):
+            radky_u = {r["rok"]: r for r in t30 if r["skupina"] == skupina and r["uzemi"] == kod_u}
+            h = [(y, radky_u[y]["hodnoty"][sl]) for y in roky if y in radky_u]
+            popis = ("Obor" if skupina == "obor" else "Ostatní obory") + " – " + \
+                radky_u[roky[0]]["popis"].split(" – ")[1]
+            role = ("uzemi" if skupina == "obor" else "srovnani") if kod_u == v.uzemi["kod"] else "cr"
+            styl = ("--", "s") if role == "cr" and skupina == "ostatni" else None
+            return {"popis": popis, "role": role, "styl": styl,
+                    "body": [(y, x if isinstance(x, (int, float)) else None) for y, x in h]}
+        uzemi30 = list(dict.fromkeys(r["uzemi"] for r in t30))
+        panely = [{"nazev": nazev, "rady": [rada30(sk, k, sl) for k in uzemi30 for sk in ("obor", "ostatni")]}
+                  for nazev, sl in (("Všechny způsoby zániku – za celý rok", "mira"),
+                                    ("Bez kódu 04 – za celý rok", "mira_bez04"))]
+        p = s.cislo_graf("g_zanik_ost")
+        obsah.append({"typ": "graf", "cislo": p,
+                      "soubor": str(g.miry_v_case(panely, adresar / "g_zanik_ost.svg", "Míra zániku PO (%)")),
+                      "nazev": "Míra zániku právnických osob – obor a všechny ostatní obory, celkem a bez kódu 04",
+                      "zdroj": zdroj_res + " Chybějící bod = pod prahem (v tabulce pásmo)."})
+        obsah.append(tabulka(v.tab["T30_mira_zaniku_ostatni"], s.cislo_tab("T30"), zdroj_res))
     t12 = v.radky("T12_demografie_cr")
     if t12:
         panely = []
@@ -327,8 +351,9 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
 
     # --- výklad (po přidělení písmen) --------------------------------------------------
     L = {k: s.L.get(k, "příloha") for k in
-         [f"T{i:02d}" for i in range(1, 29)]
-         + ["g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik"]}
+         [f"T{i:02d}" for i in range(1, 31)]
+         + ["g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po", "g_zanik",
+            "g_zanik_ost"]}
     for k in kapitoly:
         k["nedostupne"] = None
         k["vyklad"] = {"postaveni": vy.postaveni, "struktura": vy.struktura, "ekonomicky_profil": vy.ekonomika,
@@ -370,7 +395,16 @@ def sestav_data(vysledek: dict, adresar: Path, koncept: bool, vyklad_analytika: 
     body = [b["text"] for b in (vyklad_analytika or {}).get("shrnuti", [])]
     if not body:
         body = ["Shrnutí analytika zatím chybí."]
-    shrnuti = {"dlazdice": dlazdice, "body": body, "varovani": meta["varovani"]}
+    # zjištění, která jsou jevem celého území (report_zjisteni, pravidlo jev_uzemi): strojová poznámka pod body
+    jevy = [z for z in v.zjisteni if z.get("jev_uzemi")]
+    jevy_uzemi = []
+    if jevy:
+        jev, ostatnich = vy.JEV_UZEMI_VETA[v.uzemi["typ"]]
+        jevy_uzemi.append(
+            f"{jev[0].upper()}{jev[1:]}: zjištění "
+            f"{', '.join(z['id'] for z in jevy)} (míra zániku PO). Míra zániku {ostatnich} se posunula stejným "
+            f"směrem a srovnatelně ({L['T30']}, {L['g_zanik_ost']}); nejde o samostatné zjištění oboru.")
+    shrnuti = {"dlazdice": dlazdice, "body": body, "varovani": meta["varovani"], "jevy_uzemi": jevy_uzemi}
 
     # --- metodika --------------------------------------------------------------------
     pr = meta["pravidla"]

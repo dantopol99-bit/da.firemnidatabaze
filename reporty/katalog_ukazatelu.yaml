@@ -466,6 +466,72 @@ ukazatele:
     vyklad: Jediná srovnatelná míra pro neúplný poslední rok.
     stav: částečně
 
+  - kod: ZANIK_PO_ZPUSOB
+    nazev: Zaniklé právnické osoby v oboru podle způsobu zániku (RES)
+    typ: pocet
+    definice: PO zaniklé v roce, s převažující činností v oboru a sídlem v území, podle způsobu zániku ZPZAN (číselník RES 572) ve třech kategoriích – 04 zrušení bez likvidace bez nástupců, 01 likvidace, jiný způsob (přeměna 02, 03, ostatní a nezjištěné kódy).
+    vzorec: "count(subjekt PO) where year(ddatzan) = Y group by kategorie(zpzan)"
+    zdroj: ČSÚ, RES – otevřená data
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Dělení 04 / ostatní jen, jsou-li obě části aspoň na prahu; dělení ostatních na likvidaci a jiný způsob jen, jsou-li na prahu obě. Jinak pásmo podílu (PODIL_ZANIKU_04).
+    vyklad: Kód 04 zahrnuje i výmaz společnosti rejstříkovým soudem bez likvidace (§ 105a zákona č. 304/2013 Sb.); nárůst kódu 04 v celém území svědčí spíš o úklidu rejstříku než o zhoršení oboru.
+    stav: naplněno
+
+  - kod: PODIL_ZANIKU_04
+    nazev: Podíl zrušení bez likvidace bez nástupců (kód 04) na zaniklých PO v oboru (%)
+    typ: podil
+    definice: Zaniklé PO s kódem 04 / všechny zaniklé PO oboru v roce × 100; když je jedna z částí pod prahem, uvádí se jen pásmo („aspoň X %“, „nejvýš X %“ v celých procentech).
+    vzorec: "100 × ZANIK_PO_ZPUSOB(04, Y) / ZANIK_PO_RES(Y)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Pásmo místo přesné hodnoty, je-li počet s kódem 04 nebo bez něj pod prahem; nic, jsou-li pod prahem obě části.
+    vyklad: Odliší správní výmazy od zániků likvidací nebo přeměnou.
+    stav: naplněno
+
+  - kod: MIRA_ZANIKU_PO_BEZ04
+    nazev: Míra zániku právnických osob bez kódu 04 (%)
+    typ: podil
+    definice: Zaniklé PO v roce (nebo ve srovnatelném období) jiným způsobem než zrušením bez likvidace bez nástupců (ZPZAN 04) / stav PO k 1. 1. × 100; v řádcích „Ostatní obory“ za všechny ostatní obory území.
+    vzorec: "100 × (ZANIK_PO_RES(Y) − ZANIK_PO_ZPUSOB(04, Y)) / ZANIK_PO_STAV(Y)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Je-li počet zániků bez kódu 04 pod prahem, jen pásmo „pod X %“ (X = práh / stav PO, zaokrouhleno nahoru na 0,1); je-li pod prahem počet s kódem 04, nic.
+    vyklad: Míra zániku očištěná o správní výmazy; ukáže, zda obor zaniká i jinak než výmazem nečinných společností.
+    stav: naplněno
+
+  - kod: ZANIK_PO_STAV_OSTATNI
+    nazev: Stav PO k 1. 1. – všechny ostatní obory území
+    typ: pocet
+    definice: Právnické osoby se sídlem v území a s určeným oborem (CZ-NACE 2025, automatické spojení, ne pseudokód) mimo zkoumaný obor, rekonstruované k 1. 1. stejně jako ZANIK_PO_STAV.
+    vzorec: "count(PO ostatních oborů) where ddatvzn < 1. 1. Y and (ddatzan is null or ddatzan >= 1. 1. Y)"
+    zdroj: ČSÚ, RES – otevřená data
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Subjekty s neurčeným oborem a zařazené jen do vyšší úrovně se nezapočítávají ani do oboru, ani do ostatních oborů.
+    vyklad: Jmenovatel míry zániku ostatních oborů (srovnání jevu oboru a jevu celého území).
+    stav: naplněno
+
+  - kod: MIRA_ZANIKU_PO_OSTATNI
+    nazev: Míra zániku právnických osob ve všech ostatních oborech území (%)
+    typ: podil
+    definice: Zaniklé PO ostatních oborů v roce (nebo ve srovnatelném období; celkem nebo bez kódu 04) / stav PO ostatních oborů k 1. 1. × 100 – stejná metoda jako MIRA_ZANIKU_PO.
+    vzorec: "100 × zaniklé PO ostatních oborů(Y) / ZANIK_PO_STAV_OSTATNI(Y)"
+    zdroj: odvozeno z RES
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Stejná pravidla jako u míry zániku oboru.
+    vyklad: Posune-li se míra oboru stejně jako míra ostatních oborů území, jde o jev celého území, ne oboru (detektor zjištění).
+    stav: naplněno
+
+  - kod: ZJ_JEV_UZEMI
+    nazev: Jev oboru, nebo celého území (zjištění změny trendu)
+    typ: zjisteni
+    definice: "„území“ = ostatní obory území se posunuly stejným směrem a srovnatelně (relativní změna aspoň 3 % a aspoň polovina relativní změny oboru); „obor“ = neposunuly. Prázdné u zjištění, která se s ostatními obory neporovnávají."
+    vzorec: "r_ost × r_obor > 0 and |r_ost| >= 0,03 and |r_ost| >= 0,5 × |r_obor|"
+    zdroj: odvozeno z T18 a T30
+    uroven: [CR, kraj, okres]
+    chybejici_hodnoty: Jen u zjištění typu změna trendu, má-li srovnání ostatních oborů zveřejněné hodnoty.
+    vyklad: Zjištění s příznakem „území“ má sníženou sílu (vlastní část oboru) a ve shrnutí se neuvádí jako zjištění oboru.
+    stav: naplněno
+
   - kod: ZJ_TYP
     nazev: Typ zjištění
     typ: zjisteni

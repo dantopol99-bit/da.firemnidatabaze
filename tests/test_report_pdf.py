@@ -21,9 +21,9 @@ KOREN = Path(__file__).resolve().parents[1]
 VZOR = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-09-15"
 TYPST = shutil.which("typst")
 PILOT_2025 = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-10-15"
-L_VSE = {f"T{i:02d}": "tab. 1" for i in range(1, 29)} | {
+L_VSE = {f"T{i:02d}": "tab. 1" for i in range(1, 31)} | {
     k: "graf 1" for k in ("g_dyn", "g_ekon", "g_fopo", "g_hustota", "g_lq", "g_miry", "g_mzdy", "g_vek", "g_vel_fo", "g_vel_po",
-                          "g_zanik")}
+                          "g_zanik", "g_zanik_ost")}
 VYKLAD_HOTOVY = """# Výklad analytika
 
 <!-- pokyn pro analytika se do sazby nedostane -->
@@ -147,6 +147,35 @@ class TestZakazanaSlova(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             data = sestav_data(v, Path(tmp), koncept=True, vyklad_analytika=analytik)
         self.assertEqual([(s, x[:60]) for x in texty_dat(data) for s in zakazana_slova(x)], [])
+
+
+    @unittest.skipUnless((PILOT_2025 / "priloha.xlsx").exists(), "pilot v CZ-NACE 2025 chybí")
+    def test_pilot_jev_kraje_v_dynamice_a_shrnuti(self):
+        """Způsob zániku (T29), ostatní obory (T30) a jev celého kraje: tabulky a graf v kapitole Dynamika,
+        strojová poznámka pod shrnutím, čísla strojových textů jen z JSON a XLSX."""
+        from firemni_databaze.report_pdf import kontrola_odkazu, sestav_data, texty_dat
+
+        v = json.loads((PILOT_2025 / "vysledek.json").read_text(encoding="utf-8"))
+        jevy = [z["id"] for z in v["zjisteni"] if z.get("jev_uzemi")]
+        if not jevy:
+            self.skipTest("pilot nemá zjištění s příznakem jev_uzemi (starší výstup)")
+        with tempfile.TemporaryDirectory() as tmp:
+            data = sestav_data(v, Path(tmp), koncept=True, vyklad_analytika=None)
+        self.assertEqual(kontrola_odkazu(data), [])
+        dyn = next(k for k in data["kapitoly"] if k["klic"] == "dynamika")
+        nazvy = [o["nazev"] for o in dyn["obsah"]]
+        self.assertTrue(any("způsobu zániku" in n for n in nazvy))
+        self.assertTrue(any("ostatní obory" in n for n in nazvy))
+        text = " ".join(b["text"] for b in dyn["vyklad"] if b["druh"] == "vidět")
+        self.assertIn("kód 04", text)
+        self.assertIn("ve všech ostatních oborech", text)
+        self.assertIn("jev celého kraje, ne oboru", text)
+        poznamka = " ".join(data["shrnuti"]["jevy_uzemi"])
+        for i in jevy:
+            self.assertIn(i, poznamka)
+        povolena = povolena_cisla(PILOT_2025)
+        for x in texty_dat(data):
+            self.assertEqual(cisla_v_textu(x) - povolena, set(), x[:80])
 
 
 class TestNezlomitelnaProcenta(unittest.TestCase):

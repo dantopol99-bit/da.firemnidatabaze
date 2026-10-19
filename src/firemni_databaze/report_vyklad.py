@@ -489,6 +489,7 @@ def dynamika(v: Vstup, L: dict) -> list[dict]:
         if rok_txt or obd_txt:
             casti.append(f"Míra zániku PO v oboru {lok}: za celý rok " + (", ".join(rok_txt) or "nezveřejněna")
                          + f"; za období {obdobi} " + (", ".join(obd_txt) or "nezveřejněna") + f" ({L['g_zanik']}, {L['T18']}).")
+    casti += _zpusob_zaniku(v, L)
     t12 = v.radky("T12_demografie_cr")
     if t12:
         posl_fo = [r for r in t12 if r["popis"].endswith("podniky FO")][-1]
@@ -501,6 +502,61 @@ def dynamika(v: Vstup, L: dict) -> list[dict]:
     if not casti:
         return [_blok("vidět", "Údaje o dynamice nejsou k dispozici.")]
     return [_blok("vidět", " ".join(casti))] + zjisteni_kapitoly(v, "dynamika", L)
+
+
+JEV_UZEMI_VETA = {"KRAJ": ("jev celého kraje, ne oboru", "ostatních oborů kraje"),
+                  "OKRES": ("jev celého okresu, ne oboru", "ostatních oborů okresu"),
+                  "CR": ("jev všech oborů v Česku, ne oboru", "ostatních oborů v Česku")}
+
+
+def _rada(radky: list[dict], sl: str, posledni: int | None = None) -> list[str]:
+    """„2023 2,1 %“ pro zveřejněné hodnoty (čísla i pásma) v pořadí řádků."""
+    out = []
+    for r in radky:
+        h = r["hodnoty"].get(sl)
+        if h is None:
+            continue
+        hodnota = h if isinstance(h, str) else f"{cz(h)} %"
+        out.append(f"{r['rok']}{' (do data snímku)' if r['rok'] == posledni else ''} {hodnota}")
+    return out
+
+
+def _zpusob_zaniku(v: Vstup, L: dict) -> list[str]:
+    """Co je vidět: způsob zániku PO v oboru (T29), míra bez kódu 04 a ostatní obory území (T30, graf)."""
+    casti = []
+    t29 = v.radky("T29_zaniky_zpusob")
+    t30 = v.radky("T30_mira_zaniku_ostatni")
+    obdobi = (v.t("T30_mira_zaniku_ostatni") or {}).get("obdobi", "")
+    uzemi = [(v.uzemi["kod"], v.v_uzemi)] + ([("CZ", lokativ("CZ"))] if v.uzemi["typ"] != "CR" else [])
+    if t29:
+        posledni = max(r["rok"] for r in t29)
+        podily = [f"{lok} " + ", ".join(rada) for kod, lok in uzemi
+                  if (rada := _rada([r for r in t29 if r["uzemi"] == kod], "podil04", posledni))]
+        if podily:
+            casti.append("Podíl zrušení bez likvidace bez nástupců (kód 04) na zaniklých PO v oboru: "
+                         + "; ".join(podily) + f" ({L['T29']}).")
+    for skupina, uvod in (("obor", "Bez kódu 04 je míra zániku PO v oboru"),
+                          ("ostatni", "Míra zániku PO ve všech ostatních oborech")):
+        for kod, lok in uzemi:
+            radky = [r for r in t30 if r["skupina"] == skupina and r["uzemi"] == kod]
+            sl_rok, sl_obd = ("mira_bez04", "mira_obd_bez04") if skupina == "obor" else ("mira", "mira_obd")
+            rok, obd = _rada(radky, sl_rok), _rada(radky, sl_obd)
+            if not rok and not obd:
+                continue
+            veta = (f"{uvod} {lok}: za celý rok " + (", ".join(rok) or "nezveřejněna")
+                    + f"; za období {obdobi} " + (", ".join(obd) or "nezveřejněna"))
+            if skupina == "ostatni":
+                bez = _rada(radky, "mira_bez04")
+                if bez:
+                    veta += "; bez kódu 04 za celý rok " + ", ".join(bez)
+            casti.append(veta + f" ({L['g_zanik_ost']}, {L['T30']}).")
+    jevy = [z for z in v.zjisteni if z.get("jev_uzemi")]
+    if jevy:
+        jev, ostatnich = JEV_UZEMI_VETA[v.uzemi["typ"]]
+        casti.append(f"Zjištění {', '.join(z['id'] for z in jevy)} {'je' if len(jevy) == 1 else 'jsou'} {jev}: míra "
+                     f"zániku PO {ostatnich} se posunula stejným směrem a srovnatelně, proto mají sníženou sílu a "
+                     f"nejsou samostatným zjištěním oboru ({L['T30']}).")
+    return casti
 
 
 # ---------------------------------------------------------------------------
@@ -568,6 +624,8 @@ def sablona_vykladu(vysledek: dict, id_reportu: str) -> str:
              "  * odstavce oddělené prázdným řádkem; odstavec začínající „Hypotéza:“ se vysází jako hypotéza,",
              "  * každé číslo musí být ve vysledek.json i v priloha.xlsx (kontrola čísel v PDF platí i sem),",
              "  * odkazujte na zjištění stálým ID ze zjisteni.json (tvar ZXX-XXXX) a na tabulky;",
+             "  * zjištění s příznakem jev_uzemi (jev celého kraje, ne oboru) neuvádějte ve shrnutí jako",
+             "    samostatné zjištění oboru,",
              "    nepoužívejte slova „firmy“ ani „aktivní“,",
              f"  * dokud soubor obsahuje „{ZASTUPNY_TEXT}“, nelze report vysázet s --vyklad-schvalen.",
              "-->",
