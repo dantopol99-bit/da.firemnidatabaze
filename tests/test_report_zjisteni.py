@@ -8,7 +8,7 @@ import yaml
 
 from firemni_databaze.report_cestina import TABULKA, lokativ, tabulka
 from firemni_databaze.report_kontrola import cisla_v_textu, povolena_cisla, zakazana_slova
-from firemni_databaze.report_zjisteni import PRAH_ZJISTENI, detekuj, srovnej
+from firemni_databaze.report_zjisteni import PODIL_JEVU_UZEMI, PRAH_ZJISTENI, detekuj, srovnej
 
 KOREN = Path(__file__).resolve().parents[1]
 VZOR = KOREN / "reporty" / "vystupy" / "F__CZ051__2026-09-15"
@@ -141,3 +141,74 @@ class TestDetektor(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _vysledek_trend(obor_uz, obor_cr, ost_uz=None, ost_cr=None, typ="KRAJ", kod="CZ051") -> dict:
+    """Minimální výstup s mírou zániku PO oboru (T18) a ostatních oborů (T30) za roky 2023–2025."""
+    nazev = {"CZ051": "Liberecký kraj", "CZ": "Česko"}
+
+    def radky(hodnoty, uzemi, skupina=None):
+        out = []
+        for rok, h in zip((2023, 2024, 2025), hodnoty):
+            r = {"popis": f"{nazev[uzemi]} – {rok}", "typ": "polozka", "uzemi": uzemi, "rok": rok,
+                 "hodnoty": {"mira": h, "mira_obd": None}}
+            if skupina:
+                r["popis"] = ("Obor – " if skupina == "obor" else "Ostatní obory – ") + r["popis"]
+                r["skupina"] = skupina
+            out.append(r)
+        return out
+
+    tabulky = [{"kod": "T18_mira_zaniku_po", "zverejneno": True, "obdobi": "1. 1.–15. 10.",
+                "radky": radky(obor_uz, kod) + (radky(obor_cr, "CZ") if kod != "CZ" else [])}]
+    if ost_uz is not None:
+        tabulky.append({"kod": "T30_mira_zaniku_ostatni", "zverejneno": True,
+                        "radky": radky(ost_uz, kod, "ostatni") + (radky(ost_cr, "CZ", "ostatni") if kod != "CZ" else [])})
+    return {"meta": {"uzemi": {"typ": typ, "kod": kod, "nazev": nazev[kod], "kraj": kod if typ == "KRAJ" else None},
+                     "obor": [{"kod": "F"}]}, "tabulky": tabulky}
+
+
+class TestJevUzemi(unittest.TestCase):
+    """Pravidlo jev_uzemi: změna trendu oboru, kterou ostatní obory území zopakují stejným směrem
+    a srovnatelně, je jev celého kraje – nižší síla, věta v popisu, stálé ID beze změny."""
+
+    OBOR_UZ, OBOR_CR = (2.0, 2.0, 6.0), (2.5, 2.5, 2.5)
+
+    def test_skok_celeho_kraje(self):
+        bez = {z["id"]: z for z in detekuj(_vysledek_trend(self.OBOR_UZ, self.OBOR_CR))}
+        s = {z["id"]: z for z in detekuj(_vysledek_trend(self.OBOR_UZ, self.OBOR_CR, (2.0, 2.0, 5.0), (2.5, 2.5, 2.5)))}
+        self.assertEqual(set(bez), set(s))                      # čísla ostatních oborů ID nemění
+        self.assertEqual(len(s), 3)
+        for i, z in s.items():
+            self.assertTrue(z["jev_uzemi"], z["podtyp"])
+            self.assertEqual(z["sila_puvodni"], bez[i]["sila"])
+            self.assertLess(z["sila"], z["sila_puvodni"])
+            self.assertTrue(z["popis"].endswith("– jev celého kraje, ne oboru."), z["popis"])
+            self.assertTrue(any(c.get("ucel") == "jev_uzemi" for c in z["cisla"]))
+        proti_cr = next(z for z in s.values() if z["podtyp"] == "míra zániku PO za rok: proti ČR")
+        self.assertAlmostEqual(proti_cr["sila"], round(abs((6.0 / 2.5) / (5.0 / 2.5) - 1), 4))   # 0,2
+        serazena = detekuj(_vysledek_trend(self.OBOR_UZ, self.OBOR_CR, (2.0, 2.0, 5.0), (2.5, 2.5, 2.5)))
+        self.assertEqual([z["sila"] for z in serazena], sorted((z["sila"] for z in serazena), reverse=True))
+
+    def test_ostatni_obory_beze_zmeny_jev_oboru(self):
+        for z in detekuj(_vysledek_trend(self.OBOR_UZ, self.OBOR_CR, (2.0, 2.0, 2.04), (2.5, 2.5, 2.5))):
+            self.assertNotIn("jev_uzemi", z)
+            self.assertFalse(z["ostatni"]["srovnatelne"])
+            self.assertNotIn("jev celého", z["popis"])
+
+    def test_hranice_poloviny_a_smeru(self):
+        # obor +200 % proti průměru; ostatní +100 % (= polovina) je jev kraje, +90 % už ne, opačný směr ne
+        for ost, ocekavano in ((4.0, True), (3.8, False), (1.5, False)):
+            z = next(z for z in detekuj(_vysledek_trend(self.OBOR_UZ, self.OBOR_CR, (2.0, 2.0, ost), (2.0, 2.0, ost)))
+                     if z["podtyp"] == "míra zániku PO za rok: poslední rok proti předchozím")
+            self.assertEqual(z.get("jev_uzemi", False), ocekavano, ost)
+        self.assertEqual(PODIL_JEVU_UZEMI, 0.5)
+
+    def test_sila_se_nikdy_nezvysi(self):
+        # ostatní obory se posunuly mnohem víc než obor: jev kraje, síla nejvýš původní
+        for z in detekuj(_vysledek_trend((2.0, 2.0, 2.4), self.OBOR_CR, (2.0, 2.0, 8.0), (2.5, 2.5, 2.5))):
+            if z.get("jev_uzemi"):
+                self.assertLessEqual(z["sila"], z["sila_puvodni"])
+
+    def test_okres_a_cr_maji_vlastni_vetu(self):
+        z = detekuj(_vysledek_trend(self.OBOR_UZ, self.OBOR_CR, (2.0, 2.0, 5.0), (2.0, 2.0, 5.0), typ="CR", kod="CZ"))
+        self.assertTrue(z and all(x["popis"].endswith("– jev všech oborů v Česku, ne oboru.") for x in z))

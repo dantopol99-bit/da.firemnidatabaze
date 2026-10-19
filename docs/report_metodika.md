@@ -176,6 +176,8 @@ T10 zaniklé PO z RES od 2023, T11 vznik a zánik v území podle ČSÚ (RES05),
   okno 4 let 2023–2026, protože RES uchovává zaniklé subjekty jen 4 roky po zániku (nejstarší zánik ve
   snímku k 15. 9. 2026 je 1. 10. 2022, rok 2023 je tedy úplný); obor a sídlo podle snímku, jejich
   změny v čase se nepromítají.
+- Stejnou funkcí (`dynamika_agregat`) se počítají i zániky podle způsobu zániku (T29) a míra zániku
+  ostatních oborů území a ČR (T30), viz oddíl [Jev oboru, nebo jev celého území](#jev-oboru-nebo-jev-celého-území-t29-t30-pravidlo-jev_uzemi).
 
 ## Detektor zjištění (T19, `zjisteni.json`)
 
@@ -184,7 +186,7 @@ Pracuje jen se zveřejněnými čísly tabulek. Typy:
 | typ | co srovnává | tabulky |
 |---|---|---|
 | `odchylka_od_cr` | LQ proti 1, hustota proti ČR, každá položka struktury proti ČR | T02, T13–T17 |
-| `zmena_trendu` | míra zániku PO posledního roku proti průměru předchozích let (za rok i za srovnatelné období), proti ČR, a vývoj (index poslední/první rok) proti ČR | T18 |
+| `zmena_trendu` | míra zániku PO posledního roku proti průměru předchozích let (za rok i za srovnatelné období), proti ČR, a vývoj (index poslední/první rok) proti ČR; každé zjištění se porovná s ostatními obory území (pravidlo `jev_uzemi`) | T18, T30 |
 | `rozdily_uvnitr_uzemi` | hustota okresů proti kraji a proti ČR, rozpětí mezi okresy | T04, T02 |
 | `aktivita_oboru` | podíl se zjištěnou aktivitou v sekci proti všem oborům kraje (ČSÚ) | T01 |
 | `divergence_poradi` | pořadí podle počtu proti pořadí podle hustoty (kraj mezi 14 kraji, okresy v kraji) | T01, T04 |
@@ -224,13 +226,119 @@ jen jako agregáty a s pravidlem 3 (počty pod 10 se neuvádějí ani tam, kde b
    (dataor.justice.cz, úplné výpisy za rok zániku) – jen interně; ARES vymazané subjekty nevrací.
 5. **Způsob zániku.** Rozdělit zániky podle ZPZAN (likvidace, bez likvidace bez nástupců, přeměny,
    ostatní) v území a v ČR, za poslední rok i předchozí roky; u území doplnit právní důvod výmazu z OR
-   (zrušení soudem, likvidace, konkurs, přeměna). Přeměny nejsou ukončení podnikání.
+   (zrušení soudem, likvidace, konkurs, přeměna). Přeměny nejsou ukončení podnikání. Část z RES je
+   od 19. 10. 2026 přímo v reportu (T29); právní důvod z OR zůstává jen v interním ověření.
 6. **Obor, nebo celé území.** Srovnat míru v oboru s ostatními obory téhož území a se zbytkem ČR,
    i bez nejčastějšího způsobu zániku. Skok napříč obory ukazuje na příčinu v území (např. postup
-   rejstříkového soudu), ne v oboru.
+   rejstříkového soudu), ne v oboru. Report to od 19. 10. 2026 počítá sám (T30, pravidlo `jev_uzemi`);
+   ověření jen potvrdí příčinu.
 
 Závěr ověření je jeden z: **skutečné zániky / artefakt / shluk / kombinace**, s příčinou. Pokud ověření
 mění závěr kapitoly nebo bod shrnutí, analytik upraví svůj text; stroj ho neupravuje.
+
+## Jev oboru, nebo jev celého území (T29, T30, pravidlo `jev_uzemi`)
+
+Zavedeno 19. 10. 2026 po ověření pilotu ([`overeni-zaniku-F-CZ051.md`](overeni-zaniku-F-CZ051.md)):
+skok míry zániku PO ve stavebnictví Libereckého kraje v roce 2025 byl skutečný, ale nebyl jevem oboru.
+Rejstříkový soud v tom roce vymazal velké množství nečinných společností **všech oborů** kraje. Report
+to teď rozpozná sám a ukáže to čísly z RES. Údaje obchodního rejstříku (dataor.justice.cz, osoby, právní
+důvod výmazu) do reportu nevstupují. Zůstávají jen podkladem interního ověření podle předchozího oddílu.
+
+### Způsob zániku z RES (T29)
+
+- **Zdroj**: atribut ZPZAN otevřených dat RES (číselník ČSÚ 572), u každého zaniklého subjektu.
+  U PO od roku 2023 se vyskytují kódy 01 (likvidace), 02 a 03 (zrušení bez likvidace s nástupcem, tj.
+  přeměna), **04 (zrušení bez likvidace bez nástupců)**, 00 (nezjištěno) a ojediněle 05, 10, 11.
+- **Kategorie reportu**: 04; 01 likvidace; jiný způsob (02, 03 a ostatní kódy). Kód 04 zahrnuje i výmaz
+  společnosti soudem bez likvidace (§ 105a zákona č. 304/2013 Sb.), tedy typicky správní úklid rejstříku
+  od nečinných společností. Vysoký a rostoucí podíl kódu 04 v celém území je proto signálem postupu
+  rejstříkového soudu, ne zhoršení oboru. Report to ale netvrdí: popisuje jen čísla, příčinu píše analytik.
+- **T29**: zaniklé PO oboru v území a v ČR za roky 2023 až rok snímku (poslední rok do data snímku):
+  celkem, 04, ostatní způsoby celkem, z toho 01 a jiný způsob, podíl 04 (%).
+- **Pravidlo 3**: dělení na 04 a ostatní způsoby se zveřejní, jen jsou-li obě části aspoň 10 a celkový
+  počet je zveřejněný. Ostatní způsoby se dělí na 01 a jiný jen, jsou-li na prahu obě části. Jinak:
+  - je-li pod prahem počet bez kódu 04, uvede se jen dolní mez podílu „aspoň X %“, kde X = (celkem − 9) / celkem
+    zaokrouhleno dolů na celá procenta;
+  - je-li pod prahem počet s kódem 04, uvede se horní mez „nejvýš X %“, kde X = 9 / celkem zaokrouhleno nahoru;
+  - jsou-li pod prahem obě části, neuvede se nic.
+  Pásmo prozradí jen to, že část je pod prahem, ne její hodnotu.
+- Pro srovnatelné období (1. 1. až den snímku) se registruje stejné dělení. Zveřejní se, jen jsou-li
+  na prahu obě části za období. Je-li zveřejněné i dělení za celý rok, musí být na prahu i obě části ve
+  zbytku roku, jinak by šly dopočítat odečtem. Všechny vztahy jsou v interní kontrole dopočtu jako
+  rovnice: celkem = 04 + ostatní; ostatní = 01 + jiný; rok = období + zbytek roku, pro obě části.
+
+### Míra zániku bez kódu 04 a ostatní obory (T30, graf)
+
+- **Ostatní obory území** = všechny PO se sídlem v území a s určeným oborem CZ-NACE 2025 (automatické
+  spojení, ne pseudokód) mimo zkoumaný obor. Subjekty s neurčeným oborem nebo zařazené jen do vyšší
+  úrovně nejsou ani v oboru, ani v ostatních oborech. U okresu jde o ostatní obory okresu, u ČR o ostatní
+  obory ČR.
+- **Stejná metoda jako T18**: stav PO k 1. 1. rekonstruovaný ze snímku, míra za rok a za srovnatelné
+  období. Platí stejná identita stav(Y+1) = stav(Y) − zániky + vzniky a stejná ochrana stavů, zániků
+  a vzniků. Ostatní obory mají vlastní proměnné s předponou `ost:`.
+- **Míra bez kódu 04** = zániky jiným způsobem než 04 / tentýž stav k 1. 1. × 100, pro obor i ostatní
+  obory, za rok i za období. Je-li počet bez kódu 04 pod prahem, uvede se pásmo „pod X %“, kde
+  X = 10 / stav × 100 zaokrouhleno nahoru na 0,1. Pilot: počet bez kódu 04 je ve stavebnictví kraje
+  v letech 2024 a 2025 pod prahem, proto „pod 0,6 %“.
+- T30 má řádky obor a ostatní obory, každé pro území a ČR. Graf ukazuje míru za rok celkem a bez
+  kódu 04 pro všechny čtyři řady. Hodnota v pásmu je v grafu mezera.
+- **Kapitola Dynamika** (strojová část) k tomu přidává:
+  - podíl kódu 04 v území a v ČR;
+  - míru bez kódu 04 pro obor;
+  - míru ostatních oborů celkem a bez kódu 04;
+  - větu se seznamem zjištění, která jsou jevem celého území.
+
+### Pravidlo `jev_uzemi` v detektoru (pro všechny reporty)
+
+U každého zjištění typu `zmena_trendu` spočítá detektor tutéž změnu pro ostatní obory území (z T30):
+
+| zjištění oboru | tatáž změna ostatních oborů |
+|---|---|
+| míra posledního roku proti průměru předchozích let (za rok, za období) | míra ostatních oborů území v posledním roce proti průměru týchž let |
+| míra proti ČR (za rok, za období) | míra ostatních oborů území proti ostatním oborům ČR |
+| vývoj proti ČR (index poslední / první rok) | index ostatních oborů území proti indexu ostatních oborů ČR |
+
+Označme r_obor = hodnota / srovnání − 1 u oboru a r_ost totéž u ostatních oborů. Ostatní obory se
+posunuly **stejným směrem a srovnatelně**, když platí všechny tři podmínky:
+
+1. r_ost má stejné znaménko jako r_obor (stejný směr);
+2. |r_ost| ≥ 3 % – změna ostatních oborů by sama byla zjištěním (stejný práh jako u všech zjištění);
+3. |r_ost| ≥ 0,5 × |r_obor| – ostatní obory zopakují aspoň polovinu relativní změny oboru.
+
+Pak zjištění dostane příznak `jev_uzemi` a popis se doplní větou o ostatních oborech zakončenou „jev
+celého kraje, ne oboru“ (u okresu „jev celého okresu, ne oboru“, u ČR „jev všech oborů v Česku, ne oboru“).
+**Síla se sníží** na vlastní část oboru |(1 + r_obor) / (1 + r_ost) − 1|, nejvýš na původní sílu. Původní
+síla je ve sloupci „Síla před snížením“ T19 a v poli `sila_puvodni` zjištění.
+
+**Proč tato hranice:**
+
+- **Polovina relativní změny** odděluje případy, kde většinu signálu nese území, od případů, kde ji nese
+  obor. Při nižší hranici (např. čtvrtina) by se jako jev území označily i zjištění oboru jen proto, že
+  se celé území mírně posunulo. Při vyšší hranici (např. 0,8 nebo 1) by se přehlédl celoplošný skok,
+  který obor jen o něco zesiluje.
+- O zesílení oboru se nepřichází: zůstane v nové síle jako poměr změny oboru a změny ostatních oborů.
+  Ten má stejnou (relativní) stupnici jako síla ostatních zjištění, takže se zjištění dál řadí společně.
+- **Práh 3 %** pro ostatní obory zabrání tomu, aby nevýrazný pohyb celého území snižoval sílu.
+- Síla se jen snižuje, nikdy nezvyšuje. Kdyby se ostatní obory posunuly mnohem víc než obor, nevznikne
+  tím silnější zjištění oboru.
+
+**Pilot (F × Liberecký kraj):**
+
+| zjištění | r_obor | r_ost | r_ost / r_obor | síla původní → nová |
+|---|---|---|---|---|
+| ZTR-IMTV vývoj 2023–2025 proti ČR | 1,79 | 1,33 | 0,74 | 1,79 → 0,20 |
+| ZTR-CISP rok 2025 proti 2023–2024 | 1,39 | 1,28 | 0,92 | 1,39 → 0,05 |
+| ZTR-LQXC rok 2025 proti ČR | 1,26 | 0,80 | 0,64 | 1,26 → 0,25 |
+| ZTR-HJID období 2026 proti ČR | 0,81 | 0,45 | 0,56 | 0,81 → 0,25 |
+
+Protipříklad: F × Ústecký kraj, míra 2025 proti ČR. Obor je o 77 % výš, ostatní obory kraje jen o 15 %
+(poměr 0,20), takže zjištění zůstává zjištěním oboru se silou 0,77.
+
+**Shrnutí:** zjištění s příznakem `jev_uzemi` se ve shrnutí neuvádí jako samostatné zjištění oboru.
+Body shrnutí píše analytik, a pokyn je proto v šabloně výkladu. Stroj pod body shrnutí přidá
+poznámku se seznamem těchto zjištění a odkazem na T30 a graf. V kapitole a v příloze zůstávají
+s novou silou. Stálé ID se nemění: čísla ostatních oborů nesou v `cisla` značku `ucel: jev_uzemi`
+a do otisku ID se nepočítají.
 
 ## Ochrana malých buněk – přesný postup
 
@@ -439,6 +547,7 @@ tříd; podíl aktivních jen souhrnně za sekci a kraj; celostátní poměry pl
 | `DYN_OBOR_CSU` vznik a zánik v oboru × území | ČSÚ tabulku nepublikuje (viz výše) |
 | `ZANIK_PO_RES` jen částečně | zaniklé FO mají v otevřených datech jen IČO a datum zániku (GDPR), nejde je přiřadit oboru ani území; zaniklé starší 4 let v RES nejsou |
 | `MIRA_ZANIKU_PO`, `MIRA_ZANIKU_PO_OBD` jen částečně | jen PO a jen okno 2023–2026; u menších území je část let skrytá pravidlem prahu a dopočtu |
+| `ZANIK_PO_ZPUSOB`, `PODIL_ZANIKU_04`, `MIRA_ZANIKU_PO_BEZ04` jen částečně | jen PO; dělení podle způsobu zániku a míra bez kódu 04 jsou u menších počtů jen pásmem nebo skryté |
 | `DYN_VZNIK_CSU`, `DYN_ZANIK_CSU` jen částečně | jen celé území, ne obor; poslední rok neúplný |
 | `AKTIVNI_PODIL_SEKCE_KRAJ` jen částečně | jen je-li obor přesně jedna sekce publikovaná samostatně (ne B, C, D, E ani oddíl) |
 | `AKTIVNI_PODIL_KRAJ` za okres | ČSÚ podíl aktivity za okres podle převažující činnosti nepublikuje, uvádí se krajský |

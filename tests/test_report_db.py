@@ -260,6 +260,84 @@ class TestReport(unittest.TestCase):
         self.assertEqual(cr2024["hodnoty"]["stav"], stav)
         self.assertTrue(any("Omezení" in p and "4 roky" in p for p in t18["poznamky"]))
 
+    def test_zaniky_podle_zpusobu(self):
+        """T29: části dávají celek, zveřejněné počty jsou na prahu, pásmo jen tam, kde je část pod prahem;
+        ČR 2025 odpovídá nezávislému dotazu do RES."""
+        for klic in ("F_LBK", "41_42_CR", "62_JES"):
+            vysledek, _, _ = self.vystupy[klic]
+            t29 = tabulka(vysledek, "T29_zaniky_zpusob")
+            for r in t29["radky"]:
+                h = r["hodnoty"]
+                if h["k04"] is not None:
+                    self.assertEqual(h["k04"] + h["bez04"], h["celkem"], r["popis"])
+                    self.assertGreaterEqual(min(h["k04"], h["bez04"]), 10)
+                    self.assertEqual(h["podil04"], round(100 * h["k04"] / h["celkem"], 1))
+                else:
+                    self.assertIsNone(h["bez04"])
+                    if h["podil04"] is not None:
+                        self.assertRegex(h["podil04"], r"^(aspoň|nejvýš) \d+ %$")
+                if h["k01"] is not None:
+                    self.assertEqual(h["k01"] + h["jiny"], h["bez04"])
+                    self.assertGreaterEqual(min(h["k01"], h["jiny"]), 10)
+                else:
+                    self.assertIsNone(h["jiny"])
+        vysledek, _, _ = self.vystupy["F_LBK"]
+        cr = next(r for r in tabulka(vysledek, "T29_zaniky_zpusob")["radky"] if r["uzemi"] == "CZ" and r["rok"] == 2025)
+        with CONN.cursor() as cur:
+            cur.execute("SELECT count(*) FILTER (WHERE s.zpzan = '04'), count(*) FILTER (WHERE s.zpzan = '01'), count(*) "
+                        "FROM res.subjekt s JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+                        "WHERE s.datum_snimku = res.posledni_snimek() AND n.sekce = 'F' AND n.automaticke_spojeni "
+                        "AND NOT n.je_pseudokod AND s.forma IS NOT NULL AND NOT (s.forma = ANY(%s)) "
+                        "AND extract(year FROM s.ddatzan) = 2025", (sorted(FO_FORMY),))
+            k04, k01, celkem = cur.fetchone()
+        CONN.rollback()
+        self.assertEqual((cr["hodnoty"]["k04"], cr["hodnoty"]["k01"], cr["hodnoty"]["celkem"]), (k04, k01, celkem))
+
+    def test_mira_zaniku_ostatnich_oboru(self):
+        """T30: řádky oboru odpovídají T18, ostatní obory jsou spočítané stejnou metodou (stav ČR k 1. 1. 2024
+        nezávislým dotazem), pásmo „pod X %“ jen u míry bez kódu 04."""
+        vysledek, _, _ = self.vystupy["F_LBK"]
+        t18 = {(r["uzemi"], r["rok"]): r["hodnoty"] for r in tabulka(vysledek, "T18_mira_zaniku_po")["radky"]}
+        t30 = tabulka(vysledek, "T30_mira_zaniku_ostatni")["radky"]
+        self.assertEqual({(r["skupina"], r["uzemi"]) for r in t30},
+                         {("obor", "CZ051"), ("ostatni", "CZ051"), ("obor", "CZ"), ("ostatni", "CZ")})
+        for r in t30:
+            h = r["hodnoty"]
+            if r["skupina"] == "obor":
+                for sl in ("stav", "mira", "mira_obd"):
+                    self.assertEqual(h[sl], t18[(r["uzemi"], r["rok"])][sl], (r["popis"], sl))
+            for sl in ("mira", "mira_obd", "stav"):
+                self.assertNotIsInstance(h[sl], str)
+            for sl in ("mira_bez04", "mira_obd_bez04"):
+                if isinstance(h[sl], str):
+                    self.assertRegex(h[sl], r"^pod \d+(,\d)? %$")
+                elif h[sl] is not None and h["mira" if sl == "mira_bez04" else "mira_obd"] is not None:
+                    self.assertLessEqual(h[sl], h["mira" if sl == "mira_bez04" else "mira_obd"])
+        with CONN.cursor() as cur:
+            cur.execute("SELECT count(*) FROM res.subjekt s JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+                        "WHERE s.datum_snimku = res.posledni_snimek() AND n.automaticke_spojeni AND NOT n.je_pseudokod "
+                        "AND n.sekce IS DISTINCT FROM 'F' AND NOT (coalesce(s.forma, '') = ANY(%s)) "
+                        "AND s.ddatvzn < '2024-01-01' AND (s.ddatzan IS NULL OR s.ddatzan >= '2024-01-01') "
+                        "AND (s.ddatzan IS NULL OR s.forma IS NOT NULL)", (sorted(FO_FORMY),))
+            stav = cur.fetchone()[0]
+        CONN.rollback()
+        ost_cr = next(r for r in t30 if r["skupina"] == "ostatni" and r["uzemi"] == "CZ" and r["rok"] == 2024)
+        self.assertEqual(ost_cr["hodnoty"]["stav"], stav)
+
+    def test_jev_kraje_v_pilotu(self):
+        """Pilot: skok míry zániku stavebnictví v Libereckém kraji je jev celého kraje – všechna zjištění
+        změny trendu proti ČR mají příznak, nižší sílu a stálá ID jako dřív (odkazy v textu analytika)."""
+        vysledek, _, _ = self.vystupy["F_LBK"]
+        z = {x["id"]: x for x in vysledek["zjisteni"] if x["typ"] == "zmena_trendu"}
+        for i in ("ZTR-IMTV", "ZTR-CISP", "ZTR-LQXC", "ZTR-HJID"):
+            self.assertTrue(z[i].get("jev_uzemi"), i)
+            self.assertLess(z[i]["sila"], z[i]["sila_puvodni"])
+            self.assertIn("jev celého kraje, ne oboru", z[i]["popis"])
+        self.assertLess(max(x["sila"] for x in z.values()), 1)
+        t19 = {r["id"]: r["hodnoty"] for r in tabulka(vysledek, "T19_zjisteni")["radky"]}
+        self.assertEqual(t19["ZTR-LQXC"]["jev"], "území")
+        self.assertEqual(t19["ZTR-LQXC"]["sila_puvodni"], z["ZTR-LQXC"]["sila_puvodni"])
+
     def test_zjisteni(self):
         vysledek, _, adresar = self.vystupy["F_LBK"]
         z = vysledek["zjisteni"]

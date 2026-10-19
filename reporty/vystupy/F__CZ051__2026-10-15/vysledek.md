@@ -424,6 +424,47 @@ Stav k 2026-10-15. Populace: registrované ekonomické subjekty bez data zániku
 > Rok 2026 je neúplný (snímek k 15. 10. 2026); pro srovnání se proto počítá i srovnatelné období 1. 1.–15. 10. každého roku.
 > Omezení: jen právnické osoby – zaniklé FO mají v otevřených datech jen IČO a datum zániku. Okno 4 let (2023–2026): RES uchovává zaniklé subjekty jen 4 roky po zániku. Obor a sídlo jsou podle snímku (u zaniklých poslední známé), jejich změny v čase se nepromítají.
 
+## T29_zaniky_zpusob: Zaniklé právnické osoby v oboru podle způsobu zániku (RES, 2023–2026)
+
+| Položka | Zaniklé PO celkem | Zrušení bez likvidace bez nástupců (04) | Ostatní způsoby celkem | z toho likvidace (01) | z toho jiný způsob | Podíl kódu 04 (%) | Poznámka |
+|---|---|---|---|---|---|---|---|
+| Liberecký kraj – 2023 | 35 | 25 | 10 | – | – | 71,4 | likvidace a jiný způsob jen společně (pod prahem) |
+| Liberecký kraj – 2024 | 49 | – | – | – | – | aspoň 81 % | způsoby jen jako pásmo podílu (pod prahem) |
+| Liberecký kraj – 2025 | 103 | – | – | – | – | aspoň 91 % | způsoby jen jako pásmo podílu (pod prahem) |
+| Liberecký kraj – 2026 | 62 | – | – | – | – | aspoň 85 % | neúplný rok – do data snímku; způsoby jen jako pásmo podílu (pod prahem) |
+| Česko – 2023 | 1 319 | 366 | 953 | 909 | 44 | 27,7 |  |
+| Česko – 2024 | 1 373 | 513 | 860 | 820 | 40 | 37,4 |  |
+| Česko – 2025 | 1 429 | 625 | 804 | 749 | 55 | 43,7 |  |
+| Česko – 2026 | 1 142 | 514 | 628 | 573 | 55 | 45 | neúplný rok – do data snímku |
+
+> Způsob zániku podle RES (číselník 572, ZPZAN). Kód 04 = zrušení právnické osoby bez likvidace bez nástupců; zahrnuje i výmaz společnosti rejstříkovým soudem bez likvidace. Jiný způsob = přeměna (02, 03) a ostatní kódy včetně nezjištěného.
+> Pomlčka = skryto: počet pod prahem nebo by z něj šel dopočítat jiný skrytý počet. Pásmo podílu („aspoň“, „nejvýš“) se uvádí místo přesného podílu, když je jedna z částí pod prahem.
+
+## T30_mira_zaniku_ostatni: Míra zániku právnických osob – obor a všechny ostatní obory, celkem a bez kódu 04 (RES)
+
+| Položka | Stav PO k 1. 1. | Míra zániku za rok (%) | Za rok bez kódu 04 (%) | Míra zániku 1. 1.–15. 10. (%) | 1. 1.–15. 10. bez kódu 04 (%) | Poznámka |
+|---|---|---|---|---|---|---|
+| Obor – Liberecký kraj – 2023 | 1 663 | 2,1 | 0,6 | – | pod 0,7 % | část skryta (práh, dopočet); bez kódu 04 pod prahem – jen pásmo |
+| Obor – Liberecký kraj – 2024 | 1 720 | 2,85 | pod 0,6 % | 2,21 | pod 0,6 % | bez kódu 04 pod prahem – jen pásmo |
+| Obor – Liberecký kraj – 2025 | 1 739 | 5,92 | pod 0,6 % | 5,12 | pod 0,6 % | bez kódu 04 pod prahem – jen pásmo |
+| Obor – Liberecký kraj – 2026 | 1 704 | – | – | 3,64 | pod 0,6 % | neúplný rok – jen srovnatelné období; bez kódu 04 pod prahem – jen pásmo |
+| Ostatní obory – Liberecký kraj – 2023 | 22 946 | 1,94 | 0,8 | 1,52 | 0,59 |  |
+| Ostatní obory – Liberecký kraj – 2024 | 23 148 | 2,28 | 0,79 | 1,74 | 0,57 |  |
+| Ostatní obory – Liberecký kraj – 2025 | 23 305 | 4,8 | 0,89 | 3,91 | 0,67 |  |
+| Ostatní obory – Liberecký kraj – 2026 | 22 870 | – | – | 2,86 | 0,58 | neúplný rok – jen srovnatelné období |
+| Obor – Česko – 2023 | 50 946 | 2,59 | 1,87 | 2,02 | 1,48 |  |
+| Obor – Česko – 2024 | 52 622 | 2,61 | 1,63 | 1,99 | 1,28 |  |
+| Obor – Česko – 2025 | 54 450 | 2,62 | 1,48 | 2,07 | 1,13 |  |
+| Obor – Česko – 2026 | 56 779 | – | – | 2,01 | 1,11 | neúplný rok – jen srovnatelné období |
+| Ostatní obory – Česko – 2023 | 757 945 | 2,51 | 1,92 | 1,95 | 1,49 |  |
+| Ostatní obory – Česko – 2024 | 768 507 | 2,45 | 1,79 | 1,88 | 1,38 |  |
+| Ostatní obory – Česko – 2025 | 779 504 | 2,66 | 1,86 | 2,12 | 1,46 |  |
+| Ostatní obory – Česko – 2026 | 790 826 | – | – | 1,97 | 1,4 | neúplný rok – jen srovnatelné období |
+
+> Ostatní obory = všechny právnické osoby území s určeným oborem (CZ-NACE 2025) mimo zkoumaný obor; míra se počítá stejnou metodou jako míra zániku oboru (T18): zaniklé PO v roce / stav PO k 1. 1.
+> Bez kódu 04 = zániky jiným způsobem než zrušením bez likvidace bez nástupců (ZPZAN 04), vztažené ke stejnému stavu PO k 1. 1.
+> Pásmo „pod X %“ = počet zániků bez kódu 04 je pod prahem; X je práh dělený stavem PO.
+
 ## T11_dynamika_csu: Vznik a zánik ekonomických subjektů v území – všechny obory (ČSÚ, RES05)
 
 | Položka | FO | PO | Celkem | Poznámka |
@@ -458,40 +499,41 @@ Stav k 2026-10-15. Populace: registrované ekonomické subjekty bez data zániku
 
 ## T19_zjisteni: Zjištění detektoru (seřazeno podle síly)
 
-| Položka | Zjištění | Typ zjištění | Síla | Hodnota | Srovnání | Relativní rozdíl (%) | Poznámka |
-|---|---|---|---|---|---|---|---|
-| Míra zániku PO v oboru se mezi lety 2023 a 2025 změnila v Libereckém kraji z 2,1 % na 5,92 % (index 2,82), v Česku z 2,59 % na 2,62 % (index 1,01); index je relativně o 179,2 % vyšší než v Česku. | ZTR-IMTV | změna trendu | 1,79 | 2,82 | 1,01 | 179,2 |  |
-| Míra zániku PO v oboru za rok 2025 je v Libereckém kraji 5,92 %, průměr let 2023–2024 je 2,48 % (relativně o 138,7 % vyšší). | ZTR-CISP | změna trendu | 1,39 | 5,92 | 2,48 | 138,7 |  |
-| Míra zániku PO v oboru za rok 2025 je v Libereckém kraji 5,92 %, v Česku 2,62 % (relativně o 126 % vyšší). | ZTR-LQXC | změna trendu | 1,26 | 5,92 | 2,62 | 126 |  |
-| Kraj je mezi 14 kraji 13. podle počtu registrovaných subjektů oboru a 2. podle hustoty na 1 000 obyvatel. | ZPO-QDHA | divergence pořadí | 0,85 | 13 | 2 | – |  |
-| Míra zániku PO v oboru za období 1. 1.–15. 10. 2026 je v Libereckém kraji 3,64 %, v Česku 2,01 % (relativně o 81,1 % vyšší). | ZTR-HJID | změna trendu | 0,81 | 3,64 | 2,01 | 81,1 |  |
-| Nejvyšší hustotu oboru mezi okresy kraje má okres Jablonec nad Nisou (36,09 na 1 000 obyvatel), nejnižší okres Česká Lípa (25,76); hustota v okrese Jablonec nad Nisou je relativně o 40,1 % vyšší než v okrese Česká Lípa. | ZUZ-EGWN | rozdíly uvnitř území | 0,4 | 36,09 | 25,76 | 40,1 |  |
-| Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,6 %, v Česku 17,3 % (relativně o 32,9 % nižší). | ZOD-SXHQ | odchylka od ČR | 0,33 | 11,6 | 17,3 | 32,9 |  |
-| Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11 %, v Česku 16,4 % (relativně o 32,9 % nižší). | ZOD-SRRX | odchylka od ČR | 0,33 | 11 | 16,4 | 32,9 |  |
-| Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 19,5 %, v Česku 15,6 % (relativně o 25 % vyšší). | ZOD-CAID | odchylka od ČR | 0,25 | 19,5 | 15,6 | 25 |  |
-| Na 1 000 obyvatel připadá v okrese Česká Lípa 25,76 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 21,9 % nižší). | ZUZ-OWLP | rozdíly uvnitř území | 0,22 | 25,76 | 32,99 | 21,9 |  |
-| Lokalizační koeficient oboru je v Libereckém kraji 1,2 proti 1 za ČR (relativně o 20 % vyšší). | ZOD-PUOD | odchylka od ČR | 0,2 | 1,2 | 1 | 20 |  |
-| Věk subjektu – „méně než 3 roky“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,4 %, v Česku 14 % (relativně o 18,6 % nižší). | ZOD-YZQO | odchylka od ČR | 0,19 | 11,4 | 14 | 18,6 |  |
-| Na 1 000 obyvatel připadá v okrese Česká Lípa 25,76 registrovaných subjektů oboru, v Česku 31,15 (relativně o 17,3 % nižší). | ZUZ-ADGK | rozdíly uvnitř území | 0,17 | 25,76 | 31,15 | 17,3 |  |
-| Sekce F tvořila v roce 2022 v Libereckém kraji 4,44 % zaměstnanců (přepočtené počty), v Česku 5,33 % (relativně o 16,7 % nižší). | ZMZ-ULLF | mzdy a zaměstnanost | 0,17 | 4,44 | 5,33 | 16,7 |  |
-| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,09 registrovaných subjektů oboru, v Česku 31,15 (relativně o 15,9 % vyšší). | ZUZ-DHYT | rozdíly uvnitř území | 0,16 | 36,09 | 31,15 | 15,9 |  |
-| Na 1 000 obyvatel připadá v okrese Liberec 36,04 registrovaných subjektů oboru, v Česku 31,15 (relativně o 15,7 % vyšší). | ZUZ-OXBR | rozdíly uvnitř území | 0,16 | 36,04 | 31,15 | 15,7 |  |
-| Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,6 %, v Česku 39,1 % (relativně o 14,1 % vyšší). | ZOD-TOQY | odchylka od ČR | 0,14 | 44,6 | 39,1 | 14,1 |  |
-| Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,6 %, v Česku 50,1 % (relativně o 11 % nižší). | ZOD-NDPG | odchylka od ČR | 0,11 | 44,6 | 50,1 | 11 |  |
-| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,09 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší). | ZUZ-CLRE | rozdíly uvnitř území | 0,09 | 36,09 | 32,99 | 9,4 |  |
-| Na 1 000 obyvatel připadá v okrese Liberec 36,04 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,2 % vyšší). | ZUZ-HFUA | rozdíly uvnitř území | 0,09 | 36,04 | 32,99 | 9,2 |  |
-| Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 86,1 %, v Česku 79,2 % (relativně o 8,7 % vyšší). | ZOD-DWBZ | odchylka od ČR | 0,09 | 86,1 | 79,2 | 8,7 |  |
-| Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší). | ZOD-SMOT | odchylka od ČR | 0,08 | 22,1 | 23,9 | 7,5 |  |
-| Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,4 %, v Česku 82,7 % (relativně o 6,9 % vyšší). | ZOD-KHDN | odchylka od ČR | 0,07 | 88,4 | 82,7 | 6,9 |  |
-| Průměrná mzda v sekci F dosahovala v roce 2022 v Libereckém kraji 91,5 % průměrné mzdy všech odvětví kraje, v Česku 85,8 % (relativně o 6,6 % vyšší). | ZMZ-TZVU | mzdy a zaměstnanost | 0,07 | 91,5 | 85,8 | 6,6 |  |
-| Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,3 %, ve všech oborech 58,8 % (ČSÚ; relativně o 6 % vyšší). | ZAK-UMSL | aktivita oboru vůči kraji | 0,06 | 62,3 | 58,8 | 6 |  |
-| Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,15 (relativně o 5,9 % vyšší). | ZOD-YNST | odchylka od ČR | 0,06 | 32,99 | 31,15 | 5,9 |  |
-| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 10 %, v Česku 9,5 % (relativně o 5,3 % vyšší). | ZOD-JLNI | odchylka od ČR | 0,05 | 10 | 9,5 | 5,3 |  |
-| Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,4 %, v Česku 9,9 % (relativně o 5,1 % nižší). | ZOD-DKSF | odchylka od ČR | 0,05 | 9,4 | 9,9 | 5,1 |  |
-| Na 1 000 obyvatel připadá v okrese Semily 31,58 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,3 % nižší). | ZUZ-LRXD | rozdíly uvnitř území | 0,04 | 31,58 | 32,99 | 4,3 |  |
-| V sekci F se počet zaměstnanců mezi lety 2018 a 2022 změnil v Libereckém kraji z 6 tis. na 6,4 tis. (index 1,07), v Česku z 207,9 tis. na 214,9 tis. (index 1,03); index je relativně o 3,9 % vyšší než v Česku. | ZMZ-MXTD | mzdy a zaměstnanost | 0,04 | 1,07 | 1,03 | 3,9 |  |
-| Objem hrubé přidané hodnoty skupiny Stavebnictví (F) se mezi lety 2020 a 2024 změnil v Libereckém kraji na 89,8 % (rok 2020 = 100), v Česku na 93,1 % (relativně o 3,5 % nižší). | ZEK-YCEY | ekonomika | 0,04 | 89,8 | 93,1 | 3,5 |  |
-| Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší). | ZMZ-KWKY | mzdy a zaměstnanost | 0,03 | 33 623 | 34 840 | 3,5 |  |
-| Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,8 %, v Česku 44,3 % (relativně o 3,4 % vyšší). | ZOD-DHJV | odchylka od ČR | 0,03 | 45,8 | 44,3 | 3,4 |  |
+| Položka | Zjištění | Typ zjištění | Síla | Hodnota | Srovnání | Relativní rozdíl (%) | Jev oboru nebo území | Síla před snížením | Ostatní obory: hodnota | Ostatní obory: srovnání | Ostatní obory: relativní rozdíl (%) | Poznámka |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Kraj je mezi 14 kraji 13. podle počtu registrovaných subjektů oboru a 2. podle hustoty na 1 000 obyvatel. | ZPO-QDHA | divergence pořadí | 0,85 | 13 | 2 | – | – | – | – | – | – |  |
+| Nejvyšší hustotu oboru mezi okresy kraje má okres Jablonec nad Nisou (36,09 na 1 000 obyvatel), nejnižší okres Česká Lípa (25,76); hustota v okrese Jablonec nad Nisou je relativně o 40,1 % vyšší než v okrese Česká Lípa. | ZUZ-EGWN | rozdíly uvnitř území | 0,4 | 36,09 | 25,76 | 40,1 | – | – | – | – | – |  |
+| Typ osoby – „právnické osoby a ostatní (PO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,6 %, v Česku 17,3 % (relativně o 32,9 % nižší). | ZOD-SXHQ | odchylka od ČR | 0,33 | 11,6 | 17,3 | 32,9 | – | – | – | – | – |  |
+| Právní forma – „112 Společnost s ručením omezeným“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11 %, v Česku 16,4 % (relativně o 32,9 % nižší). | ZOD-SRRX | odchylka od ČR | 0,33 | 11 | 16,4 | 32,9 | – | – | – | – | – |  |
+| Míra zániku PO v oboru za rok 2025 je v Libereckém kraji 5,92 %, v Česku 2,62 % (relativně o 126 % vyšší). Ve všech ostatních oborech je míra zániku PO za rok 2025 v Libereckém kraji 4,8 %, v Česku 2,66 % (relativně o 80,5 % vyšší) – jev celého kraje, ne oboru. | ZTR-LQXC | změna trendu | 0,25 | 5,92 | 2,62 | 126 | území | 1,26 | 4,8 | 2,66 | 80,5 |  |
+| Věk subjektu – „31 a více let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 19,5 %, v Česku 15,6 % (relativně o 25 % vyšší). | ZOD-CAID | odchylka od ČR | 0,25 | 19,5 | 15,6 | 25 | – | – | – | – | – |  |
+| Míra zániku PO v oboru za období 1. 1.–15. 10. 2026 je v Libereckém kraji 3,64 %, v Česku 2,01 % (relativně o 81,1 % vyšší). Ve všech ostatních oborech je míra zániku PO za období 1. 1.–15. 10. 2026 v Libereckém kraji 2,86 %, v Česku 1,97 % (relativně o 45,2 % vyšší) – jev celého kraje, ne oboru. | ZTR-HJID | změna trendu | 0,25 | 3,64 | 2,01 | 81,1 | území | 0,81 | 2,86 | 1,97 | 45,2 |  |
+| Na 1 000 obyvatel připadá v okrese Česká Lípa 25,76 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 21,9 % nižší). | ZUZ-OWLP | rozdíly uvnitř území | 0,22 | 25,76 | 32,99 | 21,9 | – | – | – | – | – |  |
+| Lokalizační koeficient oboru je v Libereckém kraji 1,2 proti 1 za ČR (relativně o 20 % vyšší). | ZOD-PUOD | odchylka od ČR | 0,2 | 1,2 | 1 | 20 | – | – | – | – | – |  |
+| Míra zániku PO v oboru se mezi lety 2023 a 2025 změnila v Libereckém kraji z 2,1 % na 5,92 % (index 2,82), v Česku z 2,59 % na 2,62 % (index 1,01); index je relativně o 179,2 % vyšší než v Česku. Ve všech ostatních oborech se míra zániku PO mezi lety 2023 a 2025 změnila v Libereckém kraji s indexem 2,47, v Česku s indexem 1,06; index je relativně o 133 % vyšší než v Česku – jev celého kraje, ne oboru. | ZTR-IMTV | změna trendu | 0,2 | 2,82 | 1,01 | 179,2 | území | 1,79 | 2,47 | 1,06 | 133 |  |
+| Věk subjektu – „méně než 3 roky“: podíl na registrovaných subjektech oboru je v Libereckém kraji 11,4 %, v Česku 14 % (relativně o 18,6 % nižší). | ZOD-YZQO | odchylka od ČR | 0,19 | 11,4 | 14 | 18,6 | – | – | – | – | – |  |
+| Na 1 000 obyvatel připadá v okrese Česká Lípa 25,76 registrovaných subjektů oboru, v Česku 31,15 (relativně o 17,3 % nižší). | ZUZ-ADGK | rozdíly uvnitř území | 0,17 | 25,76 | 31,15 | 17,3 | – | – | – | – | – |  |
+| Sekce F tvořila v roce 2022 v Libereckém kraji 4,44 % zaměstnanců (přepočtené počty), v Česku 5,33 % (relativně o 16,7 % nižší). | ZMZ-ULLF | mzdy a zaměstnanost | 0,17 | 4,44 | 5,33 | 16,7 | – | – | – | – | – |  |
+| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,09 registrovaných subjektů oboru, v Česku 31,15 (relativně o 15,9 % vyšší). | ZUZ-DHYT | rozdíly uvnitř území | 0,16 | 36,09 | 31,15 | 15,9 | – | – | – | – | – |  |
+| Na 1 000 obyvatel připadá v okrese Liberec 36,04 registrovaných subjektů oboru, v Česku 31,15 (relativně o 15,7 % vyšší). | ZUZ-OXBR | rozdíly uvnitř území | 0,16 | 36,04 | 31,15 | 15,7 | – | – | – | – | – |  |
+| Velikost PO – „1–9 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 44,6 %, v Česku 39,1 % (relativně o 14,1 % vyšší). | ZOD-TOQY | odchylka od ČR | 0,14 | 44,6 | 39,1 | 14,1 | – | – | – | – | – |  |
+| Velikost PO – „Neuvedeno“: podíl na PO oboru je v Libereckém kraji 44,6 %, v Česku 50,1 % (relativně o 11 % nižší). | ZOD-NDPG | odchylka od ČR | 0,11 | 44,6 | 50,1 | 11 | – | – | – | – | – |  |
+| Na 1 000 obyvatel připadá v okrese Jablonec nad Nisou 36,09 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,4 % vyšší). | ZUZ-CLRE | rozdíly uvnitř území | 0,09 | 36,09 | 32,99 | 9,4 | – | – | – | – | – |  |
+| Na 1 000 obyvatel připadá v okrese Liberec 36,04 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 9,2 % vyšší). | ZUZ-HFUA | rozdíly uvnitř území | 0,09 | 36,04 | 32,99 | 9,2 | – | – | – | – | – |  |
+| Právní forma – „101 Fyzická osoba podnikající dle živnostenského zákona“: podíl na registrovaných subjektech oboru je v Libereckém kraji 86,1 %, v Česku 79,2 % (relativně o 8,7 % vyšší). | ZOD-DWBZ | odchylka od ČR | 0,09 | 86,1 | 79,2 | 8,7 | – | – | – | – | – |  |
+| Věk subjektu – „11–20 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 22,1 %, v Česku 23,9 % (relativně o 7,5 % nižší). | ZOD-SMOT | odchylka od ČR | 0,08 | 22,1 | 23,9 | 7,5 | – | – | – | – | – |  |
+| Typ osoby – „fyzické osoby (FO)“: podíl na registrovaných subjektech oboru je v Libereckém kraji 88,4 %, v Česku 82,7 % (relativně o 6,9 % vyšší). | ZOD-KHDN | odchylka od ČR | 0,07 | 88,4 | 82,7 | 6,9 | – | – | – | – | – |  |
+| Průměrná mzda v sekci F dosahovala v roce 2022 v Libereckém kraji 91,5 % průměrné mzdy všech odvětví kraje, v Česku 85,8 % (relativně o 6,6 % vyšší). | ZMZ-TZVU | mzdy a zaměstnanost | 0,07 | 91,5 | 85,8 | 6,6 | – | – | – | – | – |  |
+| Podíl registrovaných subjektů se zjištěnou aktivitou je v Libereckém kraji v sekci F 62,3 %, ve všech oborech 58,8 % (ČSÚ; relativně o 6 % vyšší). | ZAK-UMSL | aktivita oboru vůči kraji | 0,06 | 62,3 | 58,8 | 6 | – | – | – | – | – |  |
+| Na 1 000 obyvatel připadá v Libereckém kraji 32,99 registrovaných subjektů oboru, v Česku 31,15 (relativně o 5,9 % vyšší). | ZOD-YNST | odchylka od ČR | 0,06 | 32,99 | 31,15 | 5,9 | – | – | – | – | – |  |
+| Velikost PO – „10–49 zaměstnanců“: podíl na PO oboru je v Libereckém kraji 10 %, v Česku 9,5 % (relativně o 5,3 % vyšší). | ZOD-JLNI | odchylka od ČR | 0,05 | 10 | 9,5 | 5,3 | – | – | – | – | – |  |
+| Věk subjektu – „3–5 let“: podíl na registrovaných subjektech oboru je v Libereckém kraji 9,4 %, v Česku 9,9 % (relativně o 5,1 % nižší). | ZOD-DKSF | odchylka od ČR | 0,05 | 9,4 | 9,9 | 5,1 | – | – | – | – | – |  |
+| Míra zániku PO v oboru za rok 2025 je v Libereckém kraji 5,92 %, průměr let 2023–2024 je 2,48 % (relativně o 138,7 % vyšší). Ve všech ostatních oborech je v Libereckém kraji míra zániku PO za rok 2025 4,8 %, průměr let 2023–2024 2,11 % (relativně o 127,5 % vyšší) – jev celého kraje, ne oboru. | ZTR-CISP | změna trendu | 0,05 | 5,92 | 2,48 | 138,7 | území | 1,39 | 4,8 | 2,11 | 127,5 |  |
+| Na 1 000 obyvatel připadá v okrese Semily 31,58 registrovaných subjektů oboru, v Libereckém kraji 32,99 (relativně o 4,3 % nižší). | ZUZ-LRXD | rozdíly uvnitř území | 0,04 | 31,58 | 32,99 | 4,3 | – | – | – | – | – |  |
+| V sekci F se počet zaměstnanců mezi lety 2018 a 2022 změnil v Libereckém kraji z 6 tis. na 6,4 tis. (index 1,07), v Česku z 207,9 tis. na 214,9 tis. (index 1,03); index je relativně o 3,9 % vyšší než v Česku. | ZMZ-MXTD | mzdy a zaměstnanost | 0,04 | 1,07 | 1,03 | 3,9 | – | – | – | – | – |  |
+| Objem hrubé přidané hodnoty skupiny Stavebnictví (F) se mezi lety 2020 a 2024 změnil v Libereckém kraji na 89,8 % (rok 2020 = 100), v Česku na 93,1 % (relativně o 3,5 % nižší). | ZEK-YCEY | ekonomika | 0,04 | 89,8 | 93,1 | 3,5 | – | – | – | – | – |  |
+| Průměrná hrubá měsíční mzda v sekci F byla v roce 2022 v Libereckém kraji 33 623 Kč, v Česku 34 840 Kč (relativně o 3,5 % nižší). | ZMZ-KWKY | mzdy a zaměstnanost | 0,03 | 33 623 | 34 840 | 3,5 | – | – | – | – | – |  |
+| Velikost FO – „Neuvedeno“: podíl na FO oboru je v Libereckém kraji 45,8 %, v Česku 44,3 % (relativně o 3,4 % vyšší). | ZOD-DHJV | odchylka od ČR | 0,03 | 45,8 | 44,3 | 3,4 | – | – | – | – | – |  |
 
 > Síla = |hodnota / srovnání − 1|; u divergence pořadí |p1 − p2| / (počet území − 1). Rozdíly pod 3 % relativně se nehlásí. Položky struktury s podílem pod 5 % v území i v ČR se nehlásí. Popisy jsou věcné, bez interpretace.
+> Změna trendu se porovná se stejnou změnou všech ostatních oborů území (T30). Posunuly-li se stejným směrem, aspoň o 3 % relativně a aspoň o 50 % relativní změny oboru, jde o jev území, ne oboru: síla se sníží na vlastní část oboru |(1 + r oboru) / (1 + r ostatních oborů) − 1| a zjištění se ve shrnutí neuvádí jako zjištění oboru.

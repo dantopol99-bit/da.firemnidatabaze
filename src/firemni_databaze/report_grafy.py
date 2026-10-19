@@ -196,7 +196,7 @@ def vznik_zanik(roky: list[dict], cesta: Path) -> Path:
 # ---------------------------------------------------------------------------
 
 def miry_v_case(panely: list[dict], cesta: Path, popis_osy: str = "%") -> Path:
-    """panely: [{nazev, rady: [{popis, body: [(rok, hodnota | None)], role: uzemi|cr|srovnani}]}] – nejvýš 4 řady
+    """panely: [{nazev, rady: [{popis, body: [(rok, hodnota | None)], role: uzemi|cr|srovnani[, styl: (čára, značka)]}]}] – nejvýš 4 řady
     na panel (zkoumané území modře, ČR tmavě šedě, srovnávací kraje oranžově, odlišené typem čáry a značkou).
     Starší volání s hlavni=True/False odpovídá roli uzemi/cr. Chybějící hodnota (pod prahem) = mezera v čáře."""
     fig, osy = plt.subplots(1, len(panely), figsize=(SIRKA_CM / 2.54, 5.8 / 2.54), dpi=150, sharey=True)
@@ -211,7 +211,9 @@ def miry_v_case(panely: list[dict], cesta: Path, popis_osy: str = "%") -> Path:
         vsechny_roky = sorted({rok for r in p["rady"] for rok, _ in r["body"]})
         for r in p["rady"]:
             role = r.get("role") or ("uzemi" if r.get("hlavni") else "cr")
-            if role == "srovnani" and r["popis"] not in styl_rady:
+            if r.get("styl"):                    # vlastní typ čáry a značka, např. druhá řada téže role
+                styl_rady[r["popis"]] = tuple(r["styl"])
+            elif role == "srovnani" and r["popis"] not in styl_rady:
                 styl_rady[r["popis"]] = next(styly_srovnani)
             cara, znacka = styl_rady.get(r["popis"], ("-", "o"))
             roky = [rok for rok, _ in r["body"]]

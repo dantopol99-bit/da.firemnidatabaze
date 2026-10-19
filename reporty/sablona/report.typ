@@ -169,6 +169,13 @@
 #set list(marker: text(fill: modra)[■], spacing: 0.8em)
 // body shrnutí píše analytik (rozhodnutí 12); dlaždice a varování jsou strojové
 #for b in d.shrnuti.body [- #b]
+#if d.shrnuti.at("jevy_uzemi", default: ()).len() > 0 {
+  v(0.6em)
+  block(width: 100%, inset: 10pt, radius: 3pt, stroke: 0.8pt + jemna, fill: podklad)[
+    #text(weight: "bold", fill: sedy)[Strojová poznámka k zjištěním]
+    #for j in d.shrnuti.jevy_uzemi [ \ #j ]
+  ]
+}
 #if d.shrnuti.varovani.len() > 0 { v(0.6em); varovani_box(d.shrnuti.varovani) }
 
 // ---------------------------------------------------------------------------

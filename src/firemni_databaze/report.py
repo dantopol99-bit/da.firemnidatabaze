@@ -167,8 +167,20 @@ def urci_obor(cur, kody: list[str]) -> list[dict]:
 
 # Obor ve smyslu rozhraní obor.v_firma_obor_aktualni (alias n): bez pseudokódů a jen s automatickým
 # spojením (kód z RES, nebo odvozený s jistotou oddílu ≥ 0,8 – rozhodnutí 5 v docs/cz-nace-2025.md).
-PODMINKA_OBORU = ("n.automaticke_spojeni AND NOT n.je_pseudokod AND (n.sekce = ANY(%(s1)s) OR n.oddil = ANY(%(s2)s) "
-                  "OR n.skupina = ANY(%(s3)s) OR n.trida = ANY(%(s4)s))")
+PODMINKA_KODU = ("(n.sekce = ANY(%(s1)s) OR n.oddil = ANY(%(s2)s) OR n.skupina = ANY(%(s3)s) "
+                 "OR n.trida = ANY(%(s4)s))")
+PODMINKA_OBORU = "n.automaticke_spojeni AND NOT n.je_pseudokod AND " + PODMINKA_KODU
+# ostatní obory = PO s určeným oborem (automatické spojení, ne pseudokód) mimo zkoumaný obor
+PODMINKA_OSTATNICH = f"n.automaticke_spojeni AND NOT n.je_pseudokod AND NOT coalesce({PODMINKA_KODU}, false)"
+ZPUSOBY_ZANIKU = (      # způsob zániku PO (číselník RES 572, ZPZAN): kategorie reportu
+    ("04", "zrušení bez likvidace bez nástupců (04)"),
+    ("01", "likvidace (01)"),
+    ("jiny", "jiný způsob (přeměna 02, 03; ostatní a nezjištěno)"),
+)
+
+
+def kategorie_zaniku(zpzan: str | None) -> str:
+    return zpzan if zpzan in ("01", "04") else "jiny"
 POZNAMKA_A10 = ("Zdroje publikované jen podle NACE Rev. 2 (CZ-NACE 2008) – skupiny A*10 regionálních účtů Eurostatu, "
                 "statistika podniků SBS, mzdy ČSÚ a demografie podniků – jsou k oboru podle CZ-NACE 2025 přiřazeny "
                 "převodní tabulkou na úrovni sekcí (obor.nace_sekce_a10); jde o spojení dvou verzí klasifikace, "
@@ -274,12 +286,24 @@ def nacti_data(cur, obor: list[dict], datum: date) -> dict:
         f"WHERE s.datum_snimku = %(d)s AND s.ddatzan IS NULL AND {PODMINKA_OBORU}", parametry)
     subjekty = cur.fetchall()
     cur.execute(
-        "SELECT s.okreslau, s.ddatvzn, s.ddatzan FROM res.subjekt s "
+        "SELECT s.okreslau, s.ddatvzn, s.ddatzan, s.zpzan FROM res.subjekt s "
         "JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
         f"WHERE s.datum_snimku = %(d)s AND s.ddatzan >= make_date({ZANIKY_OD_ROKU}, 1, 1) "
         f"AND s.forma IS NOT NULL AND NOT (s.forma = ANY(%(fo)s)) AND {PODMINKA_OBORU}",
         {**parametry, "fo": sorted(FO_FORMY)})
     zaniky_po = cur.fetchall()
+    # ostatní obory (stejná metoda jako obor, agregováno): rok vzniku (starší než okno = rok před ním),
+    # rok zániku, zánik do dne snímku v roce (srovnatelné období), kategorie způsobu zániku
+    cur.execute(
+        "SELECT s.okreslau, greatest(coalesce(extract(year FROM s.ddatvzn)::int, 0), %(r0)s - 1), "
+        "extract(year FROM s.ddatzan)::int, to_char(s.ddatzan, 'MMDD') <= to_char(%(d)s::date, 'MMDD'), "
+        "s.ddatzan IS NULL, CASE WHEN s.zpzan IN ('01', '04') THEN s.zpzan ELSE 'jiny' END, count(*) "
+        "FROM res.subjekt s JOIN obor.v_firma_obor_aktualni n ON n.ico = s.ico "
+        "WHERE s.datum_snimku = %(d)s AND ((s.ddatzan IS NULL AND (s.forma IS NULL OR NOT (s.forma = ANY(%(fo)s)))) "
+        f"OR (s.ddatzan >= make_date(%(r0)s, 1, 1) AND s.forma IS NOT NULL AND NOT (s.forma = ANY(%(fo)s)))) "
+        f"AND {PODMINKA_OSTATNICH} GROUP BY 1, 2, 3, 4, 5, 6",
+        {**parametry, "fo": sorted(FO_FORMY), "r0": ZANIKY_OD_ROKU})
+    ostatni_po = cur.fetchall()
     cur.execute("SELECT okreslau, count(*) FROM res.subjekt WHERE datum_snimku = %s AND ddatzan IS NULL "
                 "GROUP BY okreslau", (datum,))
     vse_okres = dict(cur.fetchall())
@@ -304,7 +328,7 @@ def nacti_data(cur, obor: list[dict], datum: date) -> dict:
     for u, n, k, h in cur.fetchall():
         aktivita.setdefault((u, n), {})[k] = float(h)
     return {
-        "subjekty": subjekty, "zaniky_po": zaniky_po, "vse_okres": vse_okres, "doplnky": doplnky,
+        "subjekty": subjekty, "zaniky_po": zaniky_po, "ostatni_po": ostatni_po, "vse_okres": vse_okres, "doplnky": doplnky,
         "nazvy_predku": nazvy_predku, "formy": formy,
         "obyvatele": {u: float(h) for u, h, _ in obyv}, "rok_obyvatel": obyv[0][2] if obyv else None,
         "aktivita": aktivita, "obdobi_aktivity": obdobi_akt,
@@ -1212,7 +1236,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
 
     # T10 zániky PO z RES od 2023
     zaniky = {}
-    for okres, _, zanik in d["zaniky_po"]:
+    for okres, _, zanik, _ in d["zaniky_po"]:
         if v_uzemi(okres, uz):
             zaniky[zanik.year] = zaniky.get(zanik.year, 0) + 1
     bunky = [Bunka(f"zanik_po:{r}", str(r) + (" (do data snímku)" if r == datum.year else ""), zaniky.get(r, 0))
@@ -1416,58 +1440,91 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
     # --- T18 míra zániku PO v oboru (Blok 4 B) ---------------------------------------------
     # stav k 1. 1. Y = existující PO se vznikem před 1. 1. Y + PO zaniklé 1. 1. Y nebo později;
     # míra = zaniklé PO v roce / stav k 1. 1.; srovnatelné období 1. 1.–den snímku i pro dřívější roky.
+    # Stejnou metodou (dynamika_agregat) se počítají ostatní obory území a ČR a zániky podle způsobu (T29, T30).
     roky_z = list(range(ZANIKY_OD_ROKU, datum.year + 1))
     posledni = datum.year
     mira_uzemi = [("", uz)] + bench
+    den_snimku = (datum.month, datum.day)
 
-    def dynamika_po(u: Uzemi) -> dict:
-        exist = [v for okres, f, _, v in d["subjekty"] if f not in FO_FORMY and v_uzemi(okres, u)]
-        zan = [(v, z) for okres, v, z in d["zaniky_po"] if v_uzemi(okres, u)]
+    def dynamika_agregat(exist: dict[int, int], zan: dict[tuple, int], nazev: str) -> dict:
+        """exist: {rok vzniku: počet existujících PO}; zan: {(rok vzniku, rok zániku, zánik ve srovnatelném
+        období, kategorie způsobu zániku): počet zaniklých PO}. Rok vzniku 0 = neuveden (vznik před oknem)."""
         out = {}
         for y in roky_z:
-            od, do_obd = date(y, 1, 1), date(y, datum.month, datum.day)
-            out[y] = {
-                "stav": sum(1 for v in exist if v < od) + sum(1 for v, z in zan if (v is None or v < od) and z >= od),
-                "zan": sum(1 for _, z in zan if z.year == y),
-                "obd": sum(1 for _, z in zan if od <= z <= do_obd),
-                "vznik": sum(1 for v in exist if v.year == y) + sum(1 for v, _ in zan if v and v.year == y),
-            }
-        out["nyni"] = len(exist)
+            x = {"stav": sum(n for v, n in exist.items() if v < y)
+                 + sum(n for (v, z, _, _), n in zan.items() if v < y and z >= y),
+                 "vznik": sum(n for v, n in exist.items() if v == y) + sum(n for (v, *_), n in zan.items() if v == y)}
+            for kat, _ in ZPUSOBY_ZANIKU:
+                x[f"zan{kat}"] = sum(n for (_, z, _, k), n in zan.items() if z == y and k == kat)
+                x[f"obd{kat}"] = sum(n for (_, z, o, k), n in zan.items() if z == y and o and k == kat)
+            x["zan"] = sum(x[f"zan{k}"] for k, _ in ZPUSOBY_ZANIKU)
+            x["obd"] = sum(x[f"obd{k}"] for k, _ in ZPUSOBY_ZANIKU)
+            out[y] = x
+        out["nyni"] = sum(exist.values())
         for y in roky_z:     # kontrola rekonstrukce: stav(Y+1) = stav(Y) − zániky(Y) + vzniky(Y)
             dalsi = out[y + 1]["stav"] if y < posledni else out["nyni"]
-            assert dalsi == out[y]["stav"] - out[y]["zan"] + out[y]["vznik"], (u.kod, y)
+            assert dalsi == out[y]["stav"] - out[y]["zan"] + out[y]["vznik"], (nazev, y)
         return out
 
-    t18_radky = []
-    for pref, u in mira_uzemi:
-        dp = dynamika_po(u)
-        po_var = pref + "fopo:PO"
+    def dynamika_po(u: Uzemi) -> dict:
+        exist: dict[int, int] = {}
+        zan: dict[tuple, int] = {}
+        for okres, f, _, v in d["subjekty"]:
+            if f not in FO_FORMY and v_uzemi(okres, u):
+                exist[v.year] = exist.get(v.year, 0) + 1
+        for okres, v, z, zpzan in d["zaniky_po"]:
+            if v_uzemi(okres, u):
+                k = (v.year if v else 0, z.year, (z.month, z.day) <= den_snimku, kategorie_zaniku(zpzan))
+                zan[k] = zan.get(k, 0) + 1
+        return dynamika_agregat(exist, zan, u.kod)
+
+    def dynamika_ostatnich(u: Uzemi) -> dict:
+        """Všechny ostatní obory území (PO s určeným oborem mimo zkoumaný obor), stejná metoda."""
+        exist: dict[int, int] = {}
+        zan: dict[tuple, int] = {}
+        for okres, v, z, v_obd, zije, kat, n in d["ostatni_po"]:
+            if not v_uzemi(okres, u):
+                continue
+            if zije:
+                exist[v] = exist.get(v, 0) + n
+            else:
+                zan[(v, z, v_obd, kat)] = zan.get((v, z, v_obd, kat), 0) + n
+        return dynamika_agregat(exist, zan, "ostatní obory " + u.kod)
+
+    def registruj_miru(pref: str, dp: dict, nyni: str, zv_zan) -> None:
+        """Proměnné a vztahy míry zániku jednoho území (stav, zániky, srovnatelné období, vzniky);
+        zv_zan(proměnná, počet) rozhodne o zveřejnění zániků za rok."""
         for y in roky_z:
             x = dp[y]
             v_stav, v_zan, v_obd = f"{pref}stav_po:{y}", f"{pref}zanik_po:{y}", f"{pref}zanik_po_obd:{y}"
             v_vzn, v_mimo = f"{pref}vznik_po:{y}", f"{pref}zanik_po_mimo:{y}"
-            # zániky za rok (u zkoumaného území převzaté z T10 včetně jejího slučování)
-            zv_zan = s.zverejnena(v_zan) if pref == "" else x["zan"] >= prah
-            s.promenna(v_zan, x["zan"], zv_zan)
+            s.promenna(v_zan, x["zan"], zv_zan(v_zan, x["zan"]))
+            zv_zan_y = s.zverejnena(v_zan)
             if y < posledni:
                 mimo = x["zan"] - x["obd"]
-                zv_obd = x["obd"] >= prah and (not zv_zan or mimo >= prah)
+                zv_obd = x["obd"] >= prah and (not zv_zan_y or mimo >= prah)
                 s.promenna(v_obd, x["obd"], zv_obd)
                 s.promenna(v_mimo, mimo, False, chranit=mimo < prah)
                 s.rovnice_obecna({v_zan: 1, v_obd: -1, v_mimo: -1})
-            else:
-                v_obd, zv_obd = v_zan, zv_zan
             s.promenna(v_vzn, x["vznik"], False, chranit=x["vznik"] < prah)
-            dalsi = f"{pref}stav_po:{y + 1}" if y < posledni else po_var
+            dalsi = f"{pref}stav_po:{y + 1}" if y < posledni else nyni
             s.rovnice_obecna({dalsi: 1, v_stav: -1, v_zan: 1, v_vzn: -1})
         # stavy: zveřejnit, je-li stav na prahu a nedá se z nich dopočítat malý počet vzniků
         for y in reversed(roky_z):
             x = dp[y]
             zv = x["stav"] >= prah
-            dalsi_zv = s.zverejnena(f"{pref}stav_po:{y + 1}") if y < posledni else s.zverejnena(po_var)
+            dalsi_zv = s.zverejnena(f"{pref}stav_po:{y + 1}") if y < posledni else s.zverejnena(nyni)
             if zv and dalsi_zv and s.zverejnena(f"{pref}zanik_po:{y}") and x["vznik"] < prah:
                 zv = False
             s.promenna(f"{pref}stav_po:{y}", x["stav"], zv)
+
+    t18_radky = []
+    dyn_po: dict[str, dict] = {}
+    for pref, u in mira_uzemi:
+        dp = dyn_po[pref] = dynamika_po(u)
+        # zániky za rok (u zkoumaného území převzaté z T10 včetně jejího slučování)
+        registruj_miru(pref, dp, pref + "fopo:PO",
+                       lambda v, n, pref=pref: s.zverejnena(v) if pref == "" else n >= prah)
         for y in roky_z:
             x = dp[y]
             v_stav, v_zan = f"{pref}stav_po:{y}", f"{pref}zanik_po:{y}"
@@ -1509,6 +1566,168 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
                f"Okno {len(roky_z)} let ({ZANIKY_OD_ROKU}–{posledni}): RES uchovává zaniklé subjekty jen 4 roky po "
                "zániku. Obor a sídlo jsou podle snímku (u zaniklých poslední známé), jejich změny v čase se "
                "nepromítají."]}
+
+    # --- T29 zániky PO v oboru podle způsobu zániku, T30 míra zániku bez kódu 04 a ostatní obory ----------
+    # Způsob zániku = ZPZAN (číselník RES 572) ve třech kategoriích: 04 zrušení bez likvidace bez nástupců
+    # (typicky výmaz nečinné společnosti soudem), 01 likvidace, jiný. Pravidlo 3: dělení 04 / ostatní se
+    # zveřejní, jen jsou-li obě části na prahu; dělení ostatních na 01 / jiný jen, jsou-li na prahu obě.
+    # Kde by šlo dopočítat malý počet, zůstane jen pásmo podílu nebo míry („aspoň“, „nejvýš“, „pod“).
+    srov_zpusob = [("", uz)] + ([("cr:", Uzemi("CR", "CZ", "Česko", None))] if uz.typ != "CR" else [])
+
+    def registruj_zpusob(pref: str, dp: dict) -> dict[int, dict]:
+        out = {}
+        for y in roky_z:
+            x = dp[y]
+            uplny = y < posledni
+            v_zan = f"{pref}zanik_po:{y}"
+            v = {k: f"{pref}zanik_po{k}:{y}" for k in ("04", "_bez04", "01", "_jiny")}
+            n = {"04": x["zan04"], "_bez04": x["zan"] - x["zan04"], "01": x["zan01"], "_jiny": x["zanjiny"]}
+            hrube = s.zverejnena(v_zan) and n["04"] >= prah and n["_bez04"] >= prah
+            jemne = hrube and n["01"] >= prah and n["_jiny"] >= prah
+            for k in ("04", "_bez04"):
+                s.promenna(v[k], n[k], hrube)
+            for k in ("01", "_jiny"):
+                s.promenna(v[k], n[k], jemne)
+            s.rovnice_souctu(v_zan, [v["04"], v["_bez04"]])
+            s.rovnice_souctu(v["_bez04"], [v["01"], v["_jiny"]])
+            obd, n_obd = hrube, {"04": n["04"], "_bez04": n["_bez04"]}
+            if uplny:
+                v_obd = f"{pref}zanik_po_obd:{y}"
+                n_obd = {"04": x["obd04"], "_bez04": x["obd"] - x["obd04"]}
+                n_mimo = {k: n[k] - n_obd[k] for k in n_obd}
+                obd = (s.zverejnena(v_obd) and min(n_obd.values()) >= prah
+                       and (not hrube or min(n_mimo.values()) >= prah))
+                for k in n_obd:
+                    s.promenna(f"{pref}zanik_po_obd{k}:{y}", n_obd[k], obd)
+                    s.promenna(f"{pref}zanik_po_mimo{k}:{y}", n_mimo[k], False,
+                               chranit=False if n_mimo[k] >= prah else None)
+                    s.rovnice_souctu(v[k], [f"{pref}zanik_po_obd{k}:{y}", f"{pref}zanik_po_mimo{k}:{y}"])
+                s.rovnice_souctu(v_obd, [f"{pref}zanik_po_obd04:{y}", f"{pref}zanik_po_obd_bez04:{y}"])
+            out[y] = {"hrube": hrube, "jemne": jemne, "obd": obd, "n": n, "n_obd": n_obd}
+        return out
+
+    def pasmo_miry(pocet: int, stav: int, zv_stav: bool) -> str | None:
+        """Míra s počtem pod prahem: horní mez „pod X %“ (X = práh / stav, zaokrouhleno nahoru na 0,1)."""
+        if not zv_stav or pocet >= prah or not stav:
+            return None
+        mez = -(-1000 * prah // stav) / 10
+        return f"pod {_fmt_cz(mez)} %"
+
+    def pasmo_podilu(n04: int, celkem: int) -> str | None:
+        """Podíl kódu 04, když je jedna z částí pod prahem: dolní nebo horní mez v celých procentech."""
+        if n04 >= prah and celkem - n04 < prah:
+            return f"aspoň {100 * (celkem - prah + 1) // celkem} %"
+        if n04 < prah <= celkem - n04:
+            return f"nejvýš {-(-100 * (prah - 1) // celkem)} %"
+        return None
+
+    zpusob: dict[str, dict] = {pref: registruj_zpusob(pref, dyn_po[pref]) for pref, _ in srov_zpusob}
+    t29_radky = []
+    for pref, u in srov_zpusob:
+        for y in roky_z:
+            x, z = dyn_po[pref][y], zpusob[pref][y]
+            v_zan = f"{pref}zanik_po:{y}"
+            if not s.zverejnena(v_zan):
+                continue
+            h = {"celkem": x["zan"], "k04": None, "bez04": None, "k01": None, "jiny": None, "podil04": None}
+            zaklady = {"celkem": v_zan, "k04": f"{pref}zanik_po04:{y}", "bez04": f"{pref}zanik_po_bez04:{y}",
+                       "k01": f"{pref}zanik_po01:{y}", "jiny": f"{pref}zanik_po_jiny:{y}", "podil04": v_zan}
+            poz = ["neúplný rok – do data snímku"] if y == posledni else []
+            if z["hrube"]:
+                h.update(k04=z["n"]["04"], bez04=z["n"]["_bez04"], podil04=round(100 * z["n"]["04"] / x["zan"], 1))
+                zaklady["podil04"] = zaklady["k04"]
+                if z["jemne"]:
+                    h.update(k01=z["n"]["01"], jiny=z["n"]["_jiny"])
+                else:
+                    poz.append("likvidace a jiný způsob jen společně (pod prahem)")
+            else:
+                h["podil04"] = pasmo_podilu(z["n"]["04"], x["zan"])
+                poz.append("způsoby jen jako pásmo podílu (pod prahem)" if h["podil04"] else
+                           "způsoby skryty (pod prahem)")
+            t29_radky.append({"popis": f"{u.nazev} – {y}", "typ": "polozka", "promenna": v_zan, "uzemi": u.kod,
+                              "rok": y, "zaklady": zaklady, "hodnoty": h, "poznamka": "; ".join(poz) or None})
+    t29 = {"kod": "T29_zaniky_zpusob",
+           "nazev": f"Zaniklé právnické osoby v oboru podle způsobu zániku (RES, {ZANIKY_OD_ROKU}–{posledni})",
+           "sloupce": [{"kod": "celkem", "nazev": "Zaniklé PO celkem", "ukazatel": "ZANIK_PO_RES"},
+                       {"kod": "k04", "nazev": "Zrušení bez likvidace bez nástupců (04)", "ukazatel": "ZANIK_PO_ZPUSOB"},
+                       {"kod": "bez04", "nazev": "Ostatní způsoby celkem", "ukazatel": "ZANIK_PO_ZPUSOB"},
+                       {"kod": "k01", "nazev": "z toho likvidace (01)", "ukazatel": "ZANIK_PO_ZPUSOB"},
+                       {"kod": "jiny", "nazev": "z toho jiný způsob", "ukazatel": "ZANIK_PO_ZPUSOB"},
+                       {"kod": "podil04", "nazev": "Podíl kódu 04 (%)", "ukazatel": "PODIL_ZANIKU_04"}],
+           "radky": t29_radky, "zverejneno": bool(t29_radky),
+           "duvod": None if t29_radky else "počty zániků pod prahem",
+           "poznamky": [
+               "Způsob zániku podle RES (číselník 572, ZPZAN). Kód 04 = zrušení právnické osoby bez likvidace bez "
+               "nástupců; zahrnuje i výmaz společnosti rejstříkovým soudem bez likvidace. Jiný způsob = přeměna "
+               "(02, 03) a ostatní kódy včetně nezjištěného.",
+               "Pomlčka = skryto: počet pod prahem nebo by z něj šel dopočítat jiný skrytý počet. Pásmo podílu "
+               "(„aspoň“, „nejvýš“) se uvádí místo přesného podílu, když je jedna z částí pod prahem."]}
+
+    t30_radky = []
+    skupiny_t30 = []
+    for pref, u in srov_zpusob:
+        skupiny_t30.append(("obor", pref, u, dyn_po[pref], zpusob[pref]))
+        po = "ost:" + pref
+        dp = dynamika_ostatnich(u)
+        s.promenna(po + "po_nyni", dp["nyni"], False, chranit=False if dp["nyni"] >= prah else None)
+        registruj_miru(po, dp, po + "po_nyni", lambda v, n: n >= prah)
+        skupiny_t30.append(("ostatni", po, u, dp, registruj_zpusob(po, dp)))
+    for skupina, pref, u, dp, zp in skupiny_t30:
+        for y in roky_z:
+            x, z = dp[y], zp[y]
+            uplny = y < posledni
+            v_stav, v_zan = f"{pref}stav_po:{y}", f"{pref}zanik_po:{y}"
+            v_obd = f"{pref}zanik_po_obd:{y}" if uplny else v_zan
+            v_bez = f"{pref}zanik_po_bez04:{y}"
+            v_obd_bez = f"{pref}zanik_po_obd_bez04:{y}" if uplny else v_bez
+            zv_stav = s.zverejnena(v_stav)
+            h = {"stav": x["stav"] if zv_stav else None, "mira": None, "mira_bez04": None,
+                 "mira_obd": None, "mira_obd_bez04": None}
+            zaklady = {"stav": v_stav, "mira": v_zan, "mira_bez04": v_bez, "mira_obd": v_obd,
+                       "mira_obd_bez04": v_obd_bez}
+            if zv_stav and uplny and s.zverejnena(v_zan):
+                h["mira"] = round(100 * x["zan"] / x["stav"], 2)
+            if zv_stav and s.zverejnena(v_obd):
+                h["mira_obd"] = round(100 * x["obd"] / x["stav"], 2)
+            if uplny:
+                if zv_stav and z["hrube"]:
+                    h["mira_bez04"] = round(100 * z["n"]["_bez04"] / x["stav"], 2)
+                elif pasmo_miry(z["n"]["_bez04"], x["stav"], zv_stav):
+                    h["mira_bez04"], zaklady["mira_bez04"] = pasmo_miry(z["n"]["_bez04"], x["stav"], zv_stav), v_stav
+            if zv_stav and z["obd"]:
+                h["mira_obd_bez04"] = round(100 * z["n_obd"]["_bez04"] / x["stav"], 2)
+            elif pasmo_miry(z["n_obd"]["_bez04"], x["stav"], zv_stav):
+                h["mira_obd_bez04"], zaklady["mira_obd_bez04"] = (pasmo_miry(z["n_obd"]["_bez04"], x["stav"], zv_stav),
+                                                                  v_stav)
+            poz = ["neúplný rok – jen srovnatelné období"] if not uplny else []
+            if any(h[k] is None for k in h if uplny or k not in ("mira", "mira_bez04")):
+                poz.append("část skryta (práh, dopočet)")
+            if any(isinstance(hv, str) for hv in h.values()):
+                poz.append("bez kódu 04 pod prahem – jen pásmo")
+            nazev_sk = "Obor" if skupina == "obor" else "Ostatní obory"
+            t30_radky.append({"popis": f"{nazev_sk} – {u.nazev} – {y}", "typ": "polozka", "promenna": v_stav,
+                              "skupina": skupina, "uzemi": u.kod, "rok": y, "zaklady": zaklady, "hodnoty": h,
+                              "ukazatele": ({} if skupina == "obor" else
+                                            {"stav": "ZANIK_PO_STAV_OSTATNI", "mira": "MIRA_ZANIKU_PO_OSTATNI",
+                                             "mira_bez04": "MIRA_ZANIKU_PO_OSTATNI",
+                                             "mira_obd": "MIRA_ZANIKU_PO_OSTATNI",
+                                             "mira_obd_bez04": "MIRA_ZANIKU_PO_OSTATNI"}),
+                              "poznamka": "; ".join(poz) or None})
+    t30 = {"kod": "T30_mira_zaniku_ostatni",
+           "nazev": "Míra zániku právnických osob – obor a všechny ostatní obory, celkem a bez kódu 04 (RES)",
+           "sloupce": [{"kod": "stav", "nazev": "Stav PO k 1. 1.", "ukazatel": "ZANIK_PO_STAV"},
+                       {"kod": "mira", "nazev": "Míra zániku za rok (%)", "ukazatel": "MIRA_ZANIKU_PO"},
+                       {"kod": "mira_bez04", "nazev": "Za rok bez kódu 04 (%)", "ukazatel": "MIRA_ZANIKU_PO_BEZ04"},
+                       {"kod": "mira_obd", "nazev": f"Míra zániku {obdobi_txt} (%)", "ukazatel": "MIRA_ZANIKU_PO_OBD"},
+                       {"kod": "mira_obd_bez04", "nazev": f"{obdobi_txt} bez kódu 04 (%)",
+                        "ukazatel": "MIRA_ZANIKU_PO_BEZ04"}],
+           "radky": t30_radky, "zverejneno": bool(t30_radky), "duvod": None, "obdobi": obdobi_txt,
+           "poznamky": [
+               "Ostatní obory = všechny právnické osoby území s určeným oborem (CZ-NACE 2025) mimo zkoumaný obor; "
+               "míra se počítá stejnou metodou jako míra zániku oboru (T18): zaniklé PO v roce / stav PO k 1. 1.",
+               "Bez kódu 04 = zániky jiným způsobem než zrušením bez likvidace bez nástupců (ZPZAN 04), "
+               "vztažené ke stejnému stavu PO k 1. 1.",
+               "Pásmo „pod X %“ = počet zániků bez kódu 04 je pod prahem; X je práh dělený stavem PO."]}
 
     # T11 dynamika území podle ČSÚ (RES05) – všechny obory
     t11_radky = []
@@ -1722,7 +1941,7 @@ def spocitej(conn, zadani: Zadani) -> tuple[dict, dict]:
                                 if v_uzemi(okres, uz if uz.typ != "OKRES" else
                                            Uzemi("KRAJ", uz.kraj_kod, kraje[uz.kraj_kod]["nazev"], uz.kraj_kod))],
                                [(f, kp) for _, f, kp, _ in d["subjekty"]], d["aktivita"], ekonomika, sbs, prah)
-               + tabulky_mzdy(uz, srovnani, obor, kraje, mzdy) + [t10, t18, t11, t12])
+               + tabulky_mzdy(uz, srovnani, obor, kraje, mzdy) + [t10, t18, t29, t30, t11, t12])
     for t in tabulky:
         for r in t["radky"]:
             for sl in t["sloupce"]:
