@@ -31,7 +31,24 @@ from firemni_databaze.report import KATALOG, OZNACENI
 from firemni_databaze.report_potlaceni import dopocitatelne
 from firemni_databaze.report_xlsx import RADEK_ZAHLAVI
 
-ZAKAZANA_SLOVA = re.compile(r"\bfirm\w*|\baktivn\w*+(?!\s+podnik)", re.IGNORECASE)
+# Rozhodnutí 1: žádný tvar slova „firma“ (firmy, firem, firemní …) ani „aktivní“, i uvnitř slova
+# („neaktivní“). Výjimka z upřesnění rozhodnutí 1: sousloví „aktivní podnik(y)“ (jednotka ČSÚ
+# v demografii podniků). Interní kódy s podtržítkem (AKTIVNI_PODIL_KRAJ, firemni_databaze) se nehlídají.
+_ZAKAZANY_KOREN = re.compile(r"fir(?:m|em)|aktivn", re.IGNORECASE)
+_VYJIMKA_PODNIK = re.compile(r"\s+podnik", re.IGNORECASE)
+
+
+def zakazana_slova(text: str) -> list[str]:
+    """Slova textu, která porušují rozhodnutí 1 (prázdný seznam = v pořádku)."""
+    nalezena = []
+    for m in re.finditer(r"\w+", text):
+        slovo = m.group()
+        if "_" in slovo or not _ZAKAZANY_KOREN.search(slovo):
+            continue
+        if slovo.lower().startswith("aktivn") and _VYJIMKA_PODNIK.match(text, m.end()):
+            continue
+        nalezena.append(slovo)
+    return nalezena
 # „aktivní podnik(y)“ je oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10),
 # nikoli označení registrovaných subjektů – proto je povolené jen v tomto sousloví.
 ODVOZENE_TYPY = ("podil", "index", "poradi", "prumer")
@@ -136,8 +153,8 @@ def zkontroluj(adresar: Path, katalog_cesta: Path = KATALOG) -> list[str]:
     # 8. zakázaná slova (JSON texty i všechny textové buňky XLSX)
     for text in list(_texty(vysledek)) + [c for ws in wb for row in ws.iter_rows(values_only=True)
                                           for c in row if isinstance(c, str)]:
-        if ZAKAZANA_SLOVA.search(text) and "AKTIVNI_PODIL" not in text:
-            chyby.append(f"zakázané slovo v textu: {text[:80]!r}")
+        if zakazana_slova(text):
+            chyby.append(f"zakázané slovo {zakazana_slova(text)} v textu: {text[:80]!r}")
     return chyby
 
 

@@ -302,7 +302,7 @@ Stav k 2026-10-15. Populace: registrované ekonomické subjekty bez data zániku
 
 > Modelový odhad, ne statistika. Přidaná hodnota skupiny v kraji (Eurostat, regionální účty) je přepočtena na úroveň statistiky podniků (SBS) a rozpočítána mezi velikostní třídy podle počtu subjektů oboru v kraji (RES, KATPO, zúženo na podíl se zjištěnou aktivitou podle ČSÚ) a celostátní přidané hodnoty na podnik třídy (Eurostat SBS); obrat = přidaná hodnota třídy × celostátní poměr obrat / přidaná hodnota v třídě. Pásmo: „Neuvedeno“ v KATPO do nejmenší třídy (FO i PO), nebo poměrně podle známé struktury FO, resp. PO.
 > Rok: ekonomika (regionální účty a SBS) 2024; struktura subjektů z RES ke dni snímku. Spojení různých let je součástí modelu.
-> Koncentrace podle velikostních tříd, ne podle jednotlivých subjektů; podíl největších firem by vyžadoval účetní závěrky (Sbírka listin).
+> Koncentrace podle velikostních tříd, ne podle jednotlivých subjektů; podíl největších subjektů by vyžadoval účetní závěrky (Sbírka listin).
 
 ## T26_sbs_cr: Statistika podniků za ČR podle velikosti: typický obrat a marže (fakt za ČR, Eurostat SBS) – sekce F, 2024
 

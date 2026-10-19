@@ -777,7 +777,7 @@ def tabulky_model(uz: "Uzemi", obor: list[dict], kraje: dict, subjekty_uzemi: li
            "radky": radky25, "zverejneno": bool(radky25),
            "duvod": None if radky25 else "velikostní třídy nad 10 osob jsou pod prahem – koncentraci nelze zveřejnit",
            "poznamky": [metodika, pozn_rok, "Koncentrace podle velikostních tříd, ne podle jednotlivých subjektů; "
-                        "podíl největších firem by vyžadoval účetní závěrky (Sbírka listin)."], "rok": rok, "model": True}
+                        "podíl největších subjektů by vyžadoval účetní závěrky (Sbírka listin)."], "rok": rok, "model": True}
 
     radky26 = []
     oddily = sorted({k[1] for k in sbs if isinstance(k, tuple) and k[0] == "AV_MEUR" and k[1] != s and k[3] == rok})
@@ -1847,7 +1847,7 @@ def uloz(vysledek: dict, interni: dict, adresar: Path) -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--obor", required=True, help="kódy CZ-NACE Rev. 2 oddělené čárkou (např. F nebo 10 nebo 41,42)")
+    parser.add_argument("--obor", required=True, help="kódy CZ-NACE 2025 oddělené čárkou (např. F nebo 10 nebo 41,42)")
     parser.add_argument("--uzemi", required=True, help="CZ, kraj (CZ051 / název) nebo okres (CZ0513 / název)")
     parser.add_argument("--datum", type=date.fromisoformat, help="datum snímku RES (výchozí poslední)")
     parser.add_argument("--srovnani", default="", help="srovnávací kraje oddělené čárkou (zadává člověk)")

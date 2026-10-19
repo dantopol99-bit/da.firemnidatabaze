@@ -98,6 +98,9 @@ Starý pilot k 15. 9. 2026 (Rev. 2) je archiv označený **„CZ-NACE 2008, nahr
 | historické snímky | rozhraní je „poslední známý stav“; report nad starším snímkem by bral dnešní kód 2025 (zatím jediný snímek, viz další kroky v `cz-nace-2025.md`) |
 
 **Upřesnění k rozhodnutí 1:** kontrola zakázaných slov povoluje jen sousloví **„aktivní podnik(y)“**.
+Od 19. 10. 2026 zachytí každý tvar slova „firma“ (firmy, firem, firemní …) a „aktivní“ i uvnitř slova
+(„neaktivní“) v textu analytika, ve strojových textech (JSON, XLSX) i ve všech pevných textech sazby;
+interní kódy s podtržítkem (`AKTIVNI_PODIL_KRAJ`) se nehlídají (`report_kontrola.zakazana_slova`).
 Je to oficiální jednotka ČSÚ v demografii podniků (RESDP00, rozhodnutí 10), ne označení
 registrovaných subjektů.
 
@@ -336,7 +339,10 @@ náhrady 10. 2. 2026):
   stejné hodnoty.
 - **Detektor** má typ `ekonomika`: produktivita, podíl skupiny na HPH území, podíl sebezaměstnaných
   a objem HPH (kraj proti ČR); podíl náhrad na HPH (region soudržnosti proti ČR). Pravidlo 3 % platí.
-- **Pododdíl „Koncentrace a firemní ukazatele“** zůstává „zatím nedostupné“ (rozhodnutí 13).
+- **Pododdíl „Koncentrace a ukazatele z účetních závěrek“** zůstává „zatím nedostupné“ (rozhodnutí 13).
+  Název nahrazuje původní „Koncentrace a firemní ukazatele“ z rozhodnutí 13 (změna 19. 10. 2026). Důvod: soulad
+  s rozhodnutím 1 (report nepoužívá žádný tvar slova „firma“) a přesnější popis chybějících dat – pododdíl
+  čeká na údaje z účetních závěrek ve Sbírce listin.
 - Import: `python -m firemni_databaze.res_import eurostat` (i součást `agregaty`), tabulka
   `res.eu_regionalni_ucty`, každá sada ve vlastní dávce `dev.import_davka` (zdroj `EUROSTAT`).
 
